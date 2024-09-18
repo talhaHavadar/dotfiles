@@ -1,0 +1,7 @@
+[commit]
+	gpgSign = true
+[user]
+	email = havadartalha@gmail.com
+	name = Talha Can Havadar
+[includeIf "gitdir:~/workspace/"]
+	path = ~/workspace/.gitconfig
