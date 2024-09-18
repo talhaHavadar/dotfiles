@@ -1,0 +1,14 @@
+[commit]
+	gpgSign = true
+[user]
+	email = talha.can.havadar@canonical.com
+	name = Talha Can Havadar
+[url "git+ssh://tchavadar@git.launchpad.net/"]
+	insteadof = lp:
+[gitubuntu]
+	lpuser = tchavadar
+[filter "lfs"]
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
