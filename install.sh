@@ -6,7 +6,7 @@ curl -sS https://starship.rs/install.sh | sh
 
 sudo add-apt-repository ppa:neovim-ppa/stable
 
-sudo apt install fzf sbuild ubuntu-dev-tools apt-cacher-ng piuparts autopkgtest \
+sudo apt install fzf sbuild ubuntu-dev-tools apt-cacher-ng autopkgtest \
     lintian git-buildpackage neovim ripgrep tmux git cmake build-essential tio
 
 sudo adduser $USER sbuild

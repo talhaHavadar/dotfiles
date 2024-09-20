@@ -11,6 +11,9 @@ export DEBFULLNAME="Talha Can Havadar"
 export DEBEMAIL="talha.can.havadar@canonical.com"
 export UBUMAIL="Talha Can Havadar <talha.can.havadar@canonical.com>"
 
+export PATH="$PATH:~/.local/bin"
+
+. "$HOME/.cargo/env"
 eval "$(zoxide init --cmd cd bash)"
 eval "$(starship init bash)"
 
