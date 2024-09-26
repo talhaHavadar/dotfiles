@@ -42,3 +42,4 @@ alias tl='tmux list-sessions'
 alias tk='tmux kill-session -t'
 #alias tf='tmux new -As $(zoxide query -l | fzf-tmux | sed "s/.*\///g")'
 alias tf=tmux_find_or_create_prompt
+alias tp="tmux list-panes -a -F '#D #T #{pane_tty} #{pane_current_command} #{pane_current_path}'"
