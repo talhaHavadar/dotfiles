@@ -18,7 +18,7 @@ eval "$(zoxide init --cmd cd bash)"
 eval "$(starship init bash)"
 
 tmux_find_or_create_prompt() {
-    result=$(zoxide query -l | fzf-tmux -p 53%,58%)
+    result=$(zoxide query -l | fzf-tmux -p -w 62% -h 38% -m)
     if [ "$result" = "" ]; then
         echo ""
     else
