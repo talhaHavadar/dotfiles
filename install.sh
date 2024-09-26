@@ -7,7 +7,8 @@ curl -sS https://starship.rs/install.sh | sh
 sudo add-apt-repository ppa:neovim-ppa/stable
 
 sudo apt install fzf sbuild ubuntu-dev-tools apt-cacher-ng autopkgtest \
-    lintian git-buildpackage neovim ripgrep tmux git cmake build-essential tio
+    lintian git-buildpackage neovim ripgrep tmux git cmake build-essential tio \
+    mtools gcc-arm-none-eabi dosfstools python3-venv python3-dev
 
 sudo adduser $USER sbuild
 
@@ -55,6 +56,10 @@ tee -a ~/.bashrc <<EOF
 . ~/.config/dotfiles/.bashrc
 
 EOF
+
+source ~/.bashrc
+
+cargo install cargo-deb
 
 setup-packaging-environment
 
