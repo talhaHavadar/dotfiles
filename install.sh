@@ -1,5 +1,7 @@
 #!/bin/env bash
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
 curl -sS https://starship.rs/install.sh | sh
@@ -14,25 +16,25 @@ sudo adduser $USER sbuild
 
 # configure tmux
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-cp .tmux.conf ~/
+ln -s $SCRIPT_DIR/.tmux.conf ~/.tmux.conf
 
 # configure git
-cp .gitconfig ~/
+ln -s $SCRIPT_DIR/.gitconfig ~/.gitconfig
 mkdir -p ~/workspace
 mkdir -p ~/projects
-cp .gitconfig.workspace ~/workspace/.gitconfig
+ln -s $SCRIPT_DIR/.gitconfig.workspace ~/workspace/.gitconfig
 
 # configure nvim
 git clone git@github.com:talhaHavadar/nvim-config.git nvim
 mv ~/.config/nvim ~/.config/nvim.bak
-ln -s ~/.config/dotfiles/nvim ~/.config/nvim
+ln -s $SCRIPT_DIR/nvim ~/.config/nvim
 
 # configure packaging tools
-cp .devscripts ~/
-cp .gbp.conf ~/
-cp .mk-sbuild.rc ~/
-cp .quiltrc-dpkg ~/
-cp .sbuildrc ~/
+ln -s $SCRIPT_DIR/.devscripts ~/.devscripts
+ln -s $SCRIPT_DIR/.gbp.conf ~/.gbp.conf
+ln -s $SCRIPT_DIR/.mk-sbuild.rc ~/.mk-sbuild.rc
+ln -s $SCRIPT_DIR/.quiltrc-dpkg ~/.quiltrc-dpkg
+ln -s $SCRIPT_DIR/.sbuildrc ~/.sbuildrc
 
 mkdir -p $HOME/sbuild/build
 mkdir -p $HOME/sbuild/log
