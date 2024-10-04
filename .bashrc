@@ -1,8 +1,6 @@
 export DOTFILES_BASH_SOURCED="true"
 export GPG_TTY=$(tty)
-export PATH="$PATH:~/.local/bin"
 
-. "$HOME/.cargo/env"
 eval "$(zoxide init --cmd cd bash)"
 eval "$(starship init bash)"
 
