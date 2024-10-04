@@ -57,13 +57,7 @@ git clone git@github.com:talhaHavadar/nvim-config.git nvim
 mv ~/.config/nvim ~/.config/nvim.bak
 ln -s $SCRIPT_DIR/nvim ~/.config/nvim
 
-tee -a ~/.bashrc <<EOF
-
-. $SCRIPT_DIR/.bashrc
-
-EOF
-
-source ~/.bashrc
+. "$HOME/.cargo/env"
 
 cargo install cargo-deb
 cargo install stylua
@@ -83,22 +77,38 @@ if [ "$INCLUDE_PACKAGING" = "true" ]; then
     mkdir -p $HOME/sbuild/scratch
 
     sudo tee -a /etc/schroot/sbuild/fstab <<EOF
-    $HOME/sbuild/scratch  /scratch          none  rw,bind  0  0
-    EOF
+$HOME/sbuild/scratch  /scratch          none  rw,bind  0  0
+EOF
 
     sg sbuild
 
     sudo tee -a /etc/fstab <<EOF
-    tmpfs		/var/lib/schroot/union/overlay/		tmpfs	defaults	0	0
-    EOF
+tmpfs		/var/lib/schroot/union/overlay/		tmpfs	defaults	0	0
+EOF
 
     tee -a ~/.bashrc <<EOF
 
-    . $SCRIPT_DIR/.packaging.bashrc
+. $SCRIPT_DIR/.packaging.bashrc
 
-    EOF
+EOF
 
     source $SCRIPT_DIR/.packaging.bashrc
 
     setup-packaging-environment
 fi
+
+source ~/.bashrc
+
+if [ "$DOTFILES_BASH_SOURCED" = "true" ];
+
+    tee -a ~/.bashrc <<EOF
+
+. $SCRIPT_DIR/.bashrc
+
+EOF
+    . $SCRIPT_DIR/.bashrc
+
+fi
+
+
+

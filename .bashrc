@@ -1,3 +1,4 @@
+export DOTFILES_BASH_SOURCED="true"
 export GPG_TTY=$(tty)
 export PATH="$PATH:~/.local/bin"
 
