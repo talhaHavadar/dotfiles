@@ -10,7 +10,10 @@ sudo add-apt-repository ppa:neovim-ppa/stable
 
 sudo apt install fzf sbuild ubuntu-dev-tools apt-cacher-ng autopkgtest \
     lintian git-buildpackage neovim ripgrep tmux git cmake build-essential tio \
-    mtools gcc-arm-none-eabi dosfstools python3-venv python3-dev
+    mtools gcc-arm-none-eabi dosfstools python3-venv python3-dev pipx
+
+pipx install poetry
+poetry completions bash >> ~/.bash_completion
 
 sudo adduser $USER sbuild
 
@@ -62,6 +65,7 @@ EOF
 source ~/.bashrc
 
 cargo install cargo-deb
+cargo install stylua
 
 setup-packaging-environment
 
