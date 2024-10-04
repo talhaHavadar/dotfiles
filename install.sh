@@ -38,6 +38,7 @@ sudo apt install fzf neovim ripgrep tmux git cmake build-essential tio \
     mtools gcc-arm-none-eabi dosfstools python3-venv python3-dev pipx \
     "${packaging_related_apt_tools[@]}"
 
+pipx ensurepath
 pipx install poetry
 pipx install black
 poetry completions bash >> ~/.bash_completion
