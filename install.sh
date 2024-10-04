@@ -85,10 +85,7 @@ EOF
 tmpfs		/var/lib/schroot/union/overlay/		tmpfs	defaults	0	0
 EOF
 
-    tee -a ~/.bashrc <<EOF
-. $SCRIPT_DIR/.packaging.bashrc
-EOF
-
+    echo ". $SCRIPT_DIR/.packaging.bashrc" >> ~/.bashrc
     source $SCRIPT_DIR/.packaging.bashrc
 
     setup-packaging-environment
@@ -99,9 +96,7 @@ source ~/.bashrc
 
 if [ ! "$DOTFILES_BASH_SOURCED" = "true" ];
 
-    tee -a ~/.bashrc <<EOF
-. $SCRIPT_DIR/.bashrc
-EOF
+    echo ". $SCRIPT_DIR/.bashrc" >> ~/.bashrc
     source $SCRIPT_DIR/.bashrc
 
 fi
