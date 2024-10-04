@@ -13,6 +13,7 @@ sudo apt install fzf sbuild ubuntu-dev-tools apt-cacher-ng autopkgtest \
     mtools gcc-arm-none-eabi dosfstools python3-venv python3-dev pipx
 
 pipx install poetry
+pipx install black
 poetry completions bash >> ~/.bash_completion
 
 sudo adduser $USER sbuild
