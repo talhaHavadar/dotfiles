@@ -94,7 +94,7 @@ fi
 
 source ~/.bashrc
 
-if [ ! "$DOTFILES_BASH_SOURCED" = "true" ];
+if [ "$DOTFILES_BASH_SOURCED" -ne "true" ];
 
     echo ". $SCRIPT_DIR/.bashrc" >> ~/.bashrc
     source $SCRIPT_DIR/.bashrc
