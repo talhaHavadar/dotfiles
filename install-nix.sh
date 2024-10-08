@@ -5,8 +5,8 @@ is_linux=`uname -a | grep Linux`
 
 if [ -n "$is_macos" ]; then
     echo "Detected a macos system..."
-    sh <(curl -L https://nixos.org/nix/install)
+    curl -L https://nixos.org/nix/install | sh
 elif [ -n "$is_linux" ]; then
     echo "Detected a linux system..."
-    sh <(curl -L https://nixos.org/nix/install) --daemon
+    curl -L https://nixos.org/nix/install | sh -s -- --daemon
 fi
