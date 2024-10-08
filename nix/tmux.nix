@@ -15,7 +15,7 @@ set -g @catppuccin_flavor 'latte'
         }
       ];
     extraConfig = ''
-set -g prefix C-g
+set -g prefix C-a
     '';
   };
 }
