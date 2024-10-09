@@ -1,4 +1,10 @@
-{ config, lib, pkgs, specialArgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  specialArgs,
+  ...
+}:
 let
   pyp = pkgs.python312Packages;
 in
@@ -10,6 +16,9 @@ in
   ];
 
   home.packages = [
+    pkgs.rustc
+    pkgs.cargo
+    pkgs.cargo-deb
     pkgs.tmux
     pkgs.fzf
     pkgs.ripgrep
