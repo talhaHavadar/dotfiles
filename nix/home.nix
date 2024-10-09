@@ -1,27 +1,26 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, specialArgs, ... }:
+let
+  pyp = pkgs.python312Packages;
+in
 {
-  home.stateVersion = "24.05";
+
   imports = [
     ./tmux.nix
+    ./configs.nix
   ];
 
   home.packages = [
     pkgs.tmux
-    pkgs.neovim
     pkgs.fzf
-    pkgs.neovim
     pkgs.ripgrep
-    pkgs.tmux
     pkgs.git
     pkgs.cmake
-    pkgs.build-essential
+    pkgs.gcc13Stdenv
     pkgs.tio
     pkgs.mtools
-    pkgs.gcc-arm-none-eabi
+    pkgs.gcc-arm-embedded-13
     pkgs.dosfstools
-    pkgs.python3-venv
-    pkgs.python3-dev
-    pkgs.pipx
+    pyp.pipx
   ];
 
   programs.home-manager.enable = true;
