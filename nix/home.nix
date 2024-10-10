@@ -12,7 +12,6 @@ in
 
   imports = [
     ./tmux.nix
-    ./configs.nix
   ];
 
   home.packages = [
@@ -31,7 +30,7 @@ in
     pkgs.dosfstools
     pyp.pipx
   ];
-
+  host.home.applications.neovim.enable = true;
   programs.home-manager.enable = true;
   programs.bash.enable = true;
 
