@@ -53,12 +53,15 @@
             inherit (args) extraSpecialArgs;
           }
         );
-      username = "ubuntu";
+      username = "talha";
     in
     {
 
       darwinConfigurations = {
-        hostname = darwin.lib.darwinSystem {
+        talha = darwin.lib.darwinSystem {
+          specialArgs = {
+            inherit inputs;
+          };
           system = "aarch64-darwin";
           modules = [
             ./system.nix
@@ -77,6 +80,14 @@
       homeConfigurations.${username} = mkHomeConfiguration {
         system = "x86_64-linux";
         inherit username;
+        extraSpecialArgs = {
+          inherit inputs;
+        };
+      };
+
+      homeConfigurations.ubuntu = mkHomeConfiguration {
+        system = "x86_64-linux";
+        username = "ubuntu";
         extraSpecialArgs = {
           inherit inputs;
         };
