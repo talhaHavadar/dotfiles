@@ -20,6 +20,11 @@ in
       ./packaging
     ];
 
+  home.file = {
+    "workspace/.gitconfig".source = ./.gitconfig.workspace;
+    ".tmux.conf".source = ./.tmux.conf;
+  };
+
   home.packages = with pkgs; [
     rustup
     cargo-deb

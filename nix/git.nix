@@ -13,14 +13,11 @@ with lib;
 
   programs.git = {
     enable = true;
-    contents = ''
-      [commit]
-      	gpgSign = true
-      [user]
-      	email = havadartalha@gmail.com
-      	name = Talha Can Havadar
-      [includeIf "gitdir:~/workspace/"]
-      	path = ~/workspace/.gitconfig
-    '';
+    userName = "Talha Can Havadar";
+    userEmail = "havadartalha@gmail.com";
+    extraConfig = {
+      commit.gpgSign = "true";
+      includeIf."gitdir:~/workspace/".path = "~/workspace/.gitconfig";
+    };
   };
 }
