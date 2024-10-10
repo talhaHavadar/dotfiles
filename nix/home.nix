@@ -22,7 +22,7 @@ in
     ];
 
   home.file = {
-    "workspace/.gitconfig".source = mkOutOfStoreSymlink ../gitconfig.workspace;
+    "workspace/.gitconfig".source = mkOutOfStoreSymlink ../dot/gitconfig.workspace;
   };
 
   home.packages = with pkgs; [
