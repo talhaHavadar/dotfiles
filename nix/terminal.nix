@@ -5,16 +5,21 @@
   pkgs,
   ...
 }:
+let
+  homeDirectory = config.home.homeDirectory;
+in
 with lib;
 {
-  programs.home-manager.enable = true;
-  programs.bash.enable = true;
-  programs.starship.enable = true;
-  programs.zoxide = {
-    enable = true;
-    options = [
-      "--cmd cd"
-    ];
+  programs = {
+    home-manager.enable = true;
+    bash.enable = true;
+    starship.enable = true;
+    zoxide = {
+      enable = true;
+      options = [
+        "--cmd cd"
+      ];
+    };
   };
 
   home.packages = [
@@ -26,6 +31,5 @@ with lib;
   ];
   home.sessionVariables = {
     GPG_TTY = "$(tty)";
-
   };
 }
