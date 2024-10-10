@@ -166,6 +166,26 @@ with lib;
         theme = "dracula";
       };
 
+      cloak = {
+        enable = true;
+        settings = {
+          enabled = true;
+          cloak_character = "*";
+          cloak_length = null;
+          cloak_telescope = true;
+          patterns = [
+            {
+              cloak_pattern = "=.+";
+              replace = null;
+              file_pattern = [
+                ".env*"
+                "Rocket.toml"
+              ];
+            }
+          ];
+        };
+      };
+
       undotree.enable = true;
       treesitter = {
         enable = true;

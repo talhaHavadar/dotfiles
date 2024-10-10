@@ -45,7 +45,11 @@
         gopls.enable = true;
         yamlls.enable = true;
         ts_ls.enable = true;
-        rust_analyzer.enable = true;
+        rust_analyzer = {
+          enable = true;
+          installCargo = false;
+          installRustc = false;
+        };
         taplo.enable = true;
       };
       keymaps = {
