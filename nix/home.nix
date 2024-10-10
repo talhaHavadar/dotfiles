@@ -8,6 +8,7 @@
 let
   pyp = pkgs.python312Packages;
   isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
+  mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
 in
 {
   imports =
@@ -21,8 +22,7 @@ in
     ];
 
   home.file = {
-    "workspace/.gitconfig".source = ./.gitconfig.workspace;
-    ".tmux.conf".source = ./.tmux.conf;
+    "workspace/.gitconfig".source = mkOutOfStoreSymlink ../gitconfig.workspace;
   };
 
   home.packages = with pkgs; [
