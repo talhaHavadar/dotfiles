@@ -44,10 +44,10 @@ with lib;
               fi
           }
         ''
-        + optionalString isPackagingEnabled ". .packaging.bashrc";
+        + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
       shellAliases = {
         ll = "ls -al";
-        tn = "tmux new -As $(pwd | sed \"s/.*\///g\")";
+        tn = "tmux new -As $(pwd | sed \"s/.*\\///g\")";
         t = "tmux new -As";
         tl = "tmux list-sessions";
         tk = "tmux kill-session -t";
