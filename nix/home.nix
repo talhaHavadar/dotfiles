@@ -7,12 +7,18 @@
 }:
 let
   pyp = pkgs.python312Packages;
+  isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") != null;
+  a = builtins.trace isPackagingEnabled isPackagingEnabled;
 in
 {
 
-  imports = [
-    ./tmux.nix
-  ];
+  imports =
+    [
+      ./tmux.nix
+    ]
+    ++ lib.optionals (isPackagingEnabled) [
+      ./packaging
+    ];
 
   home.packages = [
     pkgs.rustc
@@ -30,6 +36,7 @@ in
     pkgs.dosfstools
     pyp.pipx
   ];
+
   host.home.applications.neovim.enable = true;
   programs.home-manager.enable = true;
   programs.bash.enable = true;
