@@ -54,10 +54,6 @@ with lib;
     };
   };
 
-  home.packages = [
-    pkgs.cowsay
-  ];
-
   home.sessionPath = [
     "${homeDirectory}/.local/bin"
   ];
