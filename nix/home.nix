@@ -11,6 +11,8 @@ let
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
 in
 {
+  host.home.applications.neovim.enable = true;
+
   imports =
     [
       ./terminal.nix
@@ -21,13 +23,34 @@ in
       ./packaging
     ];
 
-  home.file = {
-    "workspace/.gitconfig".source = mkOutOfStoreSymlink ../dot/gitconfig.workspace;
-  };
+  home.file =
+    {
+      "workspace/.gitconfig".source = mkOutOfStoreSymlink ../dot/gitconfig.workspace;
+    }
+    // lib.optionalAttrs isPackagingEnabled {
+      ".devscripts".source = mkOutOfStoreSymlink ../dot/devscripts;
+      ".gbp.conf".source = mkOutOfStoreSymlink ../dot/gbp.conf;
+      ".mk-sbuild.rc".source = mkOutOfStoreSymlink ../dot/mk-sbuild.rc;
+      ".quiltrc-dpkg".source = mkOutOfStoreSymlink ../dot/quiltrc-dpkg;
+      ".sbuildrc".source = mkOutOfStoreSymlink ../dot/sbuildrc;
+      ".packaging.bashrc".source = mkOutOfStoreSymlink ../dot/packaging.bashrc;
+    };
 
+  home.activation = {
+    pipx-poetry = lib.hm.dag.entryAfter [ "installPackages" ] ''
+      $DRY_RUN_CMD mkdir -p ~/.local/share/bash-completion/completions
+      PATH="${pkgs.pipx}/bin:$HOME/.local/bin:$PATH" $DRY_RUN_CMD pipx install poetry
+      PATH="${pkgs.pipx}/bin:$HOME/.local/bin:$PATH" $DRY_RUN_CMD poetry completions \
+        bash > ~/.local/share/bash-completion/completions/poetry
+    '';
+    pipx-black = lib.hm.dag.entryAfter [ "installPackages" ] ''
+      PATH="${pkgs.pipx}/bin:$HOME/.local/bin:$PATH" $DRY_RUN_CMD pipx install black
+    '';
+  };
   home.packages = with pkgs; [
     rustup
     cargo-deb
+    stylua
     tmux
     fzf
     ripgrep
@@ -50,5 +73,4 @@ in
     pyp.pipx
   ];
 
-  host.home.applications.neovim.enable = true;
 }

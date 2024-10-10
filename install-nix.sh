@@ -46,10 +46,10 @@ fi
 
 if [ -n "$is_linux" ]; then
     if [ ! which home-manager &> /dev/null ]; then
-        INCLUDE_PACKAGING="$INCLUDE_PACKAGING" nix run home-manager -- init --switch "$HOME"/.config/dotfiles/nix
+        INCLUDE_PACKAGING="$INCLUDE_PACKAGING" nix run home-manager -- init --switch "$HOME"/.config/dotfiles/nix --impure
     else
         echo "home-manager is already activated so no need for nix run."
-        INCLUDE_PACKAGING="$INCLUDE_PACKAGING" home-manager init --switch $DOTFILES_DIR/nix
+        INCLUDE_PACKAGING="$INCLUDE_PACKAGING" home-manager init --switch $DOTFILES_DIR/nix --show-trace --impure
     fi
     if [ "$INCLUDE_PACKAGING" = "true" ]; then
         echo "Packaging tools installation is enabled. Installing packaging tools..."
@@ -62,8 +62,11 @@ if [ -n "$is_linux" ]; then
             lintian
             git-buildpackage
         )
+        # TODO: add missing packaging related configurations
 
-        #sudo apt install "${packaging_related_apt_tools[@]}"
+        # sudo apt install "${packaging_related_apt_tools[@]}"
+        # source ~/.packaging.bashrc
+        # setup-packaging-environment
     fi
 fi
 

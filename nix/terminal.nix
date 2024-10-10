@@ -7,6 +7,7 @@
 }:
 let
   homeDirectory = config.home.homeDirectory;
+  isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
 in
 with lib;
 {
@@ -22,26 +23,28 @@ with lib;
 
     bash = {
       enable = true;
-      bashrcExtra = ''
-        tmux_find_or_create_prompt() {
-            result=$(zoxide query -l | fzf-tmux -p -w 62% -h 38% -m)
-            if [ "$result" = "" ]; then
-                echo ""
-            else
-                zoxide add "$result" &>/dev/null
-                session_name=$(echo $result | sed "s/.*\///g")
-                if [ "$TMUX" ]; then
-                    echo "in tmux session"
-                    
-                    tmux switch-client -t $session_name || (cd $result && tmux new-session -d -s $session_name && cd - && tmux switch-client -t $session_name)
-                else
-                    echo "not in tmux session"
-                    cd $result
-                    tmux new -As $session_name
-                fi
-            fi
-        }
-      '';
+      bashrcExtra =
+        ''
+          tmux_find_or_create_prompt() {
+              result=$(zoxide query -l | fzf-tmux -p -w 62% -h 38% -m)
+              if [ "$result" = "" ]; then
+                  echo ""
+              else
+                  zoxide add "$result" &>/dev/null
+                  session_name=$(echo $result | sed "s/.*\///g")
+                  if [ "$TMUX" ]; then
+                      echo "in tmux session"
+                      
+                      tmux switch-client -t $session_name || (cd $result && tmux new-session -d -s $session_name && cd - && tmux switch-client -t $session_name)
+                  else
+                      echo "not in tmux session"
+                      cd $result
+                      tmux new -As $session_name
+                  fi
+              fi
+          }
+        ''
+        + optionalString isPackagingEnabled ". .packaging.bashrc";
       shellAliases = {
         ll = "ls -al";
         tn = "tmux new -As $(pwd | sed \"s/.*\///g\")";
