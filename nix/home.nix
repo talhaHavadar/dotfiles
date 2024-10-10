@@ -8,7 +8,6 @@
 let
   pyp = pkgs.python312Packages;
   isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
-  homeDirectory = config.home.homeDirectory;
 in
 {
   imports =
