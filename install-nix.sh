@@ -1,5 +1,17 @@
-#!/bin/sh
+#!/bin/env bash
 #set -x
+
+while [ $# -gt 0 ]; do
+    case $1 in
+        -p|--with-packaging)
+            INCLUDE_PACKAGING="true"
+            ;;
+        *)
+            echo "Unknown argument $1"
+            ;;
+    esac
+    shift
+done
 
 dotfiles_version=`cat ./.version`
 echo "Dotfiles version $dotfiles_version"
@@ -20,15 +32,38 @@ nix_version=`which nix`
 is_macos=`uname -a | grep Darwin`
 is_linux=`uname -a | grep Linux`
 if [ -z "$nix_version" ]; then
-    if [ -n "$is_macos" -a ! command -v nix ]; then
+    if [ -n "$is_macos" -a ! which nix &> /dev/null ]; then
         echo "Detected a macos system..."
         curl -L https://nixos.org/nix/install | sh
-    elif [ -n "$is_linux" -a ! command -v nix ]; then
+    elif [ -n "$is_linux" -a ! which nix &> /dev/null ]; then
         echo "Detected a linux system..."
         curl -L https://nixos.org/nix/install | sh -s -- --daemon
     fi
     ln -s $DOTFILES_DIR/nix.conf ~/.config/nix/nix.conf
 else
     echo "nix is already installed skipping the installation step for nix"
+fi
+
+if [ -n "$is_linux" ]; then
+    if [ ! which home-manager &> /dev/null ]; then
+        nix run home-manager -- init --switch "$HOME"/.config/dotfiles/nix
+    else
+        echo "home-manager is already activated so no need for nix run."
+        home-manager init --switch $DOTFILES_DIR/nix
+    fi
+    if [ "$INCLUDE_PACKAGING" = "true" ]; then
+        echo "Packaging tools installation is enabled. Installing packaging tools..."
+
+        packaging_related_apt_tools=(
+            sbuild
+            ubuntu-dev-tools
+            apt-cacher-ng
+            autopkgtest
+            lintian
+            git-buildpackage
+        )
+
+        sudo apt install "${packaging_related_apt_tools[@]}"
+    fi
 fi
 
