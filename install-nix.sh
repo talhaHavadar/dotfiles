@@ -18,7 +18,7 @@ echo "Dotfiles version $dotfiles_version"
 if [ -d ~/.config/dotfiles ]; then
     config_dotfiles_version=`cat ~/.config/dotfiles/.version`
     if [ "$dotfiles_version" != "$config_dotfiles_version" ]; then
-	echo "Make sure you are executing this script from ~/.config/dotfiles"
+        echo "Make sure you are executing this script from ~/.config/dotfiles"
         exit 1
     fi
 else
@@ -33,24 +33,33 @@ nix_version=`which nix`
 is_macos=`uname -a | grep Darwin`
 is_linux=`uname -a | grep Linux`
 if [ -z "$nix_version" ]; then
-    if [ -n "$is_macos" -a ! which nix &> /dev/null ]; then
+    echo "is_macos=$is_macos is_linux=$is_linux"
+    if [ -n "$is_macos" ]; then
         echo "Detected a macos system..."
-        curl -L https://nixos.org/nix/install | sh
-    elif [ -n "$is_linux" -a ! which nix &> /dev/null ]; then
+        if ! command -v nix &>/dev/null
+        then
+            curl -L https://nixos.org/nix/install | sh
+        fi
+    elif [ -n "$is_linux" ]; then
         echo "Detected a linux system..."
-        curl -L https://nixos.org/nix/install | sh -s -- --daemon
+        if ! command -v nix &>/dev/null
+        then
+            curl -L https://nixos.org/nix/install | sh -s -- --daemon
+        fi
     fi
-    ln -s $DOTFILES_DIR/nix.conf ~/.config/nix/nix.conf
+    mkdir -p ~/.config/nix
+    ln -s $DOTFILES_DIR/nix.conf ~/.config/nix/nix.conf &>/dev/null
 else
     echo "nix is already installed skipping the installation step for nix"
 fi
 
 if [ -n "$is_linux" ]; then
-    if [ ! which home-manager &> /dev/null ]; then
-        INCLUDE_PACKAGING="$INCLUDE_PACKAGING" nix run home-manager -- init --switch "$HOME"/.config/dotfiles/nix --impure
+        if ! command -v home-manager &>/dev/null
+        then
+        INCLUDE_PACKAGING="$INCLUDE_PACKAGING" nix run home-manager -- init --switch "$HOME"/.config/dotfiles/nix --impure -b backup
     else
         echo "home-manager is already activated so no need for nix run."
-        INCLUDE_PACKAGING="$INCLUDE_PACKAGING" home-manager init --switch $DOTFILES_DIR/nix --show-trace --impure
+        INCLUDE_PACKAGING="$INCLUDE_PACKAGING" home-manager init --switch $DOTFILES_DIR/nix --show-trace --impure -b backup
     fi
     if [ "$INCLUDE_PACKAGING" = "true" ]; then
         echo "Packaging tools installation is enabled. Installing packaging tools..."
