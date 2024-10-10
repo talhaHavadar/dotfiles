@@ -41,8 +41,8 @@
                   stateVersion = "24.05";
                 };
               }
-              ./home.nix
               (import ./neovim)
+              ./home.nix
             ];
             pkgs = nixpkgs.legacyPackages.${system};
             extraSpecialArgs =
@@ -69,7 +69,7 @@
               home-manager.users.${username} = import ./home.nix;
               home-manager.backupFileExtension = "backup";
             }
-            ./configs.nix
+            (import ./neovim)
           ];
         };
       };
