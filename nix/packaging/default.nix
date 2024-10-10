@@ -7,9 +7,7 @@
 }:
 with lib;
 {
-
   home.packages = [
-
     pkgs.cowsay
   ];
 }

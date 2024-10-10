@@ -7,7 +7,7 @@
 }:
 let
   pyp = pkgs.python312Packages;
-  isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") != null;
+  isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
   a = builtins.trace isPackagingEnabled isPackagingEnabled;
 in
 {
