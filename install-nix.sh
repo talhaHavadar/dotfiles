@@ -46,10 +46,10 @@ fi
 
 if [ -n "$is_linux" ]; then
     if [ ! which home-manager &> /dev/null ]; then
-        nix run home-manager -- init --switch "$HOME"/.config/dotfiles/nix
+        INCLUDE_PACKAGING="$INCLUDE_PACKAGING" nix run home-manager -- init --switch "$HOME"/.config/dotfiles/nix
     else
         echo "home-manager is already activated so no need for nix run."
-        home-manager init --switch $DOTFILES_DIR/nix
+        INCLUDE_PACKAGING="$INCLUDE_PACKAGING" home-manager init --switch $DOTFILES_DIR/nix
     fi
     if [ "$INCLUDE_PACKAGING" = "true" ]; then
         echo "Packaging tools installation is enabled. Installing packaging tools..."
@@ -63,7 +63,7 @@ if [ -n "$is_linux" ]; then
             git-buildpackage
         )
 
-        sudo apt install "${packaging_related_apt_tools[@]}"
+        #sudo apt install "${packaging_related_apt_tools[@]}"
     fi
 fi
 
