@@ -28,6 +28,7 @@ fi
 
 cd ~/.config/dotfiles
 DOTFILES_DIR=~/.config/dotfiles
+
 nix_version=`which nix`
 is_macos=`uname -a | grep Darwin`
 is_linux=`uname -a | grep Linux`
