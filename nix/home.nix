@@ -13,6 +13,7 @@ in
   imports =
     [
       ./terminal.nix
+      ./git.nix
       ./tmux.nix
     ]
     ++ lib.optionals (isPackagingEnabled) [
@@ -45,8 +46,4 @@ in
   ];
 
   host.home.applications.neovim.enable = true;
-
-  programs.git = {
-    enable = true;
-  };
 }
