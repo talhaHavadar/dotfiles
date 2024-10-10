@@ -43,8 +43,9 @@ with lib;
         }
       '';
       shellAliases = {
+        ll = "ls -al";
         tn = "tmux new -As $(pwd | sed \"s/.*\///g\")";
-        t = "tmux new -As ";
+        t = "tmux new -As";
         tl = "tmux list-sessions";
         tk = "tmux kill-session -t";
         tf = "tmux_find_or_create_prompt";
