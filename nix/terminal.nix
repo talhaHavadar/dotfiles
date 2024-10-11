@@ -53,7 +53,7 @@ with lib;
           }
 
           update-home() {
-            home-manager init --show-trace --impure -b backup
+            home-manager init --switch ~/.config/dotfiles/nix --show-trace --impure -b backup
           }
 
         ''
@@ -69,7 +69,7 @@ with lib;
           tp = "tmux list-panes -a -F '#D #T #{pane_tty} #{pane_current_command} #{pane_current_path}'";
         }
         // optionalAttrs isPackagingEnabled {
-          update-home = "INCLUDE_PACKAGING=\"true\" home-manager init --show-trace --impure -b backup";
+          update-home = "INCLUDE_PACKAGING=\"true\" home-manager init --switch ~/.config/dotfiles/nix --show-trace --impure -b backup";
         };
     };
   };
