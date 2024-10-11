@@ -26,12 +26,13 @@ with lib;
       bashrcExtra =
         ''
           tmux_find_or_create_prompt() {
-              result=$(zoxide query -l | fzf-tmux -p -w 62% -h 38% -m)
+              query="$(zoxide query -l)"$'\n'"$(tmux list-sessions)"
+              result=$(echo "$query" | fzf-tmux -p -w 62% -h 38% -m)
               if [ "$result" = "" ]; then
                   echo ""
               else
                   zoxide add "$result" &>/dev/null
-                  session_name=$(echo $result | sed "s/.*\///g")
+                  session_name=$(echo $result | sed "s/:.*//g" | sed "s/.*\///g")
                   if [ "$TMUX" ]; then
                       echo "in tmux session"
                       
@@ -42,6 +43,12 @@ with lib;
                       tmux new -As $session_name
                   fi
               fi
+          }
+          lxc-update-ssh-keys() {
+            container_name=$1
+            cat ~/.ssh/id_ed25519.pub | lxc exec "$1" -- \
+            sh -c "cat >> /home/ubuntu/.ssh/authorized_keys"
+            lxc exec "$1" -- systemctl restart ssh
           }
         ''
         + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
