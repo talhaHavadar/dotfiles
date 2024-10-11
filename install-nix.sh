@@ -62,9 +62,6 @@ if [ -n "$is_linux" ]; then
         echo "home-manager is already activated so no need for nix run."
         INCLUDE_PACKAGING="$INCLUDE_PACKAGING" home-manager init --switch $DOTFILES_DIR/nix --show-trace --impure -b backup
     fi
-    source /etc/profile
-    source ~/.profile
-    source ~/.bashrc
 
     if [ "$INCLUDE_PACKAGING" = "true" ]; then
         echo "Packaging tools installation is enabled. Installing packaging tools..."
@@ -77,11 +74,29 @@ if [ -n "$is_linux" ]; then
             lintian
             git-buildpackage
         )
-        # TODO: add missing packaging related configurations
 
-        # sudo apt install "${packaging_related_apt_tools[@]}"
-        # source ~/.packaging.bashrc
-        # setup-packaging-environment
+        sudo apt install "${packaging_related_apt_tools[@]}"
+
+        sudo adduser $USER sbuild
+
+        mkdir -p $HOME/sbuild/build
+        mkdir -p $HOME/sbuild/log
+        mkdir -p $HOME/sbuild/scratch
+
+        sudo tee -a /etc/schroot/sbuild/fstab <<EOF
+$HOME/sbuild/scratch  /scratch          none  rw,bind  0  0
+EOF
+
+        sudo tee -a /etc/fstab <<EOF
+tmpfs		/var/lib/schroot/union/overlay/		tmpfs	defaults	0	0
+EOF
+        source ~/.packaging.bashrc
+
+        setup-packaging-environment
     fi
+
+    source /etc/profile
+    source ~/.profile
+    source ~/.bashrc
 fi
 
