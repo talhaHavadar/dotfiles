@@ -20,8 +20,8 @@ $purge_build_deps = 'successful';
 # $purge_build_deps = 'never';
 
 # Directory for writing build logs to
-$log_dir=$ENV{HOME}."/ubuntu/logs";
-$build_dir=$ENV{HOME}."/ubuntu/build";
+$log_dir=$ENV{HOME}."/sbuild/logs";
+$build_dir=$ENV{HOME}."/sbuild/build";
 
 ##############################################################################
 # POST-BUILD RELATED (turn off functionality by setting variables to 0)
