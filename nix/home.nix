@@ -37,6 +37,10 @@ in
     };
 
   home.activation = {
+    fzf = lib.hm.dag.entryAfter [ "installPackages" ] ''
+      PATH="${pkgs.fzf}/bin:$HOME/.local/bin:$PATH" $DRY_RUN_CMD \
+          fzf --bash > ~/.local/share/bash-completion/completions/fzf
+    '';
     pipx-poetry = lib.hm.dag.entryAfter [ "installPackages" ] ''
       $DRY_RUN_CMD mkdir -p ~/.local/share/bash-completion/completions
       PATH="${pkgs.pipx}/bin:$HOME/.local/bin:$PATH" $DRY_RUN_CMD pipx install poetry
