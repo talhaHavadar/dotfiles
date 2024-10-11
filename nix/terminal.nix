@@ -44,6 +44,7 @@ with lib;
                   fi
               fi
           }
+
           lxc-update-ssh-keys() {
             container_name=$1
             cat ~/.ssh/id_ed25519.pub | lxc exec "$1" -- \
@@ -51,17 +52,25 @@ with lib;
             lxc exec "$1" -- systemctl restart ssh
           }
 
+          update-home() {
+            home-manager switch --show-trace --impure -b backup
+          }
+
         ''
         + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
-      shellAliases = {
-        ll = "ls -al";
-        tn = "tmux new -As $(pwd | sed \"s/.*\\///g\")";
-        t = "tmux new -As";
-        tl = "tmux list-sessions";
-        tk = "tmux kill-session -t";
-        tf = "tmux_find_or_create_prompt";
-        tp = "tmux list-panes -a -F '#D #T #{pane_tty} #{pane_current_command} #{pane_current_path}'";
-      };
+      shellAliases =
+        {
+          ll = "ls -al";
+          tn = "tmux new -As $(pwd | sed \"s/.*\\///g\")";
+          t = "tmux new -As";
+          tl = "tmux list-sessions";
+          tk = "tmux kill-session -t";
+          tf = "tmux_find_or_create_prompt";
+          tp = "tmux list-panes -a -F '#D #T #{pane_tty} #{pane_current_command} #{pane_current_path}'";
+        }
+        // optionalAttrs isPackagingEnabled {
+          update-home = "INCLUDE_PACKAGING=\"true\" home-manager switch --show-trace --impure -b backup";
+        };
     };
   };
 

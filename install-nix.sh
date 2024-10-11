@@ -62,6 +62,7 @@ if [ -n "$is_linux" ]; then
         echo "home-manager is already activated so no need for nix run."
         INCLUDE_PACKAGING="$INCLUDE_PACKAGING" home-manager init --switch $DOTFILES_DIR/nix --show-trace --impure -b backup
     fi
+    ln -s $DOTFILES_DIR/nix ~/.config/home-manager &>/dev/null
 
     if [ "$INCLUDE_PACKAGING" = "true" ]; then
         echo "Packaging tools installation is enabled. Installing packaging tools..."
