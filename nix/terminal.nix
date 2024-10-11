@@ -50,6 +50,7 @@ with lib;
             sh -c "cat >> /home/ubuntu/.ssh/authorized_keys"
             lxc exec "$1" -- systemctl restart ssh
           }
+
         ''
         + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
       shellAliases = {
