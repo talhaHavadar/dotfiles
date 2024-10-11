@@ -3,7 +3,7 @@
 $maintainer_name='Talha Can Havadar <talha.can.havadar@canonical.com>';
 
 # Default distribution to build.
-$distribution = "jammy";
+$distribution = "noble";
 # Build arch-all by default.
 $build_arch_all = 1;
 
