@@ -49,6 +49,7 @@ if [ -z "$nix_version" ]; then
     fi
     mkdir -p ~/.config/nix
     ln -s $DOTFILES_DIR/nix.conf ~/.config/nix/nix.conf &>/dev/null
+    source /etc/profile
 else
     echo "nix is already installed skipping the installation step for nix"
 fi
