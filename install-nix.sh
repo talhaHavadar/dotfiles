@@ -55,13 +55,17 @@ else
 fi
 
 if [ -n "$is_linux" ]; then
-        if ! command -v home-manager &>/dev/null
-        then
+    if ! command -v home-manager &>/dev/null
+    then
         INCLUDE_PACKAGING="$INCLUDE_PACKAGING" nix run home-manager -- init --switch "$HOME"/.config/dotfiles/nix --impure -b backup
     else
         echo "home-manager is already activated so no need for nix run."
         INCLUDE_PACKAGING="$INCLUDE_PACKAGING" home-manager init --switch $DOTFILES_DIR/nix --show-trace --impure -b backup
     fi
+    source /etc/profile
+    source ~/.profile
+    source ~/.bashrc
+
     if [ "$INCLUDE_PACKAGING" = "true" ]; then
         echo "Packaging tools installation is enabled. Installing packaging tools..."
 
