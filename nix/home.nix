@@ -25,6 +25,7 @@ in
 
   home.file =
     {
+      ".config/starship.toml".source = mkOutOfStoreSymlink ../dot/starship.toml;
       "workspace/.gitconfig".source = mkOutOfStoreSymlink ../dot/gitconfig.workspace;
     }
     // lib.optionalAttrs isPackagingEnabled {
