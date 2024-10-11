@@ -1,6 +1,7 @@
 format = """
 [░▒▓](#a3aed2)\
-[  ](bg:#a3aed2 fg:#090c0c)\
+$os\
+$username\
 [](bg:#769ff0 fg:#a3aed2)\
 $directory\
 [](fg:#769ff0 bg:#394260)\
@@ -11,6 +12,8 @@ $nodejs\
 $rust\
 $golang\
 $php\
+$python\
+$c\
 [](fg:#212736 bg:#1d2230)\
 $time\
 [ ](fg:#1d2230)\
@@ -27,6 +30,9 @@ truncation_symbol = "…/"
 "Downloads" = " "
 "Music" = " "
 "Pictures" = " "
+"Developer" = "󰲋 "
+"projects" = "󰲋 "
+"workspace" = "󰲋 W"
 
 [git_branch]
 symbol = ""
@@ -57,8 +63,51 @@ symbol = ""
 style = "bg:#212736"
 format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
 
+[python]
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol( $version) ](fg:#769ff0 bg:#212736)]($style)'
+
+[c]
+symbol = " "
+style = "bg:#212736"
+format = '[[ $symbol( $version) ](fg:#769ff0 bg:#212736)]($style)'
+
 [time]
 disabled = false
 time_format = "%R" # Hour:Minute Format
 style = "bg:#1d2230"
 format = '[[  $time ](fg:#a0a9cb bg:#1d2230)]($style)'
+
+[os]
+disabled = false
+style = "bg:#a3aed2 fg:#090c0c"
+
+[username]
+show_always = true
+style_user = "bg:#a3aed2 fg:#090c0c"
+style_root = "bg:#a3aed2 fg:#090c0c"
+format = '[ $user ]($style)'
+
+[os.symbols]
+Windows = " 󰍲 "
+Ubuntu = " 󰕈 "
+SUSE = "  "
+Raspbian = " 󰐿 "
+Mint = " 󰣭 "
+Macos = " 󰀵 "
+Manjaro = "  "
+Linux = "  "
+Gentoo = " 󰣨 "
+Fedora = " 󰣛 "
+Alpine = "  "
+Amazon = "  "
+Android = "  "
+Arch = " 󰣇 "
+Artix = " 󰣇 "
+EndeavourOS = "  "
+CentOS = "  "
+Debian = " 󰣚 "
+Redhat = " 󱄛 "
+RedHatEnterprise = " 󱄛 "
+
