@@ -75,6 +75,7 @@ if [ -n "$is_linux" ]; then
             git-buildpackage
         )
 
+        sudo apt update
         sudo apt install "${packaging_related_apt_tools[@]}"
 
         sudo adduser $USER sbuild
