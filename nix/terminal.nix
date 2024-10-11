@@ -20,6 +20,7 @@ with lib;
         "--cmd cd"
       ];
     };
+    fzf.enable = true;
 
     bash = {
       enable = true;
