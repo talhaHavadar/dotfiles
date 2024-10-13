@@ -57,7 +57,7 @@
             inherit (args) extraSpecialArgs;
           }
         );
-      username = "talha";
+      username = builtins.getEnv "USER";
     in
     {
 
@@ -84,14 +84,6 @@
       homeConfigurations.${username} = mkHomeConfiguration {
         system = "x86_64-linux";
         inherit username;
-        extraSpecialArgs = {
-          inherit inputs;
-        };
-      };
-
-      homeConfigurations.ubuntu = mkHomeConfiguration {
-        system = "x86_64-linux";
-        username = "ubuntu";
         extraSpecialArgs = {
           inherit inputs;
         };
