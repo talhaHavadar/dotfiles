@@ -21,6 +21,7 @@
           };
           stylua.enable = true;
           yamlfmt.enable = true;
+          dxfmt.enable = true;
         };
       };
       settings.on_attach = ''
