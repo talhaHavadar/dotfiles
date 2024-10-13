@@ -29,7 +29,8 @@
         "<C-Space>" = "cmp.mapping.complete()";
         "<C-a>" = "cmp.mapping.scroll_docs(-4)";
         "<C-z>" = "cmp.mapping.scroll_docs(4)";
-        "<Tab>" = "cmp.mapping(cmp.mapping.select_next_item(), {'i', 's'})";
+        "<Up>" = "cmp.mapping(cmp.mapping.select_prev_item(), {'i', 's'})";
+        "<Down>" = "cmp.mapping(cmp.mapping.select_next_item(), {'i', 's'})";
       };
     };
   };
