@@ -58,6 +58,7 @@
           }
         );
       username = builtins.getEnv "USER";
+      system = builtins.getEnv "NIX_SYSTEM";
     in
     {
 
@@ -82,9 +83,12 @@
       };
 
       homeConfigurations.${username} = mkHomeConfiguration {
-        system = "x86_64-linux";
+        inherit system;
         inherit username;
         extraSpecialArgs = {
+          device = {
+            inherit system;
+          };
           inherit inputs;
         };
       };

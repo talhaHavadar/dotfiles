@@ -3,6 +3,7 @@
   inputs,
   lib,
   pkgs,
+  device,
   ...
 }:
 let
@@ -80,5 +81,6 @@ with lib;
   ];
   home.sessionVariables = {
     GPG_TTY = "$(tty)";
+    NIX_SYSTEM = device.system;
   };
 }

@@ -55,7 +55,7 @@ else
 fi
 
 if [ -n "$is_linux" ]; then
-    export NIX_SYSTEM="$(uname -i)-$(uname -s | tr ':upper:' ':lower:')"
+    export NIX_SYSTEM="$(uname -i)-$(uname -s | awk '{print tolower($0)}')"
     if ! command -v home-manager &>/dev/null
     then
         INCLUDE_PACKAGING="$INCLUDE_PACKAGING" nix run home-manager -- init --switch "$HOME"/.config/dotfiles/nix --impure -b backup
@@ -63,7 +63,6 @@ if [ -n "$is_linux" ]; then
         echo "home-manager is already activated so no need for nix run."
         INCLUDE_PACKAGING="$INCLUDE_PACKAGING" home-manager init --switch $DOTFILES_DIR/nix --show-trace --impure -b backup
     fi
-    ln -s $DOTFILES_DIR/nix ~/.config/home-manager &>/dev/null
 
     if [ "$INCLUDE_PACKAGING" = "true" ]; then
         echo "Packaging tools installation is enabled. Installing packaging tools..."
