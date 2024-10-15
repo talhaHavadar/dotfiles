@@ -55,7 +55,7 @@ else
 fi
 
 if [ -n "$is_linux" ]; then
-    export NIX_SYSTEM="$(uname -i)-$(uname -s | awk '{print tolower($0)}')"
+    # export NIX_SYSTEM="$(uname -i)-$(uname -s | awk '{print tolower($0)}')"
     if ! command -v home-manager &>/dev/null
     then
         INCLUDE_PACKAGING="$INCLUDE_PACKAGING" nix run home-manager -- init --switch "$HOME"/.config/dotfiles/nix --impure -b backup

@@ -58,7 +58,7 @@
           }
         );
       username = builtins.getEnv "USER";
-      system = builtins.getEnv "NIX_SYSTEM";
+      system = builtins.currentSystem;
     in
     {
 
@@ -66,6 +66,10 @@
         talha = darwin.lib.darwinSystem {
           specialArgs = {
             inherit inputs;
+            device = {
+              inherit system;
+              inherit username;
+            };
           };
           system = "aarch64-darwin";
           modules = [
