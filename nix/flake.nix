@@ -66,28 +66,26 @@
     in
     {
 
-      darwinConfigurations = {
-        talha = darwin.lib.darwinSystem {
-          specialArgs = {
-            inherit inputs;
-            device = {
-              inherit system;
-              inherit username;
-            };
+      darwinConfigurations.mini = darwin.lib.darwinSystem {
+        specialArgs = {
+          inherit inputs;
+          device = {
+            inherit system;
+            inherit username;
           };
-          system = "aarch64-darwin";
-          modules = [
-            ./system.nix
-            home-manager.darwinModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPkgs = true;
-              home-manager.users.${username} = import ./home.nix;
-              home-manager.backupFileExtension = "backup";
-            }
-            (import ./neovim)
-          ];
         };
+        inherit system;
+        modules = [
+          ./system.nix
+          home-manager.darwinModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPkgs = true;
+            home-manager.users.${username} = import ./home.nix;
+            home-manager.backupFileExtension = "backup";
+          }
+          (import ./neovim)
+        ];
       };
 
       homeConfigurations.${username} = mkHomeConfiguration {
