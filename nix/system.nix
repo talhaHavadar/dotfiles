@@ -10,6 +10,9 @@ in
     experimental-features = nix-command flakes
   '';
   # nix.package = pkgs.nix;
+  imports = [
+    ./homebrew.nix
+  ];
 
   environment.systemPackages = with pkgs; [
     coreutils
