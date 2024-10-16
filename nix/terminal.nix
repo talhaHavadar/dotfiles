@@ -40,11 +40,8 @@ with lib;
                   zoxide add "$result" &>/dev/null
                   session_name=$(echo $result | sed "s/:.*//g" | sed "s/.*\///g")
                   if [ "$TMUX" ]; then
-                      echo "in tmux session"
-                      
                       tmux switch-client -t $session_name || (cd $result && tmux new-session -d -s $session_name && cd - && tmux switch-client -t $session_name)
                   else
-                      echo "not in tmux session"
                       cd $result
                       tmux new -As $session_name
                   fi
@@ -64,13 +61,18 @@ with lib;
 
         ''
         + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
+      initExtra = ''
+        source ~/.complete_alias
+
+        complete -F _complete_alias t
+      '';
       shellAliases =
         {
           gg = "git grep --no-index";
           ls = "ls --color=auto";
           ll = "ls --color=auto -al";
           tn = "tmux new -As $(pwd | sed \"s/.*\\///g\")";
-          t = "tmux new -As";
+          t = "tmux new -As -t";
           tl = "tmux list-sessions";
           tk = "tmux kill-session -t";
           tf = "tmux_find_or_create_prompt";
