@@ -62,6 +62,7 @@ with lib;
         + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
       shellAliases =
         {
+          gg = "git grep --no-index";
           ls = "ls --color=auto";
           ll = "ls --color=auto -al";
           tn = "tmux new -As $(pwd | sed \"s/.*\\///g\")";
