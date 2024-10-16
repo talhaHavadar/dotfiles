@@ -12,6 +12,7 @@ let
 in
 {
   host.home.applications.neovim.enable = true;
+  host.home.applications.kitty.enable = true;
 
   imports =
     [

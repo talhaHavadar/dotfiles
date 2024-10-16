@@ -26,6 +26,10 @@
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixgl = {
+      url = "github:nix-community/nixGL";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -52,7 +56,10 @@
               (import ./neovim)
               ./home.nix
             ];
-            pkgs = nixpkgs.legacyPackages.${system};
+            pkgs = import nixpkgs {
+              inherit system;
+              overlays = [ inputs.nixgl.overlay ];
+            };
             extraSpecialArgs =
               {
               };

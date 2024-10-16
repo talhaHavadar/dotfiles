@@ -12,6 +12,10 @@ let
 in
 with lib;
 {
+  imports = [
+    ./kitty.nix
+  ];
+
   programs = {
     home-manager.enable = true;
     starship.enable = true;
