@@ -37,6 +37,7 @@ with lib;
         scrollback_pager_history_size = 100000;
         background_opacity = 0.88;
         tab_bar_edge = "top";
+        enable_audio_bell = "no";
       };
 
     };
