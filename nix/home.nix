@@ -54,6 +54,7 @@ in
     '';
   };
   home.packages = with pkgs; [
+    curl
     rustup
     cargo-deb
     stylua
