@@ -62,7 +62,8 @@ with lib;
         + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
       shellAliases =
         {
-          ll = "ls -al";
+          ls = "ls --color=auto";
+          ll = "ls --color=auto -al";
           tn = "tmux new -As $(pwd | sed \"s/.*\\///g\")";
           t = "tmux new -As";
           tl = "tmux list-sessions";
