@@ -14,6 +14,7 @@ $golang\
 $php\
 $python\
 $c\
+$nix_shell\
 [](fg:#212736 bg:#1d2230)\
 $time\
 [ ](fg:#1d2230)\
@@ -72,6 +73,9 @@ format = '[[ $symbol ($version )(<${virtualenv}> ) ](fg:#769ff0 bg:#212736)]($st
 symbol = " "
 style = "bg:#212736"
 format = '[[ $symbol( $version) ](fg:#769ff0 bg:#212736)]($style)'
+
+[nix_shell]
+style = "bg:#212736"
 
 [time]
 disabled = false
