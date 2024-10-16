@@ -38,6 +38,11 @@ with lib;
         background_opacity = 0.88;
         tab_bar_edge = "top";
         enable_audio_bell = "no";
+        enabled_layouts = "fat:bias=80;full_size=1;mirrored=false";
+      };
+      keybindings = {
+        "ctrl+shift+enter" = "new_window_with_cwd";
+        "ctrl+shift+g" = "next_window";
       };
 
     };
