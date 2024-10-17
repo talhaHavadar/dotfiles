@@ -29,6 +29,7 @@ in
       ".config/starship.toml".source = mkOutOfStoreSymlink ../dot/starship.toml;
       "workspace/.gitconfig".source = mkOutOfStoreSymlink ../dot/gitconfig.workspace;
       ".complete_alias".source = mkOutOfStoreSymlink ../dot/complete_alias;
+      ".tmux-completion".source = mkOutOfStoreSymlink ../dot/tmux-completion;
     }
     // lib.optionalAttrs isPackagingEnabled {
       ".devscripts".source = mkOutOfStoreSymlink ../dot/devscripts;
