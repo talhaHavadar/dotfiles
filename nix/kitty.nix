@@ -42,6 +42,7 @@ with lib;
         tab_bar_align = "left";
         enable_audio_bell = "no";
         enabled_layouts = "fat:bias=80;full_size=1;mirrored=false";
+        update_check_interval = 0;
       };
       keybindings = {
         "ctrl+shift+enter" = "new_window_with_cwd";
