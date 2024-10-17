@@ -62,6 +62,7 @@ with lib;
         ''
         + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
       initExtra = ''
+        source ~/.tmux-completion
         source ~/.complete_alias
 
         complete -F _complete_alias t
@@ -72,7 +73,7 @@ with lib;
           ls = "ls --color=auto";
           ll = "ls --color=auto -al";
           tn = "tmux new -As $(pwd | sed \"s/.*\\///g\")";
-          t = "tmux new -As -t";
+          t = "tmux new -A -s";
           tl = "tmux list-sessions";
           tk = "tmux kill-session -t";
           tf = "tmux_find_or_create_prompt";
