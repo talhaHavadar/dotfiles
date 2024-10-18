@@ -30,6 +30,8 @@
       url = "github:nix-community/nixGL";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    hyprland.url = "github:hyprwm/Hyprland";
+
   };
 
   outputs =
@@ -38,6 +40,7 @@
       home-manager,
       darwin,
       nixvim,
+      hyprland,
       ...
     }@inputs:
     let

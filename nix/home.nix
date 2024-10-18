@@ -13,12 +13,14 @@ in
 {
   host.home.applications.neovim.enable = true;
   host.home.applications.kitty.enable = true;
+  host.home.windowManagers.hyprland.enable = true;
 
   imports =
     [
       ./terminal.nix
       ./git.nix
       ./tmux.nix
+      ./hyprland.nix
     ]
     ++ lib.optionals (isPackagingEnabled) [
       ./packaging
