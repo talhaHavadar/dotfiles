@@ -39,6 +39,11 @@ with lib;
       opts = {
         nu = true;
         relativenumber = true;
+        guicursor = [
+          "n-v-c:block-Cursor/lCursor-blinkoff100"
+          "i-ci:block-Cursor/lCursor-blinkwait1000-blinkon100-blinkoff100"
+          "r:hor50-Cursor/lCursor-blinkwait100-blinkon100-blinkoff100"
+        ];
         mouse = "";
         tabstop = 4;
         softtabstop = 4;
