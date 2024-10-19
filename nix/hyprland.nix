@@ -9,6 +9,7 @@
 let
   home_config = config.host.home.windowManagers.hyprland;
   home = config.home;
+  pkg = inputs.hyprland.packages.${device.system}.hyprland;
 in
 with lib;
 {
@@ -26,7 +27,7 @@ with lib;
     home.sessionVariables.NIXOS_OZONE_WL = "1";
     wayland.windowManager.hyprland = {
       # enable = true;
-      # package = inputs.hyprland.packages.${device.system}.hyprland;
+      package = pkg;
       systemd.variables = [ "--all" ];
       settings = {
         "$mod" = "SUPER";
