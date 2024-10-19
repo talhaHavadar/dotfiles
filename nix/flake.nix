@@ -61,6 +61,9 @@
             ];
             pkgs = import nixpkgs {
               inherit system;
+              config = {
+                allowUnfree = true;
+              };
               overlays = [ inputs.nixgl.overlay ];
             };
             extraSpecialArgs =
