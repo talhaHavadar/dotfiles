@@ -65,7 +65,6 @@ in
     fzf
     ripgrep
     git
-    cmake
     gcc13Stdenv
     tio
     mtools
