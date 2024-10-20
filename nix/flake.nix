@@ -30,8 +30,14 @@
       url = "github:nix-community/nixGL";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    hyprland.url = "github:hyprwm/Hyprland";
+    # hyprland.url = "github:hyprwm/Hyprland/v0.41.2";
+    # hyprland-plugins = {
+    #   url = "github:hyprwm/hyprland-plugins/v0.44.0";
+    #   inputs.hyprland.follows = "hyprland";
+    # };
 
+    # hyprspace.url = "github:KZDKM/Hyprspace";
+    # hyprspace.inputs.hyprland.follows = "hyprland";
   };
 
   outputs =
@@ -40,7 +46,6 @@
       home-manager,
       darwin,
       nixvim,
-      hyprland,
       ...
     }@inputs:
     let
@@ -64,7 +69,9 @@
               config = {
                 allowUnfree = true;
               };
-              overlays = [ inputs.nixgl.overlay ];
+              overlays = [
+                inputs.nixgl.overlay
+              ];
             };
             extraSpecialArgs =
               {

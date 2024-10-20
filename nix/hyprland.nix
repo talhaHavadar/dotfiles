@@ -9,8 +9,9 @@
 let
   home_config = config.host.home.windowManagers.hyprland;
   home = config.home;
-  pkg = inputs.hyprland.packages.${device.system}.hyprland;
+  hyprland = pkgs.hyprland;
 in
+# hyprspace = inputs.hyprspace.packages.${device.system}.Hyprspace;
 with lib;
 {
   options = {
@@ -26,44 +27,52 @@ with lib;
   config = mkIf (home_config.enable && device.system != "aarch64-darwin") {
     home.sessionVariables.NIXOS_OZONE_WL = "1";
     wayland.windowManager.hyprland = {
-      # enable = true;
-      package = pkg;
-      systemd.variables = [ "--all" ];
-      settings = {
-        "$mod" = "SUPER";
-        bind =
-          [
-            "$mod, F, exec, firefox"
-            ", Print, exec, grimblast copy area"
-          ]
-          ++ (
-            # workspaces
-            # binds $mod + [shift +] {1..9} to [move to] workspace {1..9}
-            builtins.concatLists (
-              builtins.genList (
-                i:
-                let
-                  ws = i + 1;
-                in
-                [
-                  "$mod, code:1${toString i}, workspace, ${toString ws}"
-                  "$mod SHIFT, code:1${toString i}, movetoworkspace, ${toString ws}"
-                ]
-              ) 9
-            )
-          );
+      enable = true;
+      package = hyprland;
+      xwayland.enable = true;
+      systemd = {
+        enable = true;
+        variables = [ "--all" ];
+        extraCommands = [
+          "systemctl --user stop graphical-session.target"
+          "systemctl --user start hyprland-session.target"
+        ];
       };
+      plugins = [
+        pkgs.hyprlandPlugins.hyprexpo
+        # inputs.hyprland-plugins.packages.${device.system}.hyprexpo
+      ];
       extraConfig = ''
-        env = LIBVA_DRIVER_NAME,nvidia
-        env = XDG_SESSION_TYPE,wayland
-        env = GBM_BACKEND,nvidia-drm
-        env = __GLX_VENDOR_LIBRARY_NAME,nvidia
-        env = NVD_BACKEND,direct
+        # Default Configs
+        $configs = $HOME/.config/hypr/configs
 
-        cursor {
-            no_hardware_cursors = true
-        }
-      '';
+        source=$configs/settings.conf
+        source=$configs/keybinds.conf
+
+        source=startup_apps.conf
+        source=env.conf
+        source=monitors.conf
+        source=laptops.conf
+        source=laptop_display.conf
+        source=cosmetics.conf
+
+        source=window_rules.conf
+
+        # https://wiki.hyprland.org/Configuring/Workspace-Rules/
+
+        # Assigning workspace to a certain monitor
+        # workspace = 1, monitor:eDP-1
+        # workspace = 2, monitor:DP-2
+
+        workspace = name:work
+        # example rules (from wiki)
+        # workspace = 3, rounding:false, decorate:false
+        # workspace = name:coding, rounding:false, decorate:false, gapsin:0, gapsout:0, border:false, decorate:false, monitor:DP-1
+        # workspace = 8,bordersize:8
+        # workspace = name:Hello, monitor:DP-1, default:true
+        # workspace = name:gaming, monitor:desc:Chimei Innolux Corporation 0x150C, default:true
+        # workspace = 5, on-created-empty:[float] firefox
+        # workspace = special:scratchpad, on-created-empty:foot '';
     };
   };
 
