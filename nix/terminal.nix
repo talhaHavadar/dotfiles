@@ -91,5 +91,6 @@ with lib;
   home.sessionVariables = {
     GPG_TTY = "$(tty)";
     NIX_SYSTEM = device.system;
+    NIX_STORE = "/nix/store";
   };
 }
