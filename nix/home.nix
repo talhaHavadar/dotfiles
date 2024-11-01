@@ -59,9 +59,11 @@ in
     '';
   };
   home.packages = with pkgs; [
+    nixgl.nixGLMesa
     curl
     rustup
     cargo-deb
+    cargo-cross
     stylua
     tmux
     fzf

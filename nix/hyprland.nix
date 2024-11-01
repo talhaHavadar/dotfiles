@@ -25,7 +25,24 @@ with lib;
   };
 
   config = mkIf (home_config.enable && device.system != "aarch64-darwin") {
-    home.sessionVariables.NIXOS_OZONE_WL = "1";
+    home.packages = with pkgs; [
+      waybar
+      # hyprlock
+      mattermost-desktop
+    ];
+    xdg.desktopEntries.Mattermost = {
+      name = "Mattermosddt";
+      comment = "Mattermost Desktop application for Linux";
+      exec = "${pkgs.mattermost-desktop}/bin/mattermost-desktop --ozone-platform-hint=x11";
+      terminal = false;
+      type = "Application";
+      mimeType = [ "x-scheme-handler/mattermost" ];
+      icon = "${pkgs.mattermost-desktop}/share/mattermost-desktop/app_icon.png";
+      categories = [
+        "Network"
+        "InstantMessaging"
+      ];
+    };
     wayland.windowManager.hyprland = {
       enable = true;
       package = hyprland;
