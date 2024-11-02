@@ -11,13 +11,9 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {
-      url = "github:talhaHavadar/home-manager";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # home-manager = {
-    #   url = "github:nix-community/home-manager";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
     darwin = {
       url = "github:lnl7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -28,6 +24,10 @@
     };
     nixgl = {
       url = "github:nix-community/nixGL";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nixos-hardware = {
+      url = "github:NixOS/nixos-hardware";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     # hyprland.url = "github:hyprwm/Hyprland/v0.41.2";
@@ -46,6 +46,7 @@
       home-manager,
       darwin,
       nixvim,
+      nixos-hardware,
       ...
     }@inputs:
     let
@@ -85,6 +86,16 @@
       system = builtins.currentSystem;
     in
     {
+
+      nixosConfigurations.surface = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          nixos-hardware.nixosModules.microsoft-surface-common
+          nixos-hardware.nixosModules.microsoft-surface-pro-intel
+          (import ./machines/surface)
+          home-manager.nixosModules.home-manager
+        ];
+      };
 
       darwinConfigurations.mini = darwin.lib.darwinSystem {
         specialArgs = {
