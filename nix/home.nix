@@ -11,14 +11,17 @@ let
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
 in
 {
-  host.home.applications.neovim.enable = true;
-  host.home.applications.kitty.enable = true;
-  host.home.windowManagers.hyprland.enable = true;
 
+                home = {
+                  username= "benis";
+                  homeDirectory = "/home/benis";
+                  stateVersion = "24.05";
+                };
   imports =
     [
+      ./neovim
       ./terminal.nix
-      ./git.nix
+      # ./git.nix
       ./tmux.nix
       ./hyprland.nix
     ]
@@ -26,10 +29,13 @@ in
       ./packaging
     ];
 
+  host.home.applications.neovim.enable = true;
+  host.home.applications.kitty.enable = true;
+  host.home.windowManagers.hyprland.enable = true;
   home.file =
     {
       ".config/starship.toml".source = mkOutOfStoreSymlink ../dot/starship.toml;
-      "workspace/.gitconfig".source = mkOutOfStoreSymlink ../dot/gitconfig.workspace;
+      # "workspace/.gitconfig".source = mkOutOfStoreSymlink ../dot/gitconfig.workspace;
       ".complete_alias".source = mkOutOfStoreSymlink ../dot/complete_alias;
       ".tmux-completion".source = mkOutOfStoreSymlink ../dot/tmux-completion;
     }
@@ -64,8 +70,6 @@ in
     rpi-imager
     curl
     rustup
-    cargo-deb
-    cargo-cross
     stylua
     tmux
     fzf
@@ -77,6 +81,7 @@ in
     gcc-arm-embedded-13
     dosfstools
     ubuntu_font_family
+    google-chrome
     (nerdfonts.override {
       fonts = [
         "DroidSansMono"
