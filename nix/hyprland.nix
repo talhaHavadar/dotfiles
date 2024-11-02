@@ -26,6 +26,7 @@ with lib;
   config = mkIf (home_config.enable && device.system != "aarch64-darwin") {
     home.packages = with pkgs; [
       waybar
+      rofi-wayland
       # hyprlock
       # mattermost-desktop
     ];
