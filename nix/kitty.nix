@@ -9,7 +9,7 @@
 let
   home_config = config.host.home.applications.kitty;
   home = config.home;
-  kitty = "${pkgs.nixgl.nixGLMesa}/bin/nixGLMesa ${pkgs.kitty}/bin/kitty";
+  kitty = "${pkgs.kitty}/bin/kitty";
 in
 with lib;
 {
