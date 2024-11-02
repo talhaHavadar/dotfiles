@@ -28,7 +28,6 @@
     };
     nixos-hardware = {
       url = "github:NixOS/nixos-hardware";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     # hyprland.url = "github:hyprwm/Hyprland/v0.41.2";
     # hyprland-plugins = {
@@ -89,6 +88,9 @@
 
       nixosConfigurations.surface = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
+	specialArgs = {
+          inherit inputs;
+	};
         modules = [
           nixos-hardware.nixosModules.microsoft-surface-common
           nixos-hardware.nixosModules.microsoft-surface-pro-intel
@@ -96,11 +98,16 @@
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
-            home-manager.useUserPkgs = true;
+            home-manager.useUserPackages = true;
             home-manager.users.benis = import ./home.nix;
+	    home-manager.extraSpecialArgs = {
+	      inherit inputs;
+	      device = {
+                inherit system;
+	      };
+	    };
             home-manager.backupFileExtension = "backup";
           }
-          (import ./neovim)
         ];
       };
 

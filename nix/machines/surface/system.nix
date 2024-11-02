@@ -4,7 +4,6 @@
   nixpkgs.hostPlatform = "x86_64-linux";
 
   # Auto upgrade nix package
-  services.nix-daemon.enable = true;
   nix.settings.experimental-features = "nix-command flakes";
   nix.extraOptions = ''
     experimental-features = nix-command flakes
@@ -29,6 +28,7 @@
   users.users.benis.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILkzdb7RdgSlGfBePdpnBmbT+7hjpyhrL5y5QhlDIAh5 talhahavadar@hotmail.com"
   ];
+  services.openssh.enable = true;
   environment.systemPackages = with pkgs; [
     coreutils
     openssh

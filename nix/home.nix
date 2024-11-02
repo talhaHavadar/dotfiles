@@ -15,8 +15,14 @@ in
   host.home.applications.kitty.enable = true;
   host.home.windowManagers.hyprland.enable = true;
 
+                home = {
+                  username= "benis";
+                  homeDirectory = "/home/benis";
+                  stateVersion = "24.05";
+                };
   imports =
     [
+      ./neovim
       ./terminal.nix
       # ./git.nix
       ./tmux.nix
