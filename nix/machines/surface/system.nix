@@ -10,10 +10,30 @@
     experimental-features = nix-command flakes
   '';
 
+  # programs.hyprland = {
+  #   enable = true;
+  #   xwayland.enable = true;
+  # };
+
+  environment.sessionVariables = {
+    NIXOS_OZONE_WL = "1";
+  };
+
+  hardware = {
+    opengl.enable = true;
+  };
+
+  networking.networkmanager.enable = true;
+  networking.hostName = "surface";
+  users.users.benis.extraGroups = [ "networkmanager" ];
+  users.users.benis.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILkzdb7RdgSlGfBePdpnBmbT+7hjpyhrL5y5QhlDIAh5 talhahavadar@hotmail.com"
+  ];
   environment.systemPackages = with pkgs; [
     coreutils
+    openssh
     vim
-    neovim
+    libnotify
   ];
 
   fonts.packages = with pkgs; [
@@ -21,7 +41,5 @@
   ];
 
   documentation.enable = true;
-  programs.bash.enable = true;
-  environment.loginShell = pkgs.bash;
 
 }

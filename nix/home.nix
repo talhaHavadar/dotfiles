@@ -18,7 +18,7 @@ in
   imports =
     [
       ./terminal.nix
-      ./git.nix
+      # ./git.nix
       ./tmux.nix
       ./hyprland.nix
     ]
@@ -29,7 +29,7 @@ in
   home.file =
     {
       ".config/starship.toml".source = mkOutOfStoreSymlink ../dot/starship.toml;
-      "workspace/.gitconfig".source = mkOutOfStoreSymlink ../dot/gitconfig.workspace;
+      # "workspace/.gitconfig".source = mkOutOfStoreSymlink ../dot/gitconfig.workspace;
       ".complete_alias".source = mkOutOfStoreSymlink ../dot/complete_alias;
       ".tmux-completion".source = mkOutOfStoreSymlink ../dot/tmux-completion;
     }
@@ -64,8 +64,6 @@ in
     rpi-imager
     curl
     rustup
-    cargo-deb
-    cargo-cross
     stylua
     tmux
     fzf
@@ -77,6 +75,7 @@ in
     gcc-arm-embedded-13
     dosfstools
     ubuntu_font_family
+    google-chrome
     (nerdfonts.override {
       fonts = [
         "DroidSansMono"

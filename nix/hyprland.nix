@@ -11,7 +11,6 @@ let
   home = config.home;
   hyprland = pkgs.hyprland;
 in
-# hyprspace = inputs.hyprspace.packages.${device.system}.Hyprspace;
 with lib;
 {
   options = {
@@ -28,21 +27,23 @@ with lib;
     home.packages = with pkgs; [
       waybar
       # hyprlock
-      mattermost-desktop
+      # mattermost-desktop
     ];
-    xdg.desktopEntries.Mattermost = {
-      name = "Mattermosddt";
-      comment = "Mattermost Desktop application for Linux";
-      exec = "${pkgs.mattermost-desktop}/bin/mattermost-desktop --ozone-platform-hint=x11";
-      terminal = false;
-      type = "Application";
-      mimeType = [ "x-scheme-handler/mattermost" ];
-      icon = "${pkgs.mattermost-desktop}/share/mattermost-desktop/app_icon.png";
-      categories = [
-        "Network"
-        "InstantMessaging"
-      ];
-    };
+    xdg.portal.enable = true;
+    xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    # xdg.desktopEntries.Mattermost = {
+    #   name = "Mattermost";
+    #   comment = "Mattermost Desktop application for Linux";
+    #   exec = "${pkgs.mattermost-desktop}/bin/mattermost-desktop --ozone-platform-hint=x11";
+    #   terminal = false;
+    #   type = "Application";
+    #   mimeType = [ "x-scheme-handler/mattermost" ];
+    #   icon = "${pkgs.mattermost-desktop}/share/mattermost-desktop/app_icon.png";
+    #   categories = [
+    #     "Network"
+    #     "InstantMessaging"
+    #   ];
+    # };
     wayland.windowManager.hyprland = {
       enable = true;
       package = hyprland;
@@ -63,17 +64,17 @@ with lib;
         # Default Configs
         $configs = $HOME/.config/hypr/configs
 
-        source=$configs/settings.conf
-        source=$configs/keybinds.conf
+        #source=$configs/settings.conf
+        #source=$configs/keybinds.conf
 
-        source=startup_apps.conf
-        source=env.conf
-        source=monitors.conf
-        source=laptops.conf
-        source=laptop_display.conf
-        source=cosmetics.conf
+        #source=startup_apps.conf
+        #source=env.conf
+        #source=monitors.conf
+        #source=laptops.conf
+        #source=laptop_display.conf
+        #source=cosmetics.conf
 
-        source=window_rules.conf
+        #source=window_rules.conf
 
         # https://wiki.hyprland.org/Configuring/Workspace-Rules/
 
@@ -81,7 +82,6 @@ with lib;
         # workspace = 1, monitor:eDP-1
         # workspace = 2, monitor:DP-2
 
-        workspace = name:work
         # example rules (from wiki)
         # workspace = 3, rounding:false, decorate:false
         # workspace = name:coding, rounding:false, decorate:false, gapsin:0, gapsout:0, border:false, decorate:false, monitor:DP-1
