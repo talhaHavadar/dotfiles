@@ -17,9 +17,15 @@
     pam.services.hyprlock = { };
   };
 
+  services.pipewire = {
+    enable = true;
+    pulse.enable = true;
+    jack.enable = true;
+    wireplumber.enable = true;
+  };
   hardware = {
     opengl.enable = true;
-    pulseaudio.enable = true;
+    # pulseaudio.enable = true;
     bluetooth.enable = true;
   };
 
@@ -40,6 +46,15 @@
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILkzdb7RdgSlGfBePdpnBmbT+7hjpyhrL5y5QhlDIAh5 talhahavadar@hotmail.com"
     ];
 
+  };
+  services.greetd = {
+    enable = true;
+    settings = {
+      default_session = {
+        command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd Hyprland";
+        user = "greeter";
+      };
+    };
   };
 
   networking.networkmanager.enable = true;
