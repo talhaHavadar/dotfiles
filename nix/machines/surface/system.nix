@@ -34,6 +34,7 @@
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILkzdb7RdgSlGfBePdpnBmbT+7hjpyhrL5y5QhlDIAh5 talhahavadar@hotmail.com"
   ];
   services.openssh.enable = true;
+  programs.ssh.startAgent = true;
   environment.systemPackages = with pkgs; [
     coreutils
     openssh
