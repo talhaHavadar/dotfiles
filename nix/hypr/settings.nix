@@ -13,9 +13,11 @@ with lib;
         special_scale_factor = 0.8;
       };
 
+      # See https://wiki.hyprland.org/Configuring/Master-Layout/ for more
       master = {
         new_on_top = 1;
         mfact = 0.5;
+        new_status = "master";
       };
 
       general = {
@@ -24,10 +26,12 @@ with lib;
         gaps_out = 8;
 
         resize_on_border = true;
+        # Please see https://wiki.hyprland.org/Configuring/Tearing/ before you turn this on
+        allow_tearing = false;
 
-        "col.active_border" = "rgb(0C0C14)";
-        "col.inactive_border" = "rgb(FFFDFD)";
-
+        # https://wiki.hyprland.org/Configuring/Variables/#variable-types for info about colors
+        "col.active_border" = "rgba(33ccffee) rgba(00ff99ee) 45deg";
+        "col.inactive_border" = "rgba(595959aa)";
         layout = "dwindle";
       };
 
@@ -89,8 +93,6 @@ with lib;
       };
 
       misc = {
-        disable_hyprland_logo = true;
-        disable_splash_rendering = true;
         vfr = true;
         #vrr = 0
         mouse_move_enables_dpms = true;
