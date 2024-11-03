@@ -24,8 +24,7 @@
     wireplumber.enable = true;
   };
   hardware = {
-    opengl.enable = true;
-    # pulseaudio.enable = true;
+    graphics.enable = true;
     bluetooth.enable = true;
   };
 
@@ -47,11 +46,13 @@
     ];
 
   };
+  programs.regreet.enable = true;
   services.greetd = {
     enable = true;
     settings = {
       default_session = {
         command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd Hyprland";
+        #command = "${pkgs.greetd.regreet}/bin/regreet";
         user = "greeter";
       };
     };
@@ -61,6 +62,9 @@
   networking.hostName = "surface";
   services.openssh.enable = true;
   programs.ssh.startAgent = true;
+  programs.dconf = {
+    enable = true;
+  };
   environment.systemPackages = with pkgs; [
     coreutils
     wget
@@ -80,6 +84,9 @@
   virtualisation.lxc.lxcfs.enable = true;
   fonts.packages = with pkgs; [
     font-awesome
+    noto-fonts
+    noto-fonts-extra
+    noto-fonts-emoji
     powerline-fonts
     powerline-symbols
     (nerdfonts.override { fonts = [ "Meslo" ]; })

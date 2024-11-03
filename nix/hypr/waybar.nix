@@ -20,23 +20,61 @@ with lib;
           "position" = "bottom"; # Waybar position (top|bottom|left|right)
           # "width": 1280, # Waybar width
           # Choose the order of the modules
-          "modules-left" = [ "wlr/workspaces" ];
-          "modules-center" = [ "custom/music" ];
+          "modules-left" = [
+            "hyprland/workspaces"
+            "hyprland/language"
+          ];
+          "modules-center" = [
+            "custom/music"
+            "hyprland/window"
+          ];
           "modules-right" = [
             "wireplumber"
-            "backlight"
+            "cpu"
             "battery"
             "clock"
             "tray"
             "custom/lock"
             "custom/power"
           ];
-          "wlr/workspaces" = {
+
+          cpu = {
+            format = "{usage}% 󰍛";
+            interval = 1;
+            min-length = 5;
+            format-alt-click = "click";
+            format-alt = "{icon0}{icon1}{icon2}{icon3} {usage:>2}% 󰍛";
+            format-icons = [
+              "▁"
+              "▂"
+              "▃"
+              "▄"
+              "▅"
+              "▆"
+              "▇"
+              "█"
+            ];
+          };
+
+          "hyprland/workspaces" = {
             "disable-scroll" = true;
             "sort-by-name" = true;
             "format" = " {icon} ";
             "format-icons" = {
               "default" = "";
+            };
+          };
+          "hyprland/language" = {
+            "format" = "{}";
+            "format-en" = "en-us";
+            "format-tr" = "tr";
+            "on-click" = "hyprctl switchxkblayout $SET_KB next";
+          };
+          "hyprland/window" = {
+            icon = true;
+            separate-outputs = true;
+            rewrite = {
+              "(.*) - Google Chrome" = "$1";
             };
           };
           "tray" = {
@@ -55,46 +93,24 @@ with lib;
           "clock" = {
             "timezone" = "Europe/Amsterdam";
             "tooltip-format" = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
-            "format-alt" = " {:%d/%m/%Y}";
-            "format" = " {:%H:%M}";
-          };
-          "backlight" = {
-            "device" = "intel_backlight";
-            "format" = "{icon}";
-            "format-icons" = [
-              ""
-              ""
-              ""
-              ""
-              ""
-              ""
-              ""
-              ""
-              ""
-            ];
+            "format-alt" = "{:%A, %d %B, %Y (%R)}";
+            "format" = "{:%H:%M}";
           };
           "battery" = {
             "states" = {
               "warning" = 30;
               "critical" = 15;
             };
-            "format" = "{icon}";
-            "format-charging" = "";
-            "format-plugged" = "";
-            "format-alt" = "{icon}";
+            "format" = "<span font='Font Awesome 6 Free 11'>{icon}</span>";
+            "format-charging" = "<span font='Font Awesome 6 Free'></span><span font='Font Awesome 6 Free 11'>{icon}</span>";
+            "format-full" = "<span font='Font Awesome 6 Free'></span>  <span font='Font Awesome 6 Free 11'>{icon}</span>";
+            "format-alt" = "{icon} {capacity}%";
             "format-icons" = [
-              ""
-              ""
-              ""
-              ""
-              ""
-              ""
-              ""
-              ""
-              ""
-              ""
-              ""
-              ""
+              ""
+              ""
+              ""
+              ""
+              ""
             ];
           };
           "wireplumber" = {
@@ -112,7 +128,7 @@ with lib;
           };
           "custom/lock" = {
             "tooltip" = false;
-            "on-click" = "sh -c '(sleep 0.5s; swaylock --grace 0)' & disown";
+            "on-click" = "sh -c '(sleep 0.5s; hyprlock -q)' & disown";
             "format" = "";
           };
           "custom/power" = {
@@ -126,9 +142,12 @@ with lib;
         @import "mocha.css";
 
         * {
-          font-family: FantasqueSansMono Nerd Font;
-          font-size: 17px;
-          min-height: 0;
+            font-family: "JetBrainsMono Nerd Font";
+            font-weight: bold;
+            min-height: 0;
+            /* set font-size to 100% if font scaling is set to 1.00 using nwg-look */
+            font-size: 16px;
+            font-feature-settings: '"zero", "ss01", "ss02", "ss03", "ss04", "ss05", "cv31"';
         }
 
         #waybar {
@@ -162,10 +181,10 @@ with lib;
 
         #custom-music,
         #tray,
-        #backlight,
         #clock,
         #battery,
-        #pulseaudio,
+        #cpu,
+        #wireplumber,
         #custom-lock,
         #custom-power {
           background-color: @surface0;
@@ -177,6 +196,10 @@ with lib;
           color: @blue;
           border-radius: 0px 1rem 1rem 0px;
           margin-right: 1rem;
+        }
+
+        #cpu {
+          color: @blue;
         }
 
         #battery {
@@ -191,15 +214,12 @@ with lib;
           color: @red;
         }
 
-        #backlight {
-          color: @yellow;
-        }
 
-        #backlight, #battery {
+        #cpu, #battery {
             border-radius: 0;
         }
 
-        #pulseaudio {
+        #wireplumber {
           color: @maroon;
           border-radius: 1rem 0px 0px 1rem;
           margin-left: 1rem;
