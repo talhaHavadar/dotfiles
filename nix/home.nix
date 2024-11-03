@@ -24,6 +24,7 @@ in
       # ./git.nix
       ./tmux.nix
       ./hyprland.nix
+      ./home/benis.nix
     ]
     ++ lib.optionals (isPackagingEnabled) [
       ./packaging
