@@ -71,9 +71,17 @@
     blueman
     networkmanagerapplet
     swaynotificationcenter
+    helvum
+    nwg-look
+    yaru-theme
   ];
 
+  virtualisation.lxd.enable = true;
+  virtualisation.lxc.lxcfs.enable = true;
   fonts.packages = with pkgs; [
+    font-awesome
+    powerline-fonts
+    powerline-symbols
     (nerdfonts.override { fonts = [ "Meslo" ]; })
   ];
 
