@@ -24,6 +24,7 @@ with lib;
     };
   };
   imports = [
+    ./hypr/settings.nix
     ./hypr/keybinds.nix
     ./hypr/cosmetics.nix
     ./hypr/hyprlock.nix
