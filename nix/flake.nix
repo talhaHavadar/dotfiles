@@ -103,7 +103,7 @@
 	    home-manager.extraSpecialArgs = {
 	      inherit inputs;
 	      device = {
-                inherit system;
+                system = "x86_64-linux";
 	      };
 	    };
             home-manager.backupFileExtension = "backup";

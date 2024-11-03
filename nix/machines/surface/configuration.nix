@@ -68,7 +68,6 @@ users.users.benis = {
 initialPassword = "benis";
 extraGroups = [ "wheel" ];
 packages = with pkgs; [
-neovim
 git
 ];
 };

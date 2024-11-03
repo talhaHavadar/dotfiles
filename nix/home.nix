@@ -11,9 +11,6 @@ let
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
 in
 {
-  host.home.applications.neovim.enable = true;
-  host.home.applications.kitty.enable = true;
-  host.home.windowManagers.hyprland.enable = true;
 
                 home = {
                   username= "benis";
@@ -32,6 +29,9 @@ in
       ./packaging
     ];
 
+  host.home.applications.neovim.enable = true;
+  host.home.applications.kitty.enable = true;
+  host.home.windowManagers.hyprland.enable = true;
   home.file =
     {
       ".config/starship.toml".source = mkOutOfStoreSymlink ../dot/starship.toml;
