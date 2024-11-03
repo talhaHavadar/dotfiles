@@ -37,6 +37,9 @@ with lib;
     };
     home.packages = with pkgs; [
       xfce.thunar
+      playerctl
+      wlogout
+      bibata-cursors
     ];
     xdg.portal = {
       enable = true;
@@ -106,6 +109,8 @@ with lib;
         # Or execute your favorite apps at launch like this:
 
         # exec-once = $terminal
+        exec-once = dconf write /org/gnome/desktop/interface/cursor-theme "'Bibata-Modern-Ice'"
+        exec-once = hyprctl setcursor Bibata-Modern-Ice 24
         exec-once = nm-applet & blueman-applet &
         exec-once = waybar &
         # hyprpaper & firefox
