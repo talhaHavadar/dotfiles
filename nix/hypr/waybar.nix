@@ -82,7 +82,7 @@ with lib;
             "spacing" = 10;
           };
           "custom/music" = {
-            "format" = "  {}";
+            "format" = "󰝚 {}";
             "escape" = true;
             "interval" = 5;
             "tooltip" = false;
@@ -102,9 +102,9 @@ with lib;
               "critical" = 15;
             };
             "format" = "<span font='Font Awesome 6 Free 11'>{icon}</span>";
-            "format-charging" = "<span font='Font Awesome 6 Free'></span><span font='Font Awesome 6 Free 11'>{icon}</span>";
-            "format-full" = "<span font='Font Awesome 6 Free'></span>  <span font='Font Awesome 6 Free 11'>{icon}</span>";
-            "format-alt" = "{icon} {capacity}%";
+            "format-charging" = "<span font='Font Awesome 6 Free'></span> <span font='Font Awesome 6 Free 11'>{icon}</span>";
+            "format-full" = "<span font='Font Awesome 6 Free'></span> <span font='Font Awesome 6 Free 11'>{icon}</span>";
+            tooltip-format = "{capacity}%-{timeTo}";
             "format-icons" = [
               ""
               ""
@@ -134,7 +134,7 @@ with lib;
           "custom/power" = {
             "tooltip" = false;
             "on-click" = "wlogout &";
-            "format" = "襤";
+            "format" = "";
           };
         };
       };
