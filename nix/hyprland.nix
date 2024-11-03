@@ -38,9 +38,50 @@ with lib;
     home.packages = with pkgs; [
       xfce.thunar
       playerctl
-      wlogout
       bibata-cursors
     ];
+    programs.wlogout = {
+      enable = true;
+      layout = [
+        {
+          "label" = "lock";
+          "action" = "hyprlock -q";
+          "text" = "Lock";
+          "keybind" = "l";
+        }
+        {
+          "label" = "reboot";
+          "action" = "systemctl reboot";
+          "text" = "Reboot";
+          "keybind" = "r";
+        }
+        {
+          "label" = "shutdown";
+          "action" = "systemctl poweroff";
+          "text" = "Shutdown";
+          "keybind" = "s";
+        }
+        {
+          "label" = "logout";
+          "action" = "loginctl kill-session $XDG_SESSION_ID";
+          "text" = "Logout";
+          "keybind" = "e";
+        }
+        {
+          "label" = "suspend";
+          "action" = "systemctl suspend";
+          "text" = "Suspend";
+          "keybind" = "u";
+        }
+        {
+          "label" = "hibernate";
+          "action" = "systemctl hibernate";
+          "text" = "Hibernate";
+          "keybind" = "h";
+        }
+      ];
+
+    };
     xdg.portal = {
       enable = true;
       config.common.default = "*";
