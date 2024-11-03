@@ -31,7 +31,7 @@ with lib;
 
   config = mkIf (home_config.enable && device.system != "aarch64-darwin") {
     home.file = {
-      ".config/hypr/keybinds.conf".source = mkOutOfStoreSymlink ../dot/hyprland/keybinds.conf;
+      ".config/hypr/scripts/volume.sh".source = mkOutOfStoreSymlink ../dot/hyprland/volume.sh;
     };
     home.packages = with pkgs; [
       waybar

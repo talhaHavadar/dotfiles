@@ -167,12 +167,12 @@ with lib;
       #submap = reset
       # Special Keys / Hot Keys
       bindel = [
-        ", xf86audioraisevolume, exec, $scriptsDir/Volume.sh --inc #volume up"
-        ", xf86audiolowervolume, exec, $scriptsDir/Volume.sh --dec #volume down"
+        ", xf86audioraisevolume, exec, $scriptsDir/volume.sh --inc #volume up"
+        ", xf86audiolowervolume, exec, $scriptsDir/volume.sh --dec #volume down"
       ];
       bindl = [
-        ", xf86AudioMicMute, exec, $scriptsDir/Volume.sh --toggle-mic #mute mic"
-        ", xf86audiomute, exec, $scriptsDir/Volume.sh --toggle"
+        ", xf86AudioMicMute, exec, $scriptsDir/volume.sh --toggle-mic #mute mic"
+        ", xf86audiomute, exec, $scriptsDir/volume.sh --toggle"
         ", xf86Sleep, exec, systemctl suspend  # sleep button "
         ", xf86Rfkill, exec, $scriptsDir/AirplaneMode.sh #Airplane mode"
 
