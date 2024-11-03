@@ -12,11 +12,11 @@ let
 in
 {
 
-                home = {
-                  username= "benis";
-                  homeDirectory = "/home/benis";
-                  stateVersion = "24.05";
-                };
+  home = {
+    username = "benis";
+    homeDirectory = "/home/benis";
+    stateVersion = "24.05";
+  };
   imports =
     [
       ./neovim
