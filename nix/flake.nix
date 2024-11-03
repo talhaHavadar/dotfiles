@@ -91,7 +91,10 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.users.benis = import ./home.nix;
+            home-manager.users.benis.imports = [
+              ./home.nix
+              ./home/benis
+            ];
             home-manager.extraSpecialArgs = {
               inherit inputs;
               device = {
@@ -118,7 +121,10 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPkgs = true;
-            home-manager.users.${username} = import ./home.nix;
+            home-manager.users.${username}.imports = [
+              ./home.nix
+              ./home/${username}.nix
+            ];
             home-manager.backupFileExtension = "backup";
           }
           (import ./neovim)
