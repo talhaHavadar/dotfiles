@@ -93,7 +93,6 @@
             home-manager.useUserPackages = true;
             home-manager.users.benis.imports = [
               ./home.nix
-              ./home/benis
             ];
             home-manager.extraSpecialArgs = {
               inherit inputs;

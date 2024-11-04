@@ -19,6 +19,7 @@ in
   };
   imports =
     [
+      ./home/${username}
       ./neovim
       ./terminal.nix
       # ./git.nix
