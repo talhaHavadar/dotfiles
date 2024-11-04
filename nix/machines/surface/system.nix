@@ -33,6 +33,7 @@
     initialPassword = "benis";
     extraGroups = [
       "wheel"
+      "dialout"
       "networkmanager"
       "sound"
       "audio"
@@ -58,6 +59,11 @@
     };
   };
 
+  # udev rules for legacy sdwire
+  services.udev.extraRules = ''
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="04e8", ATTRS{idProduct}=="6001", MODE="0666", GROUP="dialout"
+  '';
+
   networking.networkmanager.enable = true;
   networking.hostName = "surface";
   services.openssh.enable = true;
@@ -71,6 +77,7 @@
     vim
     libnotify
     git
+    python312
     pamixer
     blueman
     networkmanagerapplet

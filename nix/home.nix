@@ -81,7 +81,6 @@ in
     gcc-arm-embedded-13
     dosfstools
     ubuntu_font_family
-    google-chrome
     (nerdfonts.override {
       fonts = [
         "DroidSansMono"
@@ -98,7 +97,7 @@ in
         "--use-gl=egl"
       ];
     })
-
+    sd-mux-ctrl
   ];
 
 }
