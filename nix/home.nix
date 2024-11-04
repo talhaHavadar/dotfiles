@@ -58,8 +58,10 @@ in
       PATH="${pkgs.pipx}/bin:$HOME/.local/bin:$PATH" $DRY_RUN_CMD pipx install black
     '';
   };
+
   home.packages = with pkgs; [
     nixgl.nixGLMesa
+    rpi-imager
     curl
     rustup
     cargo-deb
