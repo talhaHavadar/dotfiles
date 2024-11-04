@@ -86,6 +86,14 @@ in
       ];
     })
     pyp.pipx
+    (google-chrome.override {
+      commandLineArgs = [
+        "--ozone-platform=wayland"
+        "--enable-features=VaapiVideoDecoder"
+        "--use-gl=egl"
+      ];
+    })
+
   ];
 
 }
