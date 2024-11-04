@@ -97,6 +97,7 @@
             ];
             home-manager.extraSpecialArgs = {
               inherit inputs;
+              username = "benis";
               device = {
                 system = "x86_64-linux";
               };

@@ -2,7 +2,7 @@
   config,
   lib,
   pkgs,
-  specialArgs,
+  username,
   ...
 }:
 let
@@ -13,8 +13,8 @@ in
 {
 
   home = {
-    username = "benis";
-    homeDirectory = "/home/benis";
+    inherit username;
+    homeDirectory = "/home/${username}";
     stateVersion = "24.05";
   };
   imports =
