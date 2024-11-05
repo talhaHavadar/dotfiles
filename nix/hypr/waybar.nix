@@ -124,7 +124,7 @@ with lib;
                 " "
               ];
             };
-            "on-click" = "helvum";
+            "on-click" = "pwvucontrol";
           };
           "custom/lock" = {
             "tooltip" = false;
