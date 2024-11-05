@@ -3,13 +3,12 @@
   nixvim,
   lib,
   pkgs,
-  specialArgs,
+  inputs,
   ...
 }:
 let
   home_config = config.host.home.applications.neovim;
   home = config.home;
-  inputs = specialArgs.inputs;
 in
 with lib;
 {

@@ -2,7 +2,6 @@
   config,
   inputs,
   lib,
-  device,
   pkgs,
   ...
 }:
@@ -31,7 +30,7 @@ with lib;
     ./hypr/waybar.nix
   ];
 
-  config = mkIf (home_config.enable && device.system != "aarch64-darwin") {
+  config = mkIf (home_config.enable && pkgs.system != "aarch64-darwin") {
     home.file = {
       ".config/hypr/scripts/volume.sh".source = mkOutOfStoreSymlink ../dot/hyprland/volume.sh;
     };
@@ -129,6 +128,7 @@ with lib;
         ################
 
         # See https://wiki.hyprland.org/Configuring/Monitors/
+        monitor = DP-2,preferred,auto,1.6
         monitor=,preferred,auto,auto
 
 
@@ -167,13 +167,13 @@ with lib;
         env = HYPRCURSOR_SIZE,24
         env = CLUTTER_BACKEND,wayland
         env = GDK_BACKEND,wayland,x11
-        env = QT_AUTO_SCREEN_SCALE_FACTOR,1.6
+        env = QT_AUTO_SCREEN_SCALE_FACTOR,2
         env = QT_QPA_PLATFORM,wayland;xcb
         env = QT_QPA_PLATFORMTHEME,qt5ct
         env = QT_QPA_PLATFORMTHEME,qt6ct   
-        env = QT_SCALE_FACTOR,1.6
+        env = QT_SCALE_FACTOR,2
         env = QT_WAYLAND_DISABLE_WINDOWDECORATION,1
-
+        env = GDK_SCALE,2
         ##############################
         ### WINDOWS AND WORKSPACES ###
         ##############################
