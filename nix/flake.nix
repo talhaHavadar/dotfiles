@@ -44,7 +44,7 @@
       mkHomeConfiguration =
         { system, username, ... }@args:
         home-manager.lib.homeManagerConfiguration (
-          rec {
+          {
             modules = [
               {
                 home = {
@@ -53,7 +53,6 @@
                   stateVersion = "24.05";
                 };
               }
-              (import ./neovim)
               ./home.nix
             ];
             pkgs = import nixpkgs {
@@ -68,6 +67,7 @@
             extraSpecialArgs =
               {
               };
+
           }
           // {
             inherit (args) extraSpecialArgs;
@@ -97,37 +97,10 @@
             home-manager.extraSpecialArgs = {
               inherit inputs;
               username = "benis";
-              device = {
-                system = "x86_64-linux";
-              };
+              system = "x86_64-linux";
             };
             home-manager.backupFileExtension = "backup";
           }
-        ];
-      };
-
-      darwinConfigurations.mini = darwin.lib.darwinSystem {
-        specialArgs = {
-          inherit inputs;
-          device = {
-            inherit system;
-            inherit username;
-          };
-        };
-        inherit system;
-        modules = [
-          ./system.nix
-          home-manager.darwinModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPkgs = true;
-            home-manager.users.${username}.imports = [
-              ./home.nix
-              ./home/${username}.nix
-            ];
-            home-manager.backupFileExtension = "backup";
-          }
-          (import ./neovim)
         ];
       };
 
@@ -135,9 +108,7 @@
         inherit system;
         inherit username;
         extraSpecialArgs = {
-          device = {
-            inherit system;
-          };
+          inherit username;
           inherit inputs;
         };
       };

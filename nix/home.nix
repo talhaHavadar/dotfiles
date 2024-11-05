@@ -9,20 +9,15 @@ let
   pyp = pkgs.python312Packages;
   isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
+  a = builtins.trace username a;
 in
 {
 
-  home = {
-    inherit username;
-    homeDirectory = "/home/${username}";
-    stateVersion = "24.05";
-  };
   imports =
     [
       ./home/${username}
       ./neovim
       ./terminal.nix
-      # ./git.nix
       ./tmux.nix
       ./hyprland.nix
     ]
@@ -36,7 +31,7 @@ in
   home.file =
     {
       ".config/starship.toml".source = mkOutOfStoreSymlink ../dot/starship.toml;
-      # "workspace/.gitconfig".source = mkOutOfStoreSymlink ../dot/gitconfig.workspace;
+      "workspace/.gitconfig".source = mkOutOfStoreSymlink ../dot/gitconfig.workspace;
       ".complete_alias".source = mkOutOfStoreSymlink ../dot/complete_alias;
       ".tmux-completion".source = mkOutOfStoreSymlink ../dot/tmux-completion;
     }
