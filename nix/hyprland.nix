@@ -40,6 +40,7 @@ with lib;
       xfce.thunar
       playerctl
       bibata-cursors
+      pwvucontrol
     ];
     programs.wlogout = {
       enable = true;
@@ -125,15 +126,6 @@ with lib;
         # source = ~/.config/hypr/myColors.conf
         source=laptop_display.conf
 
-        ################
-        ### MONITORS ###
-        ################
-
-        # See https://wiki.hyprland.org/Configuring/Monitors/
-        monitor = DP-2,preferred,auto,1.6
-        monitor=,preferred,auto,auto
-
-
         ###################
         ### MY PROGRAMS ###
         ###################
@@ -162,20 +154,91 @@ with lib;
         ### WINDOWS AND WORKSPACES ###
         ##############################
 
-        # See https://wiki.hyprland.org/Configuring/Window-Rules/ for more
-        # See https://wiki.hyprland.org/Configuring/Workspace-Rules/ for workspace rules
+        windowrule = center,^(pavucontrol|org.pulseaudio.pavucontrol|com.saivert.pwvucontrol)
 
-        # Example windowrule v1
-        # windowrule = float, ^(kitty)$
+        # WINDOWRULE v2
 
-        # Example windowrule v2
-        # windowrulev2 = float,class:^(kitty)$,title:^(kitty)$
-
-        # Ignore maximize requests from apps. You'll probably like this.
+        ## Ignore maximize requests from apps. You'll probably like this.
         windowrulev2 = suppressevent maximize, class:.*
 
-        # Fix some dragging issues with XWayland
+        ## Fix some dragging issues with XWayland
         windowrulev2 = nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0
+
+        windowrulev2 = idleinhibit fullscreen, class:^(*)$
+        windowrulev2 = idleinhibit fullscreen, title:^(*)$
+        windowrulev2 = idleinhibit fullscreen, fullscreen:1
+
+        ## Picture-in-Picture
+        windowrulev2 = move 72% 7%, title:^(Picture-in-Picture)$ 
+        windowrulev2 = float, title:^(Picture-in-Picture)$
+        windowrulev2 = opacity 0.95 0.75, title:^(Picture-in-Picture)$
+        windowrulev2 = size 25% 25%, title:^(Picture-in-Picture)$
+        windowrulev2 = pin, title:^(Picture-in-Picture)$
+
+        windowrulev2 = move 72% 7%, title:^([Mm]eet -) class:(Google-chrome)
+        windowrulev2 = float, title:^([Mm]eet -) class:(Google-chrome)
+        windowrulev2 = opacity 1.0 0.90, title:^([Mm]eet -) class:(Google-chrome)
+        windowrulev2 = size 15% 25%, title:^([Mm]eet -) class:(Google-chrome)
+        windowrulev2 = pin, title:^([Mm]eet -) class:(Google-chrome)
+
+        # windowrule v2 - float
+        windowrulev2 = float, class:^(org.kde.polkit-kde-authentication-agent-1)$ 
+        windowrulev2 = float, class:([Zz]oom|onedriver|onedriver-launcher)$
+        windowrulev2 = float, class:(xdg-desktop-portal-gtk)
+        windowrulev2 = float, class:(org.gnome.Calculator), title:(Calculator)
+        windowrulev2 = float, class:(codium|codium-url-handler|VSCodium), title:(Add Folder to Workspace)
+        windowrulev2 = float, class:^([Rr]ofi)$
+        windowrulev2 = float, class:^(eog|org.gnome.Loupe)$ # image viewer
+        windowrulev2 = float, class:^(pavucontrol|org.pulseaudio.pavucontrol|com.saivert.pwvucontrol)$
+        windowrulev2 = float, class:^(nwg-look|qt5ct|qt6ct)$
+        windowrulev2 = float, class:^(mpv|com.github.rafostar.Clapper)$
+        windowrulev2 = float, class:^(nm-applet|nm-connection-editor|blueman-manager)$
+        windowrulev2 = float, class:^(gnome-system-monitor|org.gnome.SystemMonitor|io.missioncenter.MissionCenter)$ # system monitor
+        windowrulev2 = float, class:^([Yy]ad)$ 
+        windowrulev2 = float, class:^(wihotspot(-gui)?)$ # wifi hotspot
+        windowrulev2 = float, class:^(file-roller|org.gnome.FileRoller)$ # archive manager
+        windowrulev2 = float, class:^([Bb]aobab|org.gnome.[Bb]aobab)$ # Disk usage analyzer
+        windowrulev2 = float, title:(Kvantum Manager)
+        windowrulev2 = float, class:^([Ss]team)$,title:^((?![Ss]team).*|[Ss]team [Ss]ettings)$
+        windowrulev2 = float, class:^([Qq]alculate-gtk)$
+
+        # windowrule v2 - size
+        windowrulev2 = size 70% 70%, class:^(gnome-system-monitor|org.gnome.SystemMonitor|io.missioncenter.MissionCenter)$
+        windowrulev2 = size 70% 70%, class:^(xdg-desktop-portal-gtk)$
+        windowrulev2 = size 60% 70%, title:(Kvantum Manager)
+        windowrulev2 = size 60% 70%, class:^(qt6ct)$
+        windowrulev2 = size 70% 70%, class:^(evince|wihotspot(-gui)?)$
+        windowrulev2 = size 60% 70%, class:^(file-roller|org.gnome.FileRoller)$
+        windowrulev2 = size 60% 70%, class:^([Ww]hatsapp-for-linux)$
+
+        ## File Browser
+        windowrulev2 = opacity 0.9 0.8, class:^([Tt]hunar|org.gnome.Nautilus)$
+
+        windowrulev2 = center, class:([Nn]autilus), title:(File Operation Progress)
+        windowrulev2 = center, class:([Nn]autilus), title:(Confirm to replace files)
+        windowrulev2 = float, class:([Nn]autilus), title:(File Operation Progress)
+        windowrulev2 = float, class:([Nn]autilus), title:(Confirm to replace files)
+
+        windowrulev2 = center, class:([Tt]hunar), title:(File Operation Progress)
+        windowrulev2 = center, class:([Tt]hunar), title:(Confirm to replace files)
+        windowrulev2 = float, class:([Tt]hunar), title:(File Operation Progress)
+        windowrulev2 = float, class:([Tt]hunar), title:(Confirm to replace files)
+
+        ## Web Browser
+        #windowrulev2 = workspace 2, class:^([Ff]irefox|org.mozilla.firefox|[Ff]irefox-esr)$
+        #windowrulev2 = workspace 2, class:^([Gg]oogle-chrome(-beta|-dev|-unstable)?)$
+        windowrulev2 = opacity 0.95 0.9, class:^([Ff]irefox|org.mozilla.firefox|[Ff]irefox-esr)$
+        windowrulev2 = opacity 0.98 0.9, class:^(google-chrome(-beta|-dev|-unstable)?)$
+        windowrulev2 = opacity 0.94 0.86, class:^(chrome-.+-Default)$ # Chrome PWAs
+
+        ## Imagers
+        windowrulev2 = workspace 3, class:(org.raspberrypi.rpi-imager)
+        windowrulev2 = move 60% 7%, class:(org.raspberrypi.rpi-imager)
+        windowrulev2 = float, class:(org.raspberrypi.rpi-imager)
+
+        # windowrule v2 move to workspace
+        windowrulev2 = workspace 6 silent, class:(Mattermost)
+        windowrulev2 = workspace 1, class:^([Tt]hunderbird)$
       '';
     };
   };
