@@ -159,6 +159,12 @@ with lib;
         "ALT_L, SHIFT_L, exec, $scriptsDir/SwitchKeyboardLayout.sh # Changing the keyboard layout"
       ];
 
+      # Move/resize windows with mainMod + LMB/RMB and dragging
+      bindm = [
+        "$mainMod, mouse:272, movewindow"
+        "$mainMod, mouse:273, resizewindow"
+      ];
+
       # For passthrough keyboard into a VM
       # bind = $mainMod ALT, P, submap, passthru
       #submap = passthru
