@@ -3,7 +3,7 @@
   nixvim,
   lib,
   pkgs,
-  specialArgs,
+  inputs,
   ...
 }:
 let

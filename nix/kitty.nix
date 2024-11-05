@@ -2,7 +2,6 @@
   config,
   inputs,
   lib,
-  device,
   pkgs,
   ...
 }:
@@ -24,7 +23,7 @@ with lib;
     };
   };
 
-  config = mkIf (home_config.enable && device.system != "aarch64-darwin") {
+  config = mkIf (home_config.enable && pkgs.system != "aarch64-darwin") {
     programs.kitty = {
       enable = true;
       themeFile = "Catppuccin-Latte";

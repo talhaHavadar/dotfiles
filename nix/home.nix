@@ -9,6 +9,7 @@ let
   pyp = pkgs.python312Packages;
   isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
+  a = builtins.trace username a;
 in
 {
 
@@ -22,7 +23,6 @@ in
       ./home/${username}
       ./neovim
       ./terminal.nix
-      # ./git.nix
       ./tmux.nix
       ./hyprland.nix
     ]
