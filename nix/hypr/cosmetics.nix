@@ -41,6 +41,10 @@ with lib;
           "linear,0,0,1,1"
           "almostLinear,0.5,0.5,0.75,1.0"
           "quick,0.15,0,0.1,1"
+          "wind, 0.05, 0.9, 0.1, 1.05"
+          "winIn, 0.1, 1.1, 0.1, 1.1"
+          "winOut, 0.3, -0.3, 0, 1"
+          "overshot, 0.05, 0.9, 0.1, 1.05"
         ];
 
         animation = [
@@ -57,9 +61,11 @@ with lib;
           "layersOut, 1, 1.5, linear, fade"
           "fadeLayersIn, 1, 1.79, almostLinear"
           "fadeLayersOut, 1, 1.39, almostLinear"
-          "workspaces, 1, 1.94, almostLinear, fade"
-          "workspacesIn, 1, 1.21, almostLinear, fade"
-          "workspacesOut, 1, 1.94, almostLinear, fade"
+          "workspaces, 1, 5, overshot"
+          "workspacesIn, 1, 5, winIn, slide"
+          "workspacesOut, 1, 5, winOut, slide"
+          # "workspacesIn, 1, 1.21, almostLinear, fade"
+          # "workspacesOut, 1, 1.94, almostLinear, fade"
         ];
       };
 
