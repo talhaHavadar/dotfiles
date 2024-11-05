@@ -23,8 +23,10 @@ with lib;
     };
   };
   imports = [
+    ./hypr/env.nix
     ./hypr/settings.nix
     ./hypr/keybinds.nix
+    ./hypr/monitors.nix
     ./hypr/cosmetics.nix
     ./hypr/hyprlock.nix
     ./hypr/waybar.nix
@@ -121,7 +123,7 @@ with lib;
         # You can split this configuration into multiple files
         # Create your files separately and then link them to this file like this:
         # source = ~/.config/hypr/myColors.conf
-
+        source=laptop_display.conf
 
         ################
         ### MONITORS ###
@@ -156,24 +158,6 @@ with lib;
         exec-once = waybar &
         # hyprpaper & firefox
 
-
-        #############################
-        ### ENVIRONMENT VARIABLES ###
-        #############################
-
-        # See https://wiki.hyprland.org/Configuring/Environment-variables/
-
-        env = XCURSOR_SIZE,30
-        env = HYPRCURSOR_SIZE,24
-        env = CLUTTER_BACKEND,wayland
-        env = GDK_BACKEND,wayland,x11
-        env = QT_AUTO_SCREEN_SCALE_FACTOR,2
-        env = QT_QPA_PLATFORM,wayland;xcb
-        env = QT_QPA_PLATFORMTHEME,qt5ct
-        env = QT_QPA_PLATFORMTHEME,qt6ct   
-        env = QT_SCALE_FACTOR,2
-        env = QT_WAYLAND_DISABLE_WINDOWDECORATION,1
-        env = GDK_SCALE,2
         ##############################
         ### WINDOWS AND WORKSPACES ###
         ##############################
