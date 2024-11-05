@@ -9,40 +9,26 @@ let
   pyp = pkgs.python312Packages;
   isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
-  a = builtins.trace username a;
 in
 {
 
-  imports =
-    [
-      ./home/${username}
-      ./neovim
-      ./terminal.nix
-      ./tmux.nix
-      ./hyprland.nix
-    ]
-    ++ lib.optionals (isPackagingEnabled) [
-      ./packaging
-    ];
+  imports = [
+    ./home/${username}
+    ./neovim
+    ./terminal.nix
+    ./tmux.nix
+    ./hyprland.nix
+  ];
 
   host.home.applications.neovim.enable = true;
   host.home.applications.kitty.enable = true;
   host.home.windowManagers.hyprland.enable = true;
-  home.file =
-    {
-      ".config/starship.toml".source = mkOutOfStoreSymlink ../dot/starship.toml;
-      "workspace/.gitconfig".source = mkOutOfStoreSymlink ../dot/gitconfig.workspace;
-      ".complete_alias".source = mkOutOfStoreSymlink ../dot/complete_alias;
-      ".tmux-completion".source = mkOutOfStoreSymlink ../dot/tmux-completion;
-    }
-    // lib.optionalAttrs isPackagingEnabled {
-      ".devscripts".source = mkOutOfStoreSymlink ../dot/devscripts;
-      ".gbp.conf".source = mkOutOfStoreSymlink ../dot/gbp.conf;
-      ".mk-sbuild.rc".source = mkOutOfStoreSymlink ../dot/mk-sbuild.rc;
-      ".quiltrc-dpkg".source = mkOutOfStoreSymlink ../dot/quiltrc-dpkg;
-      ".sbuildrc".source = mkOutOfStoreSymlink ../dot/sbuildrc;
-      ".packaging.bashrc".source = mkOutOfStoreSymlink ../dot/packaging.bashrc;
-    };
+
+  home.file = {
+    ".config/starship.toml".source = mkOutOfStoreSymlink ../dot/starship.toml;
+    ".complete_alias".source = mkOutOfStoreSymlink ../dot/complete_alias;
+    ".tmux-completion".source = mkOutOfStoreSymlink ../dot/tmux-completion;
+  };
 
   home.activation = {
     fzf = lib.hm.dag.entryAfter [ "installPackages" ] ''
