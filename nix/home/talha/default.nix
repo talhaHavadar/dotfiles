@@ -34,4 +34,15 @@ with lib;
     [
     ];
 
+  programs.waybar = {
+    settings = {
+      mainBar = {
+        "custom/lock".on-click = mkForce "sh -c '(sleep 0.5s; swaylock)' & disown";
+      };
+    };
+  };
+
+  wayland.windowManager.hyprland.settings = {
+    "$screenlocker" = mkForce "swaylock";
+  };
 }

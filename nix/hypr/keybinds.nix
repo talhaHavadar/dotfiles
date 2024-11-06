@@ -19,6 +19,7 @@ with lib;
 
       "$files" = "thunar";
       "$term" = "kitty";
+      "$screenlocker" = "hyprlock";
 
       bind = [
         "CTRL ALT, Delete, exec, hyprctl dispatch exit 0"
@@ -27,7 +28,7 @@ with lib;
         "$mainMod SHIFT, Q, exec, $scriptsDir/KillActiveProcess.sh"
         "$mainMod SHIFT, F, togglefloating,"
         "$mainMod ALT, F, exec, hyprctl dispatch workspaceopt allfloat"
-        "$mainMod, L, exec, pidof hyprlock || hyprlock -q"
+        "$mainMod, L, exec, pidof $screenlocker || $screenlocker"
         "CTRL ALT, P, exec, $scriptsDir/Wlogout.sh"
 
         # FEATURES / EXTRAS
