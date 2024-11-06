@@ -29,10 +29,9 @@ with lib;
       ".packaging.bashrc".source = mkOutOfStoreSymlink ../../../dot/packaging.bashrc;
     };
 
-  home.packages =
-    with pkgs;
-    [
-    ];
+  home.packages = with pkgs; [
+    pass
+  ];
 
   programs.waybar = {
     settings = {
