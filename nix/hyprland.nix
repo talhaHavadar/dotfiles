@@ -150,7 +150,7 @@ with lib;
         exec-once = nm-applet & blueman-applet &
         exec-once = waybar &
         exec-once = hyprpaper
-        exec-once = ~/.config/hypr/scripts/wallpaperUpdate.sh
+        exec-once = sleep 2s && ~/.config/hypr/scripts/wallpaperUpdate.sh
 
         # hyprpaper & firefox
 
