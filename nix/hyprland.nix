@@ -30,6 +30,7 @@ with lib;
     ./hypr/cosmetics.nix
     ./hypr/hyprlock.nix
     ./hypr/waybar.nix
+    ./hypr/hyprpaper.nix
   ];
 
   config = mkIf (home_config.enable && pkgs.system != "aarch64-darwin") {
@@ -148,6 +149,9 @@ with lib;
         exec-once = hyprctl setcursor Bibata-Modern-Ice 24
         exec-once = nm-applet & blueman-applet &
         exec-once = waybar &
+        exec-once = hyprpaper
+        exec-once = sleep 2s && ~/.config/hypr/scripts/wallpaperUpdate.sh
+
         # hyprpaper & firefox
 
         ##############################

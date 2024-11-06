@@ -77,7 +77,7 @@ if [ -n "$is_linux" ]; then
         )
 
         sudo apt update
-        sudo apt install "${packaging_related_apt_tools[@]}"
+        sudo apt install swaylock "${packaging_related_apt_tools[@]}"
 
         sudo adduser $USER sbuild
 

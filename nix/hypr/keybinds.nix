@@ -44,9 +44,7 @@ with lib;
         # FEATURES / EXTRAS (UserScripts)
         "$mainMod, E, exec, $UserScripts/QuickEdit.sh # Quick Edit Hyprland Settings"
         "$mainMod SHIFT, M, exec, $UserScripts/RofiBeats.sh # online music"
-        "$mainMod, W, exec, $UserScripts/WallpaperSelect.sh # Select wallpaper to apply"
-        "$mainMod SHIFT, W, exec, $UserScripts/WallpaperEffects.sh # Wallpaper Effects by imagemagickWW"
-        "CTRL ALT, W, exec, $UserScripts/WallpaperRandom.sh # Random wallpapers"
+        "$mainMod SHIFT, W, exec, $scriptsDir/wallpaperUpdate.sh # Wallpaper Effects by imagemagickWW"
         "$mainMod ALT, O, exec, hyprctl setprop active opaque toggle #disable opacity to active window"
 
         # Waybar / Bar related
