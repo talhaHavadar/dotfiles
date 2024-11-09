@@ -16,6 +16,7 @@
     polkit.enable = true;
     pam.services.hyprlock = { };
   };
+  services.pcscd.enable = true;
 
   services.pipewire = {
     enable = true;

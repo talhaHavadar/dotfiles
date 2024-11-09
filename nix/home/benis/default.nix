@@ -18,5 +18,7 @@ with lib;
 
   home.packages = with pkgs; [
     teams-for-linux
+    pcsclite
+    yubikey-manager
   ];
 }

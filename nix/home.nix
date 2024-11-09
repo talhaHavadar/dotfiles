@@ -80,6 +80,7 @@ in
       ];
     })
     sd-mux-ctrl
+    yubioath-flutter
   ];
 
 }

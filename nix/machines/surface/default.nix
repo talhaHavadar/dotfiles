@@ -5,7 +5,7 @@
 }:
 {
   imports = [
-  ./configuration.nix
+    ./configuration.nix
     ./system.nix
   ];
 }
