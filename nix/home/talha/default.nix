@@ -29,7 +29,12 @@ with lib;
       ".packaging.bashrc".source = mkOutOfStoreSymlink ../../../dot/packaging.bashrc;
     };
 
+  home.sessionVariables = {
+    GIO_EXTRA_MODULES = "${pkgs.gvfs}/lib/gio/modules";
+  };
+
   home.packages = with pkgs; [
+    gnome.gvfs
     pass
   ];
 
