@@ -104,6 +104,7 @@ with lib;
           key = "<C-u>";
           action = "<C-u>zz";
         }
+        # paste without overriting the copy buffer
         {
           mode = "x";
           key = "<leader>p";
@@ -117,7 +118,7 @@ with lib;
         {
           mode = "i";
           key = "<C-r>";
-          action = "<esc>:%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>";
+          action = "<cmd>lua vim.lsp.buf.rename()<CR>";
         }
         {
           mode = "n";
