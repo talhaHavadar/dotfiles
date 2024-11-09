@@ -80,6 +80,8 @@ in
       ];
     })
     sd-mux-ctrl
+    yubikey-manager
+    yubioath-flutter
   ];
 
 }
