@@ -20,5 +20,6 @@ with lib;
     teams-for-linux
     pcsclite
     yubikey-manager
+    yubikey-personalization
   ];
 }
