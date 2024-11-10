@@ -16,7 +16,6 @@
     polkit.enable = true;
     pam.services.hyprlock = { };
   };
-  services.pcscd.enable = true;
 
   services.pipewire = {
     enable = true;
@@ -27,6 +26,20 @@
   hardware = {
     graphics.enable = true;
     bluetooth.enable = true;
+    gpgSmartcards.enable = true;
+    ledger.enable = true;
+  };
+
+  services.pcscd.enable = true;
+  services.udev = {
+    packages = [
+      pkgs.yubikey-personalization
+    ];
+
+    # udev rules for legacy sdwire
+    extraRules = ''
+      SUBSYSTEM=="usb", ATTRS{idVendor}=="04e8", ATTRS{idProduct}=="6001", MODE="0666", GROUP="dialout"
+    '';
   };
 
   users.users.benis = {
@@ -59,11 +72,6 @@
       };
     };
   };
-
-  # udev rules for legacy sdwire
-  services.udev.extraRules = ''
-    SUBSYSTEM=="usb", ATTRS{idVendor}=="04e8", ATTRS{idProduct}=="6001", MODE="0666", GROUP="dialout"
-  '';
 
   networking.networkmanager.enable = true;
   networking.hostName = "surface";

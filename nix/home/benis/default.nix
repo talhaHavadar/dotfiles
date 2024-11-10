@@ -24,13 +24,13 @@ with lib;
   programs.gpg = {
     enable = true;
     scdaemonSettings = {
-      disable-ccid = true;
+      pcsc-shared = true;
+      #disable-ccid = true;
     };
   };
   home.packages = with pkgs; [
     teams-for-linux
-    pcsclite
-    #yubikey-manager
-    #yubikey-personalization
+    yubikey-manager
+    yubikey-personalization
   ];
 }
