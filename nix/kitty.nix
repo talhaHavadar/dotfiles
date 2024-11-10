@@ -26,7 +26,7 @@ with lib;
   config = mkIf (home_config.enable && pkgs.system != "aarch64-darwin") {
     programs.kitty = {
       enable = true;
-      themeFile = "Catppuccin-Latte";
+      themeFile = "Chalk";
       font = {
         package = (pkgs.nerdfonts.override { fonts = [ "Meslo" ]; });
         name = "MesloLG Nerd Font";
@@ -43,7 +43,7 @@ with lib;
         enable_audio_bell = "no";
         enabled_layouts = "fat:bias=80;full_size=1;mirrored=false";
         update_check_interval = 0;
-        cursor = "#394260";
+        cursor = "#ebedf2";
       };
       keybindings = {
         "ctrl+shift+enter" = "new_window_with_cwd";

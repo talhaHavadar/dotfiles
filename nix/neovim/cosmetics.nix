@@ -3,7 +3,7 @@
 
   colorschemes.catppuccin.enable = true;
   colorschemes.catppuccin.settings = {
-    flavour = "latte";
+    flavour = "frappe";
     integrations = {
       cmp = true;
       gitsigns = true;
