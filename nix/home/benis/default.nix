@@ -12,6 +12,11 @@ let
 in
 with lib;
 {
+  home = {
+    username = "benis";
+    homeDirectory = "/home/benis";
+    stateVersion = "24.05";
+  };
   imports = [
     ./git.nix
   ];
@@ -19,7 +24,7 @@ with lib;
   home.packages = with pkgs; [
     teams-for-linux
     pcsclite
-    yubikey-manager
-    yubikey-personalization
+    #yubikey-manager
+    #yubikey-personalization
   ];
 }

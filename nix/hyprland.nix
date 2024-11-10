@@ -125,6 +125,7 @@ with lib;
         # You can split this configuration into multiple files
         # Create your files separately and then link them to this file like this:
         # source = ~/.config/hypr/myColors.conf
+        exec-once = touch ~/.config/hypr/laptop_display.conf
         source=laptop_display.conf
 
         ###################

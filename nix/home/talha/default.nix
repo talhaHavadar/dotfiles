@@ -34,8 +34,13 @@ with lib;
   };
 
   home.packages = with pkgs; [
+    rpi-imager
+    nixgl.nixGLMesa
     gnome.gvfs
     pass
+    gcc13Stdenv
+    mtools
+    gcc-arm-embedded-13
   ];
 
   programs.waybar = {

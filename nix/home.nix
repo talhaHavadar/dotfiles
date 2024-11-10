@@ -48,8 +48,6 @@ in
   };
 
   home.packages = with pkgs; [
-    nixgl.nixGLMesa
-    rpi-imager
     curl
     rustup
     stylua
@@ -57,10 +55,7 @@ in
     fzf
     ripgrep
     git
-    gcc13Stdenv
     tio
-    mtools
-    gcc-arm-embedded-13
     dosfstools
     ubuntu_font_family
     (nerdfonts.override {
