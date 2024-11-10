@@ -16,7 +16,10 @@ with lib;
     userName = "Bahanur Enis";
     userEmail = "bahanurenis@gmail.com";
     extraConfig = {
+      # tag.gpgSign = "true"
       #commit.gpgSign = "true";
+      log.showSignature = "true";
+
     };
   };
 }
