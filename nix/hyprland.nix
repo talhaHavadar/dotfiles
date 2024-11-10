@@ -237,9 +237,9 @@ with lib;
         windowrulev2 = opacity 0.94 0.86, class:^(chrome-.+-Default)$ # Chrome PWAs
 
         ## Imagers
-        windowrulev2 = workspace 3, class:(org.raspberrypi.rpi-imager)
-        windowrulev2 = move 60% 7%, class:(org.raspberrypi.rpi-imager)
-        windowrulev2 = float, class:(org.raspberrypi.rpi-imager)
+        windowrulev2 = workspace 3, class:(org.raspberrypi.)
+        windowrulev2 = center, class:(org.raspberrypi.)
+        windowrulev2 = float, class:(org.raspberrypi.)
 
         # windowrule v2 move to workspace
         windowrulev2 = workspace 6 silent, class:(Mattermost)
