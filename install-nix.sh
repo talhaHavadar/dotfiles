@@ -77,9 +77,9 @@ if [ -n "$is_linux" ]; then
         )
 
         sudo apt update
-
+# https://raw.githubusercontent.com/Yubico/libfido2/refs/heads/main/udev/70-u2f.rules
         sudo apt install swaylock  "${packaging_related_apt_tools[@]}" \
-                pcscd yubikey-manager
+                pcscd sssd libpam-sss scdaemon yubikey-manager
 
 
         sudo adduser $USER sbuild
