@@ -20,6 +20,7 @@ with lib;
 
   home.packages = with pkgs; [
     yubioath-flutter
+    wl-clipboard
   ];
 
 }
