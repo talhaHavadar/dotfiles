@@ -21,6 +21,12 @@ with lib;
     ./git.nix
   ];
 
+  programs.gpg = {
+    enable = true;
+    scdaemonSettings = {
+      disable-ccid = true;
+    };
+  };
   home.packages = with pkgs; [
     teams-for-linux
     pcsclite
