@@ -197,7 +197,7 @@ with lib;
         windowrulev2 = float, class:^(pavucontrol|org.pulseaudio.pavucontrol|com.saivert.pwvucontrol)$
         windowrulev2 = float, class:^(nwg-look|qt5ct|qt6ct)$
         windowrulev2 = float, class:^(mpv|com.github.rafostar.Clapper)$
-        windowrulev2 = float, class:^(nm-applet|nm-connection-editor|blueman-manager)$
+        windowrulev2 = float, class:^(nm-applet|nm-connection-editor|blueman-manager|.blueman-manager-wrapped)$
         windowrulev2 = float, class:^(gnome-system-monitor|org.gnome.SystemMonitor|io.missioncenter.MissionCenter)$ # system monitor
         windowrulev2 = float, class:^([Yy]ad)$ 
         windowrulev2 = float, class:^(wihotspot(-gui)?)$ # wifi hotspot
