@@ -46,13 +46,6 @@
         home-manager.lib.homeManagerConfiguration (
           {
             modules = [
-              {
-                home = {
-                  inherit username;
-                  homeDirectory = "/home/${username}";
-                  stateVersion = "24.05";
-                };
-              }
               ./home.nix
             ];
             pkgs = import nixpkgs {
@@ -104,7 +97,7 @@
         ];
       };
 
-      homeConfigurations.${username} = mkHomeConfiguration {
+      homeConfigurations.linux = mkHomeConfiguration {
         inherit system;
         inherit username;
         extraSpecialArgs = {

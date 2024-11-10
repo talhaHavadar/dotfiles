@@ -12,6 +12,12 @@ let
 in
 with lib;
 {
+  home = {
+    username = "talha";
+    homeDirectory = "/home/talha";
+    stateVersion = "24.05";
+  };
+
   imports = [
     ./git.nix
   ];

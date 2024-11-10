@@ -58,10 +58,10 @@ if [ -n "$is_linux" ]; then
     # export NIX_SYSTEM="$(uname -i)-$(uname -s | awk '{print tolower($0)}')"
     if ! command -v home-manager &>/dev/null
     then
-        INCLUDE_PACKAGING="$INCLUDE_PACKAGING" nix run home-manager -- init --switch "$HOME"/.config/dotfiles/nix --impure -b backup
+        INCLUDE_PACKAGING="$INCLUDE_PACKAGING" nix run home-manager -- init --switch "$HOME"/.config/dotfiles/nix#linux --impure -b backup
     else
         echo "home-manager is already activated so no need for nix run."
-        INCLUDE_PACKAGING="$INCLUDE_PACKAGING" home-manager init --switch $DOTFILES_DIR/nix --show-trace --impure -b backup
+        INCLUDE_PACKAGING="$INCLUDE_PACKAGING" home-manager init --switch $DOTFILES_DIR/nix#linux --show-trace --impure -b backup
     fi
 
     if [ "$INCLUDE_PACKAGING" = "true" ]; then
@@ -79,7 +79,7 @@ if [ -n "$is_linux" ]; then
         sudo apt update
         # https://raw.githubusercontent.com/Yubico/libfido2/refs/heads/main/udev/70-u2f.rules
         sudo apt install swaylock  "${packaging_related_apt_tools[@]}" \
-                pcscd sssd libpam-sss scdaemon yubikey-manager libpam-u2f
+                pcscd sssd libpam-sss scdaemon yubikey-manager libpam-u2f libfido2-dev
         # use pamu2fcfg > ~/.config/Yubico/u2f_keys to setup keys
         # update /etc/pam.d/{sudo,gdm-password,swaylock} with "auth required pam_u2f.so"
 

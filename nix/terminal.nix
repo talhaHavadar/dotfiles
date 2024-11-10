@@ -55,7 +55,7 @@ with lib;
           }
 
           update-home() {
-            NIXPKGS_ALLOW_UNFREE=1 home-manager switch --flake ~/.config/dotfiles/nix --show-trace --impure -b backup
+            NIXPKGS_ALLOW_UNFREE=1 home-manager switch --flake ~/.config/dotfiles/nix#linux --show-trace --impure -b backup
           }
 
         ''
