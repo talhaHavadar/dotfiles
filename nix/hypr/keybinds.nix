@@ -29,7 +29,7 @@ with lib;
         "$mainMod SHIFT, F, togglefloating,"
         "$mainMod ALT, F, exec, hyprctl dispatch workspaceopt allfloat"
         "$mainMod, L, exec, pidof $screenlocker || $screenlocker"
-        "CTRL ALT, P, exec, $scriptsDir/Wlogout.sh"
+        "CTRL ALT, P, exec, wlogout &"
 
         # FEATURES / EXTRAS
         "$mainMod ALT, R, exec, $scriptsDir/Refresh.sh # Refresh waybar, swaync, rofi"
