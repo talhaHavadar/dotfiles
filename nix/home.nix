@@ -3,6 +3,7 @@
   lib,
   pkgs,
   username,
+  platform,
   ...
 }:
 let
@@ -13,11 +14,11 @@ in
 {
 
   imports = [
-    ./home/${username}
+    ./home/${platform}.nix # platform specific configuration [ nixos, non-nixos, macos ]
+    ./home/${username} # user specific configuration
     ./neovim
     ./terminal.nix
     ./tmux.nix
-    ./hyprland.nix # TODO: linux only
   ];
 
   host.home.applications.neovim.enable = true;
@@ -75,7 +76,6 @@ in
       ];
     })
     sd-mux-ctrl
-    yubioath-flutter # TODO: linux only
   ];
 
 }

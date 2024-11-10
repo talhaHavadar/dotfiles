@@ -91,6 +91,7 @@
               inherit inputs;
               username = "benis";
               system = "x86_64-linux";
+              platform = "nixos";
             };
             home-manager.backupFileExtension = "backup";
           }
@@ -103,6 +104,7 @@
         extraSpecialArgs = {
           inherit username;
           inherit inputs;
+          platform = "non-nixos";
         };
       };
 

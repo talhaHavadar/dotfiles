@@ -2,7 +2,7 @@
   config,
   lib,
   pkgs,
-  specialArgs,
+  platform,
   ...
 }:
 let
@@ -39,15 +39,18 @@ with lib;
     GIO_EXTRA_MODULES = "${pkgs.gvfs}/lib/gio/modules";
   };
 
-  home.packages = with pkgs; [
-    rpi-imager
-    nixgl.nixGLMesa # TODO: linux-nonnixos only
-    gnome.gvfs # TODO:
-    pass
-    gcc13Stdenv
-    mtools
-    gcc-arm-embedded-13
-  ];
+  home.packages =
+    with pkgs;
+    [
+      rpi-imager
+      pass
+      gcc13Stdenv
+      mtools
+      gcc-arm-embedded-13
+    ]
+    ++ optionals (platform != "macos") [
+      gnome.gvfs
+    ];
 
   programs.waybar = {
     settings = {

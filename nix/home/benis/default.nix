@@ -2,7 +2,7 @@
   config,
   lib,
   pkgs,
-  specialArgs,
+  platform,
   ...
 }:
 let
@@ -28,9 +28,13 @@ with lib;
       #disable-ccid = true;
     };
   };
-  home.packages = with pkgs; [
-    teams-for-linux # TODO: linux only use "teams" for darwin
-    yubikey-manager
-    yubikey-personalization
-  ];
+  home.packages =
+    with pkgs;
+    [
+      yubikey-manager
+      yubikey-personalization
+    ]
+    ++ optionals (platform != "macos") [
+      teams-for-linux
+    ];
 }
