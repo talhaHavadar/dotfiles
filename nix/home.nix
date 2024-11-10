@@ -59,6 +59,7 @@ in
     tio
     dosfstools
     ubuntu-classic
+    rpi-imager
     (nerdfonts.override {
       fonts = [
         "DroidSansMono"

@@ -42,7 +42,6 @@ with lib;
   home.packages =
     with pkgs;
     [
-      rpi-imager
       pass
       gcc13Stdenv
       mtools
