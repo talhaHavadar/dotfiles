@@ -25,9 +25,22 @@
   };
   hardware = {
     graphics.enable = true;
-    bluetooth.enable = true;
     gpgSmartcards.enable = true;
     ledger.enable = true;
+    bluetooth = {
+      enable = true;
+      # settings = {
+      #   General = {
+      #     Name = "Hello";
+      #     ControllerMode = "dual";
+      #     FastConnectable = "true";
+      #     Experimental = "true";
+      #   };
+      #   Policy = {
+      #     AutoEnable = true;
+      #   };
+      # };
+    };
   };
 
   services.pcscd.enable = true;
