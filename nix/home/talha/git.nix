@@ -16,6 +16,8 @@ with lib;
     userEmail = "havadartalha@gmail.com";
     extraConfig = {
       commit.gpgSign = "true";
+      tag.gpgSign = true;
+      log.showSignature = true;
       includeIf."gitdir:~/workspace/".path = "~/workspace/.gitconfig";
     };
   };
