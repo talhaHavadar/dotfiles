@@ -41,8 +41,8 @@ with lib;
 
   home.packages = with pkgs; [
     rpi-imager
-    nixgl.nixGLMesa
-    gnome.gvfs
+    nixgl.nixGLMesa # TODO: linux-nonnixos only
+    gnome.gvfs # TODO:
     pass
     gcc13Stdenv
     mtools

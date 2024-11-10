@@ -17,7 +17,7 @@ in
     ./neovim
     ./terminal.nix
     ./tmux.nix
-    ./hyprland.nix
+    ./hyprland.nix # TODO: linux only
   ];
 
   host.home.applications.neovim.enable = true;
@@ -57,7 +57,7 @@ in
     git
     tio
     dosfstools
-    ubuntu_font_family
+    ubuntu-classic
     (nerdfonts.override {
       fonts = [
         "DroidSansMono"
@@ -75,7 +75,7 @@ in
       ];
     })
     sd-mux-ctrl
-    yubioath-flutter
+    yubioath-flutter # TODO: linux only
   ];
 
 }

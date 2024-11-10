@@ -29,7 +29,7 @@ with lib;
     };
   };
   home.packages = with pkgs; [
-    teams-for-linux
+    teams-for-linux # TODO: linux only use "teams" for darwin
     yubikey-manager
     yubikey-personalization
   ];

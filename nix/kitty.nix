@@ -63,6 +63,7 @@ with lib;
     # };
     home.shellAliases.kitty = kitty;
     xdg.dataFile."applications/kitty.desktop" = {
+      # TODO: not needed/effective in macos
       text = ''
         [Desktop Entry]
         Version=1.0
