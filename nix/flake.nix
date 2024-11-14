@@ -107,6 +107,16 @@
           platform = "non-nixos";
         };
       };
+      homeConfigurations.ubuntu-headless = mkHomeConfiguration {
+        inherit system;
+        username = "ubuntu";
+        extraSpecialArgs = {
+          username = "ubuntu";
+          inherit inputs;
+          platform = "ubuntu-headless";
+          packagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
+        };
+      };
 
     };
 }
