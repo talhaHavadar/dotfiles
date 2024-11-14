@@ -8,7 +8,6 @@
 }:
 let
   pyp = pkgs.python312Packages;
-  isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
 in
 {
@@ -20,10 +19,6 @@ in
     ./terminal.nix
     ./tmux.nix
   ];
-
-  host.home.applications.neovim.enable = true;
-  host.home.applications.kitty.enable = true;
-  host.home.windowManagers.hyprland.enable = true;
 
   home.file = {
     ".config/starship.toml".source = mkOutOfStoreSymlink ../dot/starship.toml;
