@@ -58,13 +58,18 @@ with lib;
             NIXPKGS_ALLOW_UNFREE=1 home-manager switch --flake ~/.config/dotfiles/nix#linux --show-trace --impure -b backup
           }
 
+
         ''
         + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
       initExtra = ''
         source ~/.tmux-completion
         source ~/.complete_alias
+        # GPG-Agent
+        unset SSH_AGENT_PID
+        export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
 
         complete -F _complete_alias t
+        eval "$(/opt/homebrew/bin/brew shellenv)"
       '';
       shellAliases =
         {

@@ -23,7 +23,6 @@ in
 
   host.home.applications.neovim.enable = true;
   host.home.applications.kitty.enable = true;
-  host.home.windowManagers.hyprland.enable = true;
 
   home.file = {
     ".config/starship.toml".source = mkOutOfStoreSymlink ../dot/starship.toml;
@@ -59,7 +58,7 @@ in
     tio
     dosfstools
     ubuntu-classic
-    rpi-imager
+#    rpi-imager
     (nerdfonts.override {
       fonts = [
         "DroidSansMono"
@@ -69,13 +68,13 @@ in
       ];
     })
     pyp.pipx
-    (google-chrome.override {
-      commandLineArgs = [
-        "--ozone-platform=wayland"
-        "--enable-features=VaapiVideoDecoder"
-        "--use-gl=egl"
-      ];
-    })
+#    (google-chrome.override {
+#      commandLineArgs = [
+#        "--ozone-platform=wayland"
+#        "--enable-features=VaapiVideoDecoder"
+#        "--use-gl=egl"
+#      ];
+#    })
     sd-mux-ctrl
   ];
 

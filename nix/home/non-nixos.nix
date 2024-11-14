@@ -14,6 +14,7 @@ in
 with lib;
 {
 
+  host.home.windowManagers.hyprland.enable = true;
   imports = [
     ../hyprland.nix
   ];
