@@ -58,6 +58,7 @@ with lib;
             NIXPKGS_ALLOW_UNFREE=1 home-manager switch --flake ~/.config/dotfiles/nix#linux --show-trace --impure -b backup
           }
 
+
         ''
         + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
       initExtra = ''
@@ -71,6 +72,7 @@ with lib;
 
         export GPG_TTY="$(tty)"
         gpgconf --create-socketdir
+        eval "$(/opt/homebrew/bin/brew shellenv)"
       '';
       shellAliases =
         {
