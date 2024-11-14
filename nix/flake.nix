@@ -9,13 +9,13 @@
   };
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/master";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     darwin = {
-      url = "github:lnl7/nix-darwin";
+      url = "github:talhaHavadar/nix-darwin/0a3df54";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixvim = {
@@ -33,14 +33,20 @@
     nixos-hardware = {
       url = "github:NixOS/nixos-hardware/feefc78";
     };
+    mac-app-util = {
+      url = "github:hraban/mac-app-util";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
     {
+      self,
       nixpkgs,
       home-manager,
       darwin,
       nixvim,
+      mac-app-util,
       nixos-hardware,
       system-manager,
       nix-system-graphics,
@@ -116,6 +122,54 @@
           })
         ];
       };
+
+      # Build darwin flake using:
+      # $ darwin-rebuild build --flake .#simple
+      darwinConfigurations.macmini = darwin.lib.darwinSystem {
+
+        system = "aarch64-darwin";
+        specialArgs = {
+          inherit self;
+        };
+        modules = [
+          mac-app-util.darwinModules.default
+          ./machines/macmini
+          (
+            { ... }:
+            {
+              users.users.talha = {
+                name = "talha";
+                home = "/Users/talha";
+              };
+            }
+          )
+          home-manager.darwinModules.home-manager
+          {
+            # To enable it for all users:
+            home-manager.sharedModules = [
+              mac-app-util.homeManagerModules.default
+            ];
+
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.talha.imports = [
+              ./home.nix
+            ];
+            # Optionally, use home-manager.extraSpecialArgs to pass
+            # arguments to home.nix
+            home-manager.extraSpecialArgs = {
+              inherit inputs;
+              username = "talha";
+              system = "aarch64-darwin";
+              platform = "macos";
+            };
+          }
+        ];
+      };
+
+      # Expose the package set, including overlays, for convenience.
+      darwinPackages = self.darwinConfigurations.macmini.pkgs;
+
       homeConfigurations.linux = mkHomeConfiguration {
         inherit system;
         inherit username;

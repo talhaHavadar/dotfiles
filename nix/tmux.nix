@@ -7,6 +7,7 @@ in
     enable = true;
     historyLimit = 100000;
     keyMode = "vi";
+    shell = "/opt/homebrew/bin/bash";
     plugins = with tmuxPlugins; [
       {
         plugin = catppuccin;
@@ -26,6 +27,7 @@ in
       set -g mouse on
 
       set-option -g detach-on-destroy off
+      set-option -g default-command "/opt/homebrew/bin/bash"
 
       unbind C-g
       bind C-g select-pane -t :.+
