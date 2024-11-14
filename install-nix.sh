@@ -6,6 +6,9 @@ while [ $# -gt 0 ]; do
         -p|--with-packaging)
             INCLUDE_PACKAGING="true"
             ;;
+        -c|--headless)
+            HEADLESS_INSTANCE="true"
+            ;;
         *)
             echo "Unknown argument $1"
             ;;
@@ -58,10 +61,18 @@ if [ -n "$is_linux" ]; then
     # export NIX_SYSTEM="$(uname -i)-$(uname -s | awk '{print tolower($0)}')"
     if ! command -v home-manager &>/dev/null
     then
-        INCLUDE_PACKAGING="$INCLUDE_PACKAGING" nix run home-manager -- init --switch "$HOME"/.config/dotfiles/nix#linux --impure -b backup
+        if [ "$HEADLESS_INSTANCE" = "true" ]; then
+            INCLUDE_PACKAGING="$INCLUDE_PACKAGING" nix run home-manager -- init --switch "$HOME"/.config/dotfiles/nix#ubuntu-headless --impure -b backup
+        else
+            INCLUDE_PACKAGING="$INCLUDE_PACKAGING" nix run home-manager -- init --switch "$HOME"/.config/dotfiles/nix#linux --impure -b backup
+        fi
     else
         echo "home-manager is already activated so no need for nix run."
-        INCLUDE_PACKAGING="$INCLUDE_PACKAGING" home-manager init --switch $DOTFILES_DIR/nix#linux --show-trace --impure -b backup
+        if [ "$HEADLESS_INSTANCE" = "true" ]; then
+            INCLUDE_PACKAGING="$INCLUDE_PACKAGING" home-manager init --switch $DOTFILES_DIR/nix#ubuntu-headless --show-trace --impure -b backup
+        else
+            INCLUDE_PACKAGING="$INCLUDE_PACKAGING" home-manager init --switch $DOTFILES_DIR/nix#linux --show-trace --impure -b backup
+        fi
     fi
 
     if [ "$INCLUDE_PACKAGING" = "true" ]; then
@@ -74,6 +85,7 @@ if [ -n "$is_linux" ]; then
             autopkgtest
             lintian
             git-buildpackage
+            config-package-dev
         )
 
         sudo apt update
