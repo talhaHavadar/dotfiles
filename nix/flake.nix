@@ -108,5 +108,16 @@
         };
       };
 
+      nixosConfigurations.nutter = nixpkgs.lib.nixosSystem {
+        system = "aarch64-linux";
+        specialArgs = {
+          inherit inputs;
+        };
+        modules = [
+          (import ./machines/pi3)
+          (import ./host/nutter)
+        ];
+      };
+
     };
 }
