@@ -189,6 +189,8 @@
         };
       }
       "google-chrome"
+      "obsidian"
+      "kicad"
       # "firefox"
     ];
 
