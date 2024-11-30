@@ -15,8 +15,8 @@ with lib;
 
       # See https://wiki.hyprland.org/Configuring/Monitors/
       monitor = [
-        "DP-2,preferred,auto,1.6"
-        ",preferred,auto,auto"
+        "desc:BNQ BenQ PD3220U 27P00235019, preferred, 0x0, 1.6"
+        ",preferred,auto,1.6"
       ];
 
       bindl = [
