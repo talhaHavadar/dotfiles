@@ -42,11 +42,15 @@ with lib;
         ]
         ++ optionals (platform != "macos") [
           teams-for-linux
+          obsidian
         ];
     }
-    // lib.optionalAttrs (currentConfigSystem == "darwin") {
-    }
-    // lib.optionalAttrs (currentConfigSystem == "nixos") {
-    };
-
+    //
+      lib.optionalAttrs (currentConfigSystem == "darwin")
+        {
+        }
+    //
+      lib.optionalAttrs (currentConfigSystem == "nixos")
+        {
+        };
 }
