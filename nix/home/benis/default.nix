@@ -36,5 +36,6 @@ with lib;
     ]
     ++ optionals (platform != "macos") [
       teams-for-linux
+      obsidian
     ];
 }
