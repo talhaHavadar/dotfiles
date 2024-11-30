@@ -7,8 +7,7 @@ with lib;
 {
   config = mkIf (home_config.enable) {
     home.file = {
-      ".config/hypr/scripts/laptopDisplayHandler.sh".source =
-        mkOutOfStoreSymlink ../../dot/hyprland/laptopDisplayHandler.sh;
+      ".config/hypr/scripts/laptopDisplayHandler.sh".source = mkOutOfStoreSymlink ../../dot/hyprland/laptopDisplayHandler.sh;
     };
     wayland.windowManager.hyprland.settings = {
       "$scriptsDir" = "$HOME/.config/hypr/scripts";
@@ -20,6 +19,7 @@ with lib;
         "desc:A/Vaux Electronics AVT GC553,2560x1080,auto,auto"
         #"desc:LG Electronics LG ULTRAWIDE 207NTUW4Q462,3840x2160,auto,auto"
         ",preferred,auto,auto"
+        "desc:BNQ BenQ PD3220U 27P00235019, preferred, 0x0, 1.6"
       ];
 
       bindl = [
