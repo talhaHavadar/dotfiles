@@ -100,27 +100,27 @@
   services.apcupsd = {
     enable = true;
     configText = ''
-        UPSTYPE usb
-        DEVICE
-        BATTERYLEVEL 5
-        MINUTES 5
-        ONBATTERYDELAY 30
-        NISIP 127.0.0.1
-        NISPORT 3551
+      UPSTYPE usb
+      DEVICE
+      BATTERYLEVEL 5
+      MINUTES 5
+      ONBATTERYDELAY 30
+      NISIP 127.0.0.1
+      NISPORT 3551
     '';
     hooks = {
       onbattery = ''
         echo "UPS is on battery!!"
         now="$(date -Iseconds)"
         echo "$now" >> /home/talha/upsbattery.log
-	sed -i "s/ups.status:.*/ups.status: OB/" /etc/nut/something.dev
+        sed -i "s/ups.status:.*/ups.status: OB/" /etc/nut/something.dev
         exit 99
       '';
       mainsback = ''
         echo "UPS is on main power!!"
         now="$(date -Iseconds)"
         echo "$now" >> /home/talha/upsmains.log
-	sed -i "s/ups.status:.*/ups.status: OL/" /etc/nut/something.dev
+        sed -i "s/ups.status:.*/ups.status: OL/" /etc/nut/something.dev
         exit 99
       '';
     };
