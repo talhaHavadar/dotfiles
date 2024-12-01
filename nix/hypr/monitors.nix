@@ -18,7 +18,9 @@ with lib;
         "desc:BNQ BenQ PD3220U 27P00235019, preferred, 0x0, 1.6"
         ",preferred,auto,1.6"
       ];
-
+      bind = [
+        "$mainMod SHIFT, M, exec, $scriptsDir/laptopDisplayHandler.sh"
+      ];
       bindl = [
         ", switch:off:Lid Switch,exec,echo \"monitor = eDP-1, preferred, auto, 2\" > $laptop_display_conf"
         ", switch:on:Lid Switch,exec, $scriptsDir/laptopDisplayHandler.sh"
