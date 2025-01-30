@@ -35,9 +35,9 @@ with lib;
       ".packaging.bashrc".source = mkOutOfStoreSymlink ../../../dot/packaging.bashrc;
     };
 
-  home.sessionVariables =
-    {
-    };
+  home.sessionVariables = {
+    TERM = "xterm-256color";
+  };
 
   home.packages = with pkgs; [
     gcc13Stdenv

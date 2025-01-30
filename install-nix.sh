@@ -86,6 +86,7 @@ if [ -n "$is_linux" ]; then
             lintian
             git-buildpackage
             config-package-dev
+	    dh-sequence-gir
         )
 
         sudo apt update
