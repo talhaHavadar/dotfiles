@@ -168,6 +168,7 @@
   # https://daiderd.com/nix-darwin/manual/index.html#opt-homebrew.brews
   homebrew = {
     enable = true;
+
     brews = [
       "bash"
       "libfido2"
@@ -192,6 +193,8 @@
       "obsidian"
       "kicad"
       # "firefox"
+      "wifiman"
+      "jordanbaird-ice"
     ];
 
     masApps = {

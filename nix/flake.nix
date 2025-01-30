@@ -15,7 +15,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     darwin = {
-      url = "github:talhaHavadar/nix-darwin/0a3df54";
+      url = "github:talhaHavadar/nix-darwin/7f5231c";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixvim = {
