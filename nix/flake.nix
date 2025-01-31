@@ -167,8 +167,46 @@
         ];
       };
 
-      # Expose the package set, including overlays, for convenience.
-      darwinPackages = self.darwinConfigurations.macmini.pkgs;
+      darwinConfigurations.talhaMacpro = darwin.lib.darwinSystem {
+        system = "aarch64-darwin";
+        specialArgs = {
+          inherit self;
+        };
+        modules = [
+          mac-app-util.darwinModules.default
+          ./machines/macpro
+          (
+            { ... }:
+            {
+              users.users.talha = {
+                name = "talha";
+                home = "/Users/talha";
+              };
+            }
+          )
+          home-manager.darwinModules.home-manager
+          {
+            # To enable it for all users:
+            home-manager.sharedModules = [
+              mac-app-util.homeManagerModules.default
+            ];
+
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.talha.imports = [
+              ./home.nix
+            ];
+            # Optionally, use home-manager.extraSpecialArgs to pass
+            # arguments to home.nix
+            home-manager.extraSpecialArgs = {
+              inherit inputs;
+              username = "talha";
+              system = "aarch64-darwin";
+              platform = "macos";
+            };
+          }
+        ];
+      };
 
       homeConfigurations.linux = mkHomeConfiguration {
         inherit system;
