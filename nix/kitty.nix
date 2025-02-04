@@ -28,7 +28,7 @@ with lib;
       enable = true;
       themeFile = "Chalk";
       font = {
-        package = (pkgs.nerdfonts.override { fonts = [ "Meslo" ]; });
+        package = (pkgs.nerd-fonts.meslo-lg);
         name = "MesloLG Nerd Font";
         size = 12;
       };

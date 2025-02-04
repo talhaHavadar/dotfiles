@@ -60,22 +60,18 @@ in
     dosfstools
     ubuntu-classic
     rpi-imager
-    (nerdfonts.override {
-      fonts = [
-        "DroidSansMono"
-        "Hack"
-        "JetBrainsMono"
-        "Noto"
-      ];
-    })
+    nerd-fonts.hack
+    nerd-fonts.noto
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.droid-sans-mono
     pyp.pipx
-    (google-chrome.override {
-      commandLineArgs = [
-        "--ozone-platform=wayland"
-        "--enable-features=VaapiVideoDecoder"
-        "--use-gl=egl"
-      ];
-    })
+    # (google-chrome.override {
+    #   commandLineArgs = [
+    #     "--ozone-platform=wayland"
+    #     "--enable-features=VaapiVideoDecoder"
+    #     "--use-gl=egl"
+    #   ];
+    # })
     sd-mux-ctrl
   ];
 
