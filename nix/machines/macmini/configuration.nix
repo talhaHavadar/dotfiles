@@ -174,6 +174,17 @@
       "libfido2"
       "openssh"
       "tailscale"
+      "cmake"
+      "ninja"
+      "gperf"
+      "python3"
+      "python-tk"
+      "ccache"
+      "qemu"
+      "dtc"
+      "libmagic"
+      "wget"
+      "openocd"
     ];
 
     casks = [
@@ -195,6 +206,7 @@
       # "firefox"
       "wifiman"
       "jordanbaird-ice"
+      "nordic-nrf-command-line-tools"
     ];
 
     masApps = {

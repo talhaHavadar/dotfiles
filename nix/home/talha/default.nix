@@ -53,23 +53,23 @@ with lib;
     with pkgs;
     [
       pass
-#      gcc13Stdenv
-#      mtools
-#      gcc-arm-embedded-13
+      #      gcc13Stdenv
+      #      mtools
+      #      gcc-arm-embedded-13
     ]
     ++ optionals (platform != "macos") [
       gnome.gvfs
     ];
 
- # programs.waybar = {
- #   settings = {
- #     mainBar = {
- #       "custom/lock".on-click = mkForce "sh -c '(sleep 0.5s; swaylock)' & disown";
- #     };
- #   };
- # };
+  # programs.waybar = {
+  #   settings = {
+  #     mainBar = {
+  #       "custom/lock".on-click = mkForce "sh -c '(sleep 0.5s; swaylock)' & disown";
+  #     };
+  #   };
+  # };
 
- # wayland.windowManager.hyprland.settings = {
- #   "$screenlocker" = mkForce "swaylock";
- # };
+  # wayland.windowManager.hyprland.settings = {
+  #   "$screenlocker" = mkForce "swaylock";
+  # };
 }
