@@ -50,6 +50,7 @@ truncation_symbol = "…/"
 "Pictures" = "  "
 "Developer" = "󰲋  "
 "projects" = "󰲋  "
+"zephyrprojects" = "󰲋 Z "
 "workspace" = "󰲋 W "
 
 [git_branch]
