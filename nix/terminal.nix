@@ -3,6 +3,7 @@
   inputs,
   lib,
   pkgs,
+  platform,
   ...
 }:
 let
@@ -61,16 +62,21 @@ with lib;
 
         ''
         + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
-      initExtra = ''
-        source ~/.tmux-completion
-        source ~/.complete_alias
-        # GPG-Agent
-        unset SSH_AGENT_PID
-        export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+      initExtra =
+        ''
+          source ~/.tmux-completion
+          source ~/.complete_alias
+          # GPG-Agent
+          unset SSH_AGENT_PID
+          export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
 
-        complete -F _complete_alias t
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-      '';
+          complete -F _complete_alias t
+        ''
+        + optionalString (platform == "macos") ''
+          eval "$(/opt/homebrew/bin/brew shellenv)"
+          export PATH="$(brew --prefix)/opt/python/libexec/bin:$PATH";
+        '';
+
       shellAliases =
         {
           gg = "git grep --no-index";
