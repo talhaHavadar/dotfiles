@@ -65,6 +65,8 @@ with lib;
         source ~/.complete_alias
 
         complete -F _complete_alias t
+
+        export GPG_TTY="$(tty)"
       '';
       shellAliases =
         {
@@ -88,7 +90,6 @@ with lib;
     "${homeDirectory}/.local/bin"
   ];
   home.sessionVariables = {
-    GPG_TTY = "$(tty)";
     NIX_SYSTEM = pkgs.system;
     NIX_STORE = "/nix/store";
   };
