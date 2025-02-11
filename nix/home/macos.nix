@@ -21,6 +21,18 @@ with lib;
   programs.ssh = {
     enable = true;
     extraConfig = ''
+      Host dev-amd64.lan
+        User ubuntu
+        StreamLocalBindUnlink yes
+        RemoteForward /run/user/1000/gnupg/S.gpg-agent /Users/talha/.gnupg/S.gpg-agent
+
+      Host badgerd-nl.jump
+        User ubuntu
+        HostName badgerd-nl.local
+        ProxyJump dev-amd64.lan
+        StreamLocalBindUnlink yes
+        RemoteForward /run/user/1000/gnupg/S.gpg-agent /Users/talha/.gnupg/S.gpg-agent
+
       Include ~/.orbstack/ssh/config
       IdentityFile ~/.ssh/id_ed25519_sk_mobil
     '';

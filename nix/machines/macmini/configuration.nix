@@ -207,6 +207,7 @@
       "wifiman"
       "jordanbaird-ice"
       "nordic-nrf-command-line-tools"
+      "visual-studio-code"
     ];
 
     masApps = {
