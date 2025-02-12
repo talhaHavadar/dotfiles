@@ -21,6 +21,11 @@ with lib;
   programs.ssh = {
     enable = true;
     extraConfig = ''
+      Host dev-amd64-unlock
+        User root
+        Port 2222
+        HostName dev-amd64.lan
+
       Host dev-amd64.lan
         User ubuntu
         StreamLocalBindUnlink yes
