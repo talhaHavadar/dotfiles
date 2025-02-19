@@ -71,6 +71,7 @@ with lib;
           export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
 
           complete -F _complete_alias t
+          export GPG_TTY="$(tty)"
         ''
         + optionalString (platform == "macos") ''
           eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -99,7 +100,6 @@ with lib;
     "${homeDirectory}/.local/bin"
   ];
   home.sessionVariables = {
-    GPG_TTY = "$(tty)";
     NIX_SYSTEM = pkgs.system;
     NIX_STORE = "/nix/store";
   };

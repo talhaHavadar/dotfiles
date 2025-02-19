@@ -63,9 +63,8 @@
                 inputs.nixgl.overlay
               ];
             };
-            extraSpecialArgs =
-              {
-              };
+            extraSpecialArgs = {
+            };
 
           }
           // {
