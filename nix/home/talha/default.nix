@@ -47,15 +47,16 @@ with lib;
 
   home.sessionVariables = {
     GIO_EXTRA_MODULES = "${pkgs.gvfs}/lib/gio/modules";
+    PATH = "/opt/homebrew/opt/python/libexec/bin:$PATH";
   };
 
   home.packages =
     with pkgs;
     [
       pass
-      #      gcc13Stdenv
-      #      mtools
-      #      gcc-arm-embedded-13
+      # gcc13Stdenv
+      # mtools
+      # gcc-arm-embedded-13
     ]
     ++ optionals (platform != "macos") [
       gnome.gvfs
