@@ -60,13 +60,6 @@ in
     nerd-fonts.jetbrains-mono
     nerd-fonts.droid-sans-mono
     pyp.pipx
-    # (google-chrome.override {
-    #   commandLineArgs = [
-    #     "--ozone-platform=wayland"
-    #     "--enable-features=VaapiVideoDecoder"
-    #     "--use-gl=egl"
-    #   ];
-    # })
     sd-mux-ctrl
   ];
 

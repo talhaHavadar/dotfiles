@@ -168,6 +168,17 @@
       "bash"
       "libfido2"
       "openssh"
+      "cmake"
+      "ninja"
+      "gperf"
+      "python3"
+      "python-tk"
+      "ccache"
+      "qemu"
+      "dtc"
+      "libmagic"
+      "wget"
+      "openocd"
     ];
 
     casks = [
@@ -175,6 +186,7 @@
       "raspberry-pi-imager"
       "obsidian"
       "wifiman"
+      "godot"
     ];
 
     masApps = {
