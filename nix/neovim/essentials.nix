@@ -24,6 +24,7 @@
         python
         svelte
         toml
+        gdscript
       ];
       settings = {
         indent.enable = true;
