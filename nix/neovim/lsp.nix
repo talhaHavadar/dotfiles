@@ -53,6 +53,11 @@
           installRustc = false;
         };
         taplo.enable = true;
+        gdscript = {
+          enable = true;
+          package = pkgs.vscode-extensions.geequlim.godot-tools;
+
+        };
       };
       keymaps = {
         silent = true;
