@@ -21,6 +21,17 @@ with lib;
   programs.ssh = {
     enable = true;
     extraConfig = ''
+      Host macmini.lan
+        HostName 10.17.0.21
+        User talha
+        StreamLocalBindUnlink yes
+        RemoteForward /Users/talha/.gnupg/S.gpg-agent /Users/talha/.gnupg/S.gpg-agent
+
+      Host pi-dev.local
+        User talha
+        StreamLocalBindUnlink yes
+        RemoteForward /run/user/1000/gnupg/S.gpg-agent /Users/talha/.gnupg/S.gpg-agent
+
       Host dev-amd64-unlock
         User root
         Port 2222
