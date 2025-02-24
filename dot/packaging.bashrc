@@ -17,7 +17,7 @@ mksbuild() {
 
     mk-sbuild "$series" --arch="$arch" && \
     sudo sed -i 's/^union-type=.*/union-type=overlay/' \
-        /etc/schroot/chroot.d/sbuild-oracular-arm64 && \
+        /etc/schroot/chroot.d/sbuild-$series-$arch && \
     sbuild-update -udcar "$series"-"$arch"
 }
 

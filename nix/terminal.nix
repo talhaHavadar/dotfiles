@@ -55,7 +55,7 @@ with lib;
           }
 
           update-home() {
-            NIXPKGS_ALLOW_UNFREE=1 home-manager switch --flake ~/.config/dotfiles/nix#ubuntu-headless --show-trace --impure -b backup
+            NIXPKGS_ALLOW_UNFREE=1 home-manager switch --flake ~/.config/dotfiles/nix#linux --show-trace --impure -b backup
           }
 
         ''
@@ -63,10 +63,14 @@ with lib;
       initExtra = ''
         source ~/.tmux-completion
         source ~/.complete_alias
+        # GPG-Agent
+        unset SSH_AGENT_PID
+        export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
 
         complete -F _complete_alias t
 
         export GPG_TTY="$(tty)"
+        gpgconf --create-socketdir
       '';
       shellAliases =
         {
