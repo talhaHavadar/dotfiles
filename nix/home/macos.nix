@@ -21,6 +21,9 @@ with lib;
   programs.ssh = {
     enable = true;
     extraConfig = ''
+      Host launchpad.net
+        IdentityFile ~/.ssh/id_ed25519
+
       Host macmini.lan
         HostName 10.17.0.21
         User talha
@@ -41,6 +44,7 @@ with lib;
         User ubuntu
         StreamLocalBindUnlink yes
         RemoteForward /run/user/1000/gnupg/S.gpg-agent /Users/talha/.gnupg/S.gpg-agent
+        RemoteForward /run/user/1000/gnupg/S.gpg-agent.ssh /Users/talha/.gnupg/S.gpg-agent.ssh
 
       Host badgerd-nl.jump
         User ubuntu
@@ -48,6 +52,7 @@ with lib;
         ProxyJump dev-amd64.lan
         StreamLocalBindUnlink yes
         RemoteForward /run/user/1000/gnupg/S.gpg-agent /Users/talha/.gnupg/S.gpg-agent
+        RemoteForward /run/user/1000/gnupg/S.gpg-agent.ssh /Users/talha/.gnupg/S.gpg-agent.ssh
 
       Include ~/.orbstack/ssh/config
       IdentityFile ~/.ssh/id_ed25519_sk_mobil
