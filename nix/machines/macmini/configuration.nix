@@ -18,8 +18,6 @@
     pkgs.vim
   ];
 
-  # Auto upgrade nix package and the daemon service.
-  services.nix-daemon.enable = true;
   # nix.package = pkgs.nix;
 
   # Necessary for using flakes on this system.
@@ -49,7 +47,7 @@
   programs.gnupg.agent.enable = true;
 
   services.aerospace = {
-    enable = true;
+    enable = false;
     settings = {
       on-focus-changed = [ "move-mouse window-lazy-center" ];
 
@@ -208,6 +206,8 @@
       "jordanbaird-ice"
       "nordic-nrf-command-line-tools"
       "visual-studio-code"
+      "godot"
+      "poedit"
     ];
 
     masApps = {

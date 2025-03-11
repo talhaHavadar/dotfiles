@@ -89,6 +89,7 @@ with lib;
           tk = "tmux kill-session -t";
           tf = "tmux_find_or_create_prompt";
           tp = "tmux list-panes -a -F '#D #T #{pane_tty} #{pane_current_command} #{pane_current_path}'";
+          gvim = "nvim --listen ~/.cache/nvim/godot.pipe .";
         }
         // optionalAttrs isPackagingEnabled {
           update-home = "INCLUDE_PACKAGING=\"true\" update-home";

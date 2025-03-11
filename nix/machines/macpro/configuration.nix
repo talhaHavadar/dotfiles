@@ -18,9 +18,6 @@
     pkgs.vim
   ];
 
-  # Auto upgrade nix package and the daemon service.
-  services.nix-daemon.enable = true;
-
   # Necessary for using flakes on this system.
   nix.settings.experimental-features = "nix-command flakes";
 
@@ -186,6 +183,7 @@
       "raspberry-pi-imager"
       "obsidian"
       "wifiman"
+      "nordic-nrf-command-line-tools"
       "godot"
     ];
 

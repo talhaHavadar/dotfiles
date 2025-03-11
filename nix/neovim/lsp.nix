@@ -63,6 +63,7 @@
         silent = true;
         lspBuf = {
           K = "hover";
+          "<C-k>" = "signature_help";
           gD = "references";
           gd = "definition";
           gt = "type_definition";
