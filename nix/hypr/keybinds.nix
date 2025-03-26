@@ -93,7 +93,7 @@ with lib;
         "$mainMod, U, togglespecialworkspace,"
         # The following mappings use the key codes to better support various keyboard layouts
         # 1 is code:10, 2 is code 11, etc
-        # Switch workspaces with mainMod + [0-9] 
+        # Switch workspaces with mainMod + [0-9]
         "$mainMod, code:10, workspace, 1"
         "$mainMod, code:11, workspace, 2"
         "$mainMod, code:12, workspace, 3"
@@ -147,7 +147,7 @@ with lib;
 
         # ags overview
         #bind = $mainMod, A, exec, pkill rofi || true && ags -t 'overview'
-        "$mainMod, A, hyprexpo:expo, toggle"
+        #"$mainMod, A, hyprexpo:expo, toggle"
 
         "$mainMod, Return, exec, $term  # Launch terminal"
         "$mainMod, T, exec, $files # Launch file manager"

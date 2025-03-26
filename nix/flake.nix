@@ -22,8 +22,12 @@
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixgl = {
-      url = "github:nix-community/nixGL";
+    system-manager = {
+      url = "github:numtide/system-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nix-system-graphics = {
+      url = "github:soupglasses/nix-system-graphics";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-hardware = {
@@ -38,10 +42,13 @@
       darwin,
       nixvim,
       nixos-hardware,
+      system-manager,
+      nix-system-graphics,
       ...
     }@inputs:
     let
       mkHomeConfiguration =
+
         { system, username, ... }@args:
         home-manager.lib.homeManagerConfiguration (
           {
@@ -54,12 +61,11 @@
                 allowUnfree = true;
               };
               overlays = [
-                inputs.nixgl.overlay
+                #                inputs.nixgl.overlay
               ];
             };
-            extraSpecialArgs =
-              {
-              };
+            extraSpecialArgs = {
+            };
 
           }
           // {
@@ -70,6 +76,7 @@
       system = builtins.currentSystem;
     in
     {
+      default = { };
 
       nixosConfigurations.surface = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
@@ -97,7 +104,18 @@
           }
         ];
       };
-
+      systemConfigs.default = system-manager.lib.makeSystemConfig {
+        modules = [
+          nix-system-graphics.systemModules.default
+          ({
+            config = {
+              nixpkgs.hostPlatform = "x86_64-linux";
+              system-manager.allowAnyDistro = true;
+              system-graphics.enable = true;
+            };
+          })
+        ];
+      };
       homeConfigurations.linux = mkHomeConfiguration {
         inherit system;
         inherit username;

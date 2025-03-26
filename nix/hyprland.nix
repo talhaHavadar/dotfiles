@@ -169,8 +169,8 @@ with lib;
         ## Fix some dragging issues with XWayland
         windowrulev2 = nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0
 
-        windowrulev2 = idleinhibit fullscreen, class:^(*)$
-        windowrulev2 = idleinhibit fullscreen, title:^(*)$
+        #windowrulev2 = idleinhibit fullscreen, class:^(*)$
+        #windowrulev2 = idleinhibit fullscreen, title:^(*)$
         windowrulev2 = idleinhibit fullscreen, fullscreen:1
 
         ## Picture-in-Picture
@@ -204,7 +204,7 @@ with lib;
         windowrulev2 = float, class:^(file-roller|org.gnome.FileRoller)$ # archive manager
         windowrulev2 = float, class:^([Bb]aobab|org.gnome.[Bb]aobab)$ # Disk usage analyzer
         windowrulev2 = float, title:(Kvantum Manager)
-        windowrulev2 = float, class:^([Ss]team)$,title:^((?![Ss]team).*|[Ss]team [Ss]ettings)$
+        #windowrulev2 = float, class:^([Ss]team)$,title:^((?![Ss]team).*|[Ss]team [Ss]ettings)$
         windowrulev2 = float, class:^([Qq]alculate-gtk)$
 
         # windowrule v2 - size

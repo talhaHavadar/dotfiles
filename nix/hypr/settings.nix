@@ -104,6 +104,9 @@ with lib;
       #opengl {
       #  nvidia_anti_flicker = true
       #}
+      # cursor = {
+      #   no_hardware_cursors = true;
+      # };
 
       binds = {
         workspace_back_and_forth = true;

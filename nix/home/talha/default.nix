@@ -18,6 +18,16 @@ with lib;
     stateVersion = "24.05";
   };
 
+  programs.ssh = {
+    enable = true;
+    extraConfig = ''
+      Host dev-amd64-unlock
+        User root
+        Port 2222
+        HostName dev-amd64.lan
+    '';
+  };
+
   imports = [
     ./git.nix
   ];

@@ -16,11 +16,11 @@ with lib;
         "dim_strength" = 5.0e-2;
         "dim_special" = 0.8;
 
-        "drop_shadow" = true;
-        "shadow_range" = 6;
-        "shadow_render_power" = 1;
-        "col.shadow" = "rgb(0C0C14)";
-        "col.shadow_inactive" = "0x50000000";
+        #        "drop_shadow" = true;
+        #"shadow_range" = 6;
+        #  "shadow_render_power" = 1;
+        #"col.shadow" = "rgb(0C0C14)";
+        #"col.shadow_inactive" = "0x50000000";
 
         blur = {
           enabled = true;
