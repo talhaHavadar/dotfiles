@@ -17,7 +17,6 @@ with lib;
   host.home.applications.kitty.enable = true;
   host.home.windowManagers.hyprland.enable = true;
 
-  host.home.windowManagers.hyprland.enable = true;
   imports = [
     ../hyprland.nix
   ];
