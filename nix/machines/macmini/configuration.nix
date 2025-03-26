@@ -208,6 +208,13 @@
       "visual-studio-code"
       "godot"
       "poedit"
+      {
+        name = "librewolf";
+        args = {
+          no_quarantine = true;
+        };
+      }
+      "obs"
     ];
 
     masApps = {
