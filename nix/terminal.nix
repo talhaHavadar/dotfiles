@@ -72,6 +72,7 @@ with lib;
 
           complete -F _complete_alias t
           export GPG_TTY="$(tty)"
+          gpgconf --create-socketdir
         ''
         + optionalString (platform == "macos") ''
           eval "$(/opt/homebrew/bin/brew shellenv)"
