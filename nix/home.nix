@@ -54,7 +54,7 @@ in
     tio
     dosfstools
     ubuntu-classic
-    rpi-imager
+    #rpi-imager
     nerd-fonts.hack
     nerd-fonts.noto
     nerd-fonts.jetbrains-mono
