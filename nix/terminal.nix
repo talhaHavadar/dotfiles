@@ -68,15 +68,18 @@ with lib;
           source ~/.complete_alias
           # GPG-Agent
           unset SSH_AGENT_PID
+          unset SSH_AUTH_SOCK
           export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
 
           complete -F _complete_alias t
           export GPG_TTY="$(tty)"
-          gpgconf --create-socketdir
         ''
         + optionalString (platform == "macos") ''
           eval "$(/opt/homebrew/bin/brew shellenv)"
           export PATH="$(brew --prefix)/opt/python/libexec/bin:$PATH";
+        ''
+        + optionalString (platform != "macos") ''
+          gpgconf --create-socketdir
         '';
 
       shellAliases =

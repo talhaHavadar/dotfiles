@@ -14,6 +14,7 @@ in
 with lib;
 {
 
+host.home.applications.neovim.enable = true;
   # imports = [
   #   ../hyprland.nix
   # ];
