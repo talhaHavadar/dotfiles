@@ -45,7 +45,7 @@ with lib;
           enabled_layouts = "fat:bias=80;full_size=1;mirrored=false";
           update_check_interval = 0;
           cursor = "#ebedf2";
-          kitty_mod = "cmd+shift";
+          kitty_mod = "super+shift";
         }
         // optionalAttrs (platform == "macos") {
           shell = "/opt/homebrew/bin/bash --login";

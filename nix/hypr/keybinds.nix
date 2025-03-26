@@ -192,10 +192,10 @@ with lib;
 
       binde = [
         # Resize windows
-        "$mainMod SHIFT, left, resizeactive,-50 0"
-        "$mainMod SHIFT, right, resizeactive,50 0"
-        "$mainMod SHIFT, up, resizeactive,0 -50"
-        "$mainMod SHIFT, down, resizeactive,0 50"
+        "$mainMod ALT SHIFT, left, resizeactive,-50 0"
+        "$mainMod ALT SHIFT, right, resizeactive,50 0"
+        "$mainMod ALT SHIFT, up, resizeactive,0 -50"
+        "$mainMod ALT SHIFT, down, resizeactive,0 50"
       ];
     };
   };
