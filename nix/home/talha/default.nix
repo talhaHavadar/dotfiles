@@ -12,65 +12,82 @@ let
 in
 with lib;
 {
-  home = {
-    username = "talha";
-    homeDirectory = "/Users/talha";
-    stateVersion = "24.05";
-  };
+  home =
+    {
+      username = "talha";
+      stateVersion = "24.05";
+      file =
+        {
+          "workspace/.gitconfig".source = mkOutOfStoreSymlink ../../../dot/gitconfig.workspace;
+        }
+        // lib.optionalAttrs isPackagingEnabled {
+          ".devscripts".source = mkOutOfStoreSymlink ../../../dot/devscripts;
+          ".gbp.conf".source = mkOutOfStoreSymlink ../../../dot/gbp.conf;
+          ".mk-sbuild.rc".source = mkOutOfStoreSymlink ../../../dot/mk-sbuild.rc;
+          ".quiltrc-dpkg".source = mkOutOfStoreSymlink ../../../dot/quiltrc-dpkg;
+          ".sbuildrc".source = mkOutOfStoreSymlink ../../../dot/sbuildrc;
+          ".packaging.bashrc".source = mkOutOfStoreSymlink ../../../dot/packaging.bashrc;
+        };
 
-  programs.ssh = {
-    enable = true;
-    extraConfig = ''
-      Host dev-amd64-unlock
-        User root
-        Port 2222
-        HostName dev-amd64.lan
-    '';
-  };
+      sessionVariables =
+        {
+          TERM = "xterm-256color";
+        }
+        // optionalAttrs (platform == "macos") {
+          PATH = "/opt/homebrew/opt/python/libexec/bin:$PATH";
+        }
+        // optionalAttrs (platform != "macos") {
+          GIO_EXTRA_MODULES = "${pkgs.gvfs}/lib/gio/modules";
+        };
+      packages =
+        with pkgs;
+        [
+          pass
+        ]
+        ++ optionals (platform != "macos") [
+          gnome.gvfs
+          mtools
+        ];
+
+    }
+    // optionalAttrs (platform == "macos") {
+      homeDirectory = "/Users/talha";
+    }
+    // optionalAttrs (platform != "macos") {
+      homeDirectory = "/home/talha";
+    };
 
   imports = [
     ./git.nix
   ];
 
-  home.file =
+  programs =
     {
-      "workspace/.gitconfig".source = mkOutOfStoreSymlink ../../../dot/gitconfig.workspace;
+      ssh = {
+        enable = true;
+        extraConfig = ''
+          Host dev-amd64-unlock
+            User root
+            Port 2222
+            HostName dev-amd64.lan
+        '';
+      };
     }
-    // lib.optionalAttrs isPackagingEnabled {
-      ".devscripts".source = mkOutOfStoreSymlink ../../../dot/devscripts;
-      ".gbp.conf".source = mkOutOfStoreSymlink ../../../dot/gbp.conf;
-      ".mk-sbuild.rc".source = mkOutOfStoreSymlink ../../../dot/mk-sbuild.rc;
-      ".quiltrc-dpkg".source = mkOutOfStoreSymlink ../../../dot/quiltrc-dpkg;
-      ".sbuildrc".source = mkOutOfStoreSymlink ../../../dot/sbuildrc;
-      ".packaging.bashrc".source = mkOutOfStoreSymlink ../../../dot/packaging.bashrc;
+    // optionalAttrs (platform != "macos") {
+      waybar = {
+        settings = {
+          mainBar = {
+            "custom/lock".on-click = mkForce "sh -c '(sleep 0.5s; swaylock)' & disown";
+          };
+        };
+      };
     };
 
-  home.sessionVariables = {
-    GIO_EXTRA_MODULES = "${pkgs.gvfs}/lib/gio/modules";
-    PATH = "/opt/homebrew/opt/python/libexec/bin:$PATH";
-  };
-
-  home.packages =
-    with pkgs;
-    [
-      pass
-      # gcc13Stdenv
-      # mtools
-      # gcc-arm-embedded-13
-    ]
-    ++ optionals (platform != "macos") [
-      gnome.gvfs
-    ];
-
-  # programs.waybar = {
-  #   settings = {
-  #     mainBar = {
-  #       "custom/lock".on-click = mkForce "sh -c '(sleep 0.5s; swaylock)' & disown";
-  #     };
-  #   };
-  # };
-
-  # wayland.windowManager.hyprland.settings = {
-  #   "$screenlocker" = mkForce "swaylock";
-  # };
+  wayland =
+    { }
+    // optionalAttrs (platform != "macos") {
+      windowManager.hyprland.settings = {
+        "$screenlocker" = mkForce "swaylock";
+      };
+    };
 }
