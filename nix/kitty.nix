@@ -3,6 +3,7 @@
   inputs,
   lib,
   pkgs,
+  platform,
   ...
 }:
 let
@@ -32,27 +33,30 @@ with lib;
         size = 12;
       };
       shellIntegration.enableBashIntegration = true;
-      settings = {
-        shell = "/opt/homebrew/bin/bash --login";
-        scrollback_pager_history_size = 100000;
-        background_opacity = 0.88;
-        tab_bar_edge = "top";
-        tab_bar_style = "powerline";
-        tab_powerline_style = "slanted";
-        tab_bar_align = "left";
-        enable_audio_bell = "no";
-        enabled_layouts = "fat:bias=80;full_size=1;mirrored=false";
-        update_check_interval = 0;
-        cursor = "#ebedf2";
-        kitty_mod = "cmd+shift";
-      };
+      settings =
+        {
+          scrollback_pager_history_size = 100000;
+          background_opacity = 0.88;
+          tab_bar_edge = "top";
+          tab_bar_style = "powerline";
+          tab_powerline_style = "slanted";
+          tab_bar_align = "left";
+          enable_audio_bell = "no";
+          enabled_layouts = "fat:bias=80;full_size=1;mirrored=false";
+          update_check_interval = 0;
+          cursor = "#ebedf2";
+          kitty_mod = "cmd+shift";
+        }
+        // optionalAttrs (platform == "macos") {
+          shell = "/opt/homebrew/bin/bash --login";
+        };
       keybindings = {
         "kitty_mod+enter" = "new_window_with_cwd";
         "kitty_mod+g" = "next_window";
       };
 
     };
-
+    home.shellAliases.kitty = "${pkgs.kitty}/bin/kitty";
     xdg.dataFile."applications/kitty.desktop" = {
       # TODO: not needed/effective in macos
       text = ''
