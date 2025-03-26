@@ -28,7 +28,9 @@ with lib;
         HostName 10.17.0.21
         User talha
         StreamLocalBindUnlink yes
-        RemoteForward /Users/talha/.gnupg/S.gpg-agent /run/user/1000/gnupg/S.gpg-agent 
+        PermitLocalCommand yes
+        LocalCommand unset SSH_AUTH_SOCK
+        RemoteForward /Users/talha/.gnupg/S.gpg-agent /run/user/1000/gnupg/S.gpg-agent
         RemoteForward /Users/talha/.gnupg/S.gpg-agent.ssh /run/user/1000/gnupg/S.gpg-agent.ssh
 
 
