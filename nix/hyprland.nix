@@ -31,17 +31,63 @@ with lib;
     ./hypr/hyprlock.nix
     ./hypr/waybar.nix
     ./hypr/hyprpaper.nix
+    inputs.walker.homeManagerModules.default
   ];
 
   config = mkIf (home_config.enable && pkgs.system != "aarch64-darwin") {
     home.file = {
       ".config/hypr/scripts/volume.sh".source = mkOutOfStoreSymlink ../dot/hyprland/volume.sh;
     };
+
+    programs.walker = {
+      enable = true;
+      runAsService = true;
+
+      # All options from the config.json can be used here.
+      config = {
+        search.placeholder = "Example";
+        ui.fullscreen = true;
+        list = {
+          height = 200;
+        };
+        websearch.prefix = "?";
+        switcher.prefix = "/";
+      };
+
+      # If this is not set the default styling is used.
+      # style = ''
+      #   * {
+      #     color: #dcd7ba;
+      #   }
+      # '';
+    };
+
+    systemd.user = {
+      services = {
+        reset_hyprland_laptop_display = {
+          Unit = {
+            Description = "Systemd Service to Reset Hyprland Monitor Config";
+            After = [ "multi-user.target" ];
+          };
+
+          Service = {
+            Type = "simple";
+            ExecStart = "${pkgs.bash}/bin/bash -c echo '' > ${home.homeDirectory}/.config/hypr/laptop_display.conf";
+            Restart = "no";
+          };
+          Install = {
+            WantedBy = [ "multi-user.target" ];
+          };
+        };
+      };
+    };
+
     home.packages = with pkgs; [
       xfce.thunar
       playerctl
       bibata-cursors
       pwvucontrol
+      hyprsunset
     ];
     programs.wlogout = {
       enable = true;
@@ -93,11 +139,6 @@ with lib;
       ];
 
     };
-    programs.rofi = {
-      enable = true;
-      package = pkgs.rofi-wayland;
-      font = "MesloLG Nerd Font";
-    };
 
     wayland.windowManager.hyprland = {
       enable = true;
@@ -112,7 +153,7 @@ with lib;
         ];
       };
       plugins = [
-        #pkgs.hyprlandPlugins.hyprexpo
+        pkgs.hyprlandPlugins.hyprexpo
       ];
       extraConfig = ''
         # This is an example Hyprland config file.
@@ -135,8 +176,7 @@ with lib;
         # See https://wiki.hyprland.org/Configuring/Keywords/
 
         # Set programs that you use
-        $menu = rofi --show drun
-
+        $menu = walker
 
         #################
         ### AUTOSTART ###
@@ -151,6 +191,8 @@ with lib;
         exec-once = nm-applet & blueman-applet &
         exec-once = waybar &
         exec-once = hyprpaper
+        exec-once = hyprsunset &
+        exec-once = walker --gapplication-service
         exec-once = sleep 2s && ~/.config/hypr/scripts/wallpaperUpdate.sh
 
         # hyprpaper & firefox
@@ -159,7 +201,7 @@ with lib;
         ### WINDOWS AND WORKSPACES ###
         ##############################
 
-        windowrule = center,^(pavucontrol|org.pulseaudio.pavucontrol|com.saivert.pwvucontrol)
+        #windowrule = center,^(pavucontrol|org.pulseaudio.pavucontrol|com.saivert.pwvucontrol)
 
         # WINDOWRULE v2
 

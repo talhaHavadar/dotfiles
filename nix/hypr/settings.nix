@@ -32,7 +32,7 @@ with lib;
         # https://wiki.hyprland.org/Configuring/Variables/#variable-types for info about colors
         "col.active_border" = "rgba(33ccffee) rgba(00ff99ee) 45deg";
         "col.inactive_border" = "rgba(595959aa)";
-        layout = "dwindle";
+        layout = "master";
       };
 
       input = {
@@ -117,6 +117,19 @@ with lib;
       #Could help when scaling and not pixelating
       xwayland = {
         force_zero_scaling = true;
+      };
+      plugin = {
+        hyprexpo = {
+          columns = 3;
+          gap_size = 5;
+          bg_col = 286331153; # 0x11111111;
+          workspace_method = "center current"; # [center/first] [workspace] e.g. first 1 or center m+1
+
+          enable_gesture = true; # laptop touchpad
+          gesture_fingers = 3; # 3 or 4
+          gesture_distance = 300; # how far is the "max"
+          gesture_positive = true; # positive = swipe down. Negative = swipe up.
+        };
       };
     };
   };

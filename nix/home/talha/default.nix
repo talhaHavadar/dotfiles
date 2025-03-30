@@ -43,10 +43,14 @@ with lib;
         with pkgs;
         [
           pass
+          obsidian
         ]
         ++ optionals (platform != "macos") [
           gnome.gvfs
           mtools
+          obs-studio
+          godot
+          mattermost-desktop
         ];
 
     }

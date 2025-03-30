@@ -18,7 +18,7 @@ with lib;
         {
           plugin = catppuccin;
           extraConfig = ''
-            set -g @catppuccin_flavor 'latte'
+            set -g @catppuccin_flavor 'frappe'
             set -g @catppuccin_window_status_style "rounded"
             set -g @catppuccin_status_modules_right "load cpu user"
           '';
@@ -50,7 +50,7 @@ with lib;
           set-option -g default-command "/opt/homebrew/bin/bash"
         '';
     }
-    // optionalAttrs (platform != "macos") {
+    // optionalAttrs (platform == "macos") {
       shell = "/opt/homebrew/bin/bash";
     };
 }

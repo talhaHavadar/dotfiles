@@ -14,6 +14,7 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    walker.url = "github:abenz1267/walker";
     darwin = {
       url = "github:talhaHavadar/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";

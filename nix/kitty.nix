@@ -53,6 +53,7 @@ with lib;
       keybindings = {
         "kitty_mod+enter" = "new_window_with_cwd";
         "kitty_mod+g" = "next_window";
+        "kitty_mod+w" = "close_window";
       };
 
     };

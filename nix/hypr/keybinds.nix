@@ -24,73 +24,17 @@ with lib;
       bind = [
         "CTRL ALT, Delete, exec, hyprctl dispatch exit 0"
         "$mainMod, Q, killactive,"
-        "$mainMod, F, fullscreen"
-        "$mainMod SHIFT, Q, exec, $scriptsDir/KillActiveProcess.sh"
-        "$mainMod SHIFT, F, togglefloating,"
-        "$mainMod ALT, F, exec, hyprctl dispatch workspaceopt allfloat"
         "$mainMod, L, exec, pidof $screenlocker || $screenlocker"
-        "CTRL ALT, P, exec, wlogout &"
-
-        # FEATURES / EXTRAS
-        "$mainMod ALT, R, exec, $scriptsDir/Refresh.sh # Refresh waybar, swaync, rofi"
-        "$mainMod ALT, E, exec, $scriptsDir/RofiEmoji.sh # emoji"
-        "$mainMod, S, exec, $scriptsDir/RofiSearch.sh # Google search from Rofi"
-        "$mainMod SHIFT, B, exec, $scriptsDir/ChangeBlur.sh # Toggle blur settings "
-        "$mainMod SHIFT, G, exec, $scriptsDir/GameMode.sh # animations ON/OFF"
-        "$mainMod ALT, L, exec, $scriptsDir/ChangeLayout.sh # Toggle Master or Dwindle Layout"
-        "$mainMod ALT, V, exec, $scriptsDir/ClipManager.sh # Clipboard Manager"
-        "$mainMod SHIFT, N, exec, swaync-client -t -sw # swayNC panel"
-
-        # FEATURES / EXTRAS (UserScripts)
-        "$mainMod, E, exec, $UserScripts/QuickEdit.sh # Quick Edit Hyprland Settings"
-        "$mainMod SHIFT, M, exec, $UserScripts/RofiBeats.sh # online music"
-        "$mainMod SHIFT, W, exec, $scriptsDir/wallpaperUpdate.sh # Wallpaper Effects by imagemagickWW"
-        "$mainMod ALT, O, exec, hyprctl setprop active opaque toggle #disable opacity to active window"
-
-        # Waybar / Bar related
-        "$mainMod, B, exec, pkill -SIGUSR1 waybar # Toggle hide/show waybar "
-        "$mainMod CTRL, B, exec, $scriptsDir/WaybarStyles.sh # Waybar Styles Menu"
-        "$mainMod ALT, B, exec, $scriptsDir/WaybarLayout.sh # Waybar Layout Menu"
-
-        # Master Layout
-        "$mainMod CTRL, D, layoutmsg, removemaster"
-        "$mainMod, I, layoutmsg, addmaster"
-        "$mainMod, J, layoutmsg, cyclenext"
-        "$mainMod, K, layoutmsg, cycleprev"
         "$mainMod, M, exec, hyprctl dispatch splitratio 0.3"
         "$mainMod, P, pseudo, # dwindle"
-        "$mainMod CTRL, Return, layoutmsg, swapwithmaster"
-
-        # group
-        "$mainMod, G, togglegroup"
-        "$mainMod CTRL, tab, changegroupactive  #change focus to another window"
-
-        # Cycle windows if floating bring to top
-        "ALT, tab, cyclenext"
-        "ALT, tab, bringactivetotop  "
-        # Screenshot keybindings NOTE: You may need to press Fn key as well
-        "$mainMod, Print, exec, $scriptsDir/ScreenShot.sh --now"
-        "$mainMod SHIFT, Print, exec, $scriptsDir/ScreenShot.sh --area"
-        "$mainMod CTRL, Print, exec, $scriptsDir/ScreenShot.sh --in5 #screenshot in 5 secs"
-        "$mainMod CTRL SHIFT, Print, exec, $scriptsDir/ScreenShot.sh --in10 #screenshot in 10 secs"
-        "ALT, Print, exec, $scriptsDir/ScreenShot.sh --active #take screenshot of active window"
-        "$mainMod SHIFT, S, exec, $scriptsDir/ScreenShot.sh --area"
-        # Move windows
-        "$mainMod CTRL, left, movewindow, l"
-        "$mainMod CTRL, right, movewindow, r"
-        "$mainMod CTRL, up, movewindow, u"
-        "$mainMod CTRL, down, movewindow, d"
-        # Move focus with mainMod + arrow keys
         "$mainMod, left, movefocus, l"
         "$mainMod, right, movefocus, r"
         "$mainMod, up, movefocus, u"
         "$mainMod, down, movefocus, d"
-        # Workspaces related
-        "$mainMod, tab, workspace, m+1"
-        "$mainMod SHIFT, tab, workspace, m-1"
-        # Special workspace
-        "$mainMod SHIFT, U, movetoworkspace, special"
         "$mainMod, U, togglespecialworkspace,"
+        "$mainMod, A, hyprexpo:expo, toggle"
+        "$mainMod, Return, exec, $term  # Launch terminal"
+
         # The following mappings use the key codes to better support various keyboard layouts
         # 1 is code:10, 2 is code 11, etc
         # Switch workspaces with mainMod + [0-9]
@@ -104,6 +48,27 @@ with lib;
         "$mainMod, code:17, workspace, 8"
         "$mainMod, code:18, workspace, 9"
         "$mainMod, code:19, workspace, 10"
+        # Scroll through existing workspaces with mainMod + scroll
+        "$mainMod, mouse_down, workspace, e+1"
+        "$mainMod, mouse_up, workspace, e-1"
+        # Move/resize windows with mainMod + LMB/RMB and dragging
+        "$mainMod, mouse:272, movewindow"
+        "$mainMod, mouse:273, resizewindowpixel"
+
+        "$mainMod ALT, L, exec, wlogout &"
+        "$mainMod ALT, V, exec, $scriptsDir/ClipManager.sh # Clipboard Manager"
+        "$mainMod ALT, F, exec, hyprctl dispatch workspaceopt allfloat"
+        "$mainMod ALT, B, exec, $scriptsDir/WaybarLayout.sh # Waybar Layout Menu"
+        "$mainMod ALT, right, workspace, e+1"
+        "$mainMod ALT, left, workspace, e-1"
+        "$mainMod ALT SHIFT, F, fullscreen"
+
+        "$mainMod SHIFT, L, exec, $scriptsDir/ChangeLayout.sh # Toggle Master or Dwindle Layout"
+        "$mainMod SHIFT, Q, exec, $scriptsDir/KillActiveProcess.sh"
+        "$mainMod SHIFT, F, togglefloating,"
+        "$mainMod SHIFT, Print, exec, $scriptsDir/ScreenShot.sh --area"
+        "$mainMod SHIFT, U, movetoworkspace, special"
+
         # Move active window and follow to workspace mainMod + SHIFT [0-9]
         "$mainMod SHIFT, code:10, movetoworkspace, 1"
         "$mainMod SHIFT, code:11, movetoworkspace, 2"
@@ -117,6 +82,15 @@ with lib;
         "$mainMod SHIFT, code:19, movetoworkspace, 10"
         "$mainMod SHIFT, bracketleft, movetoworkspace, -1 # brackets [ or ]"
         "$mainMod SHIFT, bracketright, movetoworkspace, +1"
+
+        "$mainMod CTRL, B, exec, $scriptsDir/WaybarStyles.sh # Waybar Styles Menu"
+        "$mainMod CTRL, D, layoutmsg, removemaster"
+        "$mainMod CTRL, Return, layoutmsg, swapwithmaster"
+        "$mainMod CTRL, Print, exec, $scriptsDir/ScreenShot.sh --in5 #screenshot in 5 secs"
+        "$mainMod CTRL, left, movewindow, l"
+        "$mainMod CTRL, right, movewindow, r"
+        "$mainMod CTRL, up, movewindow, u"
+        "$mainMod CTRL, down, movewindow, d"
 
         # Move active window to a workspace silently mainMod + CTRL [0-9]
         "$mainMod CTRL, code:10, movetoworkspacesilent, 1"
@@ -132,25 +106,19 @@ with lib;
         "$mainMod CTRL, bracketleft, movetoworkspacesilent, -1 # brackets [ or ]"
         "$mainMod CTRL, bracketright, movetoworkspacesilent, +1"
 
-        # Scroll through existing workspaces with mainMod + scroll
-        "$mainMod, mouse_down, workspace, e+1"
-        "$mainMod, mouse_up, workspace, e-1"
-        "$mainMod ALT, right, workspace, e+1"
-        "$mainMod ALT, left, workspace, e-1"
+        "$mainMod CTRL SHIFT, Print, exec, $scriptsDir/ScreenShot.sh --in10 #screenshot in 10 secs"
 
-        # Move/resize windows with mainMod + LMB/RMB and dragging
-        "$mainMod, mouse:272, movewindow"
-        "$mainMod, mouse:273, resizewindowpixel"
+        # Cycle windows if floating bring to top
+        "ALT, tab, cyclenext"
+        "ALT, tab, bringactivetotop  "
+
+        # Workspaces related
+        "$mainMod, tab, workspace, m+1"
+        "$mainMod SHIFT, tab, workspace, m-1"
 
         # rofi App launcher
-        "$mainMod, space, exec, pkill rofi || rofi -show drun -modi drun,filebrowser,run,window -show-icons"
+        "$mainMod, space, exec, pkill walker || walker"
 
-        # ags overview
-        #bind = $mainMod, A, exec, pkill rofi || true && ags -t 'overview'
-        #"$mainMod, A, hyprexpo:expo, toggle"
-
-        "$mainMod, Return, exec, $term  # Launch terminal"
-        "$mainMod, T, exec, $files # Launch file manager"
       ];
 
       bindn = [
