@@ -21,6 +21,7 @@ in
   ];
 
   home.file = {
+    ".local/bin/git-stack-commits".source = mkOutOfStoreSymlink ../dot/bin/git-stack-commits;
     ".config/starship.toml".source = mkOutOfStoreSymlink ../dot/starship.toml;
     ".complete_alias".source = mkOutOfStoreSymlink ../dot/complete_alias;
     ".tmux-completion".source = mkOutOfStoreSymlink ../dot/tmux-completion;

@@ -55,11 +55,18 @@ with lib;
             lxc exec "$1" -- systemctl restart ssh
           }
 
+
+
+        ''
+        + optionalString (platform == "ubuntu-headless") ''
+          update-home() {
+            NIXPKGS_ALLOW_UNFREE=1 home-manager switch --flake ~/.config/dotfiles/nix#ubuntu-headless --show-trace --impure -b backup
+          }
+        ''
+        + optionalString (platform != "macos") ''
           update-home() {
             NIXPKGS_ALLOW_UNFREE=1 home-manager switch --flake ~/.config/dotfiles/nix#linux --show-trace --impure -b backup
           }
-
-
         ''
         + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
       initExtra =

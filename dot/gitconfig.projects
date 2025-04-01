@@ -1,0 +1,5 @@
+[user]
+	email = havadartalha@gmail.com
+	name = Talha Can Havadar
+[url "git+ssh://tchavadar@git.launchpad.net/"]
+	insteadof = lp:
