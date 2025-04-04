@@ -44,6 +44,7 @@ with lib;
         [
           pass
           obsidian
+          yazi
         ]
         ++ optionals (platform != "macos") [
           gnome.gvfs
