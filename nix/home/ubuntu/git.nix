@@ -16,6 +16,7 @@ with lib;
     userName = "Talha Can Havadar";
     userEmail = "havadartalha@gmail.com";
     extraConfig = {
+      rebase.autoSquash = true;
       commit.gpgSign = "true";
       tag.gpgSign = true;
       log.showSignature = true;

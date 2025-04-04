@@ -80,6 +80,7 @@ with lib;
 
           complete -F _complete_alias t
           export GPG_TTY="$(tty)"
+          source ~/.extra_bashrc 2>/dev/null || true
         ''
         + optionalString (platform == "macos") ''
           eval "$(/opt/homebrew/bin/brew shellenv)"
