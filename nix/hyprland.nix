@@ -67,16 +67,12 @@ with lib;
         reset_hyprland_laptop_display = {
           Unit = {
             Description = "Systemd Service to Reset Hyprland Monitor Config";
-            After = [ "multi-user.target" ];
           };
 
           Service = {
             Type = "simple";
-            ExecStart = "${pkgs.bash}/bin/bash -c echo '' > ${home.homeDirectory}/.config/hypr/laptop_display.conf";
+            ExecStart = "/usr/bin/env bash -c echo '' > ${home.homeDirectory}/.config/hypr/laptop_display.conf";
             Restart = "no";
-          };
-          Install = {
-            WantedBy = [ "multi-user.target" ];
           };
         };
       };
@@ -89,6 +85,23 @@ with lib;
       pwvucontrol
       hyprsunset
     ];
+    programs.bash = {
+      initExtra = ''
+        export QT_IM_MODULE=fcitx
+        export XMODIFIERS=@im=fcitx
+      '';
+    };
+
+    i18n.inputMethod = {
+      enabled = "fcitx5";
+      fcitx5 = {
+        waylandFrontend = true;
+        addons = with pkgs; [
+          fcitx5-mozc
+        ];
+      };
+    };
+
     programs.wlogout = {
       enable = true;
       layout = [
