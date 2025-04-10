@@ -43,7 +43,6 @@ with lib;
         with pkgs;
         [
           pass
-          obsidian
           yazi
         ]
         ++ optionals (platform != "macos") [
@@ -52,6 +51,7 @@ with lib;
           obs-studio
           godot
           mattermost-desktop
+          obsidian
         ];
 
     }
