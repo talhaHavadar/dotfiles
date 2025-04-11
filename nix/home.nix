@@ -42,6 +42,9 @@ in
     pipx-black = lib.hm.dag.entryAfter [ "installPackages" ] ''
       PATH="${pkgs.pipx}/bin:$HOME/.local/bin:$PATH" $DRY_RUN_CMD pipx install black
     '';
+    pipx-stack-pr = lib.hm.dag.entryAfter [ "installPackages" ] ''
+      PATH="${pkgs.pipx}/bin:$HOME/.local/bin:$PATH" $DRY_RUN_CMD pipx install stack-pr
+    '';
   };
 
   home.packages = with pkgs; [
