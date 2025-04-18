@@ -31,9 +31,6 @@
       url = "github:soupglasses/nix-system-graphics";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # nixos-hardware = {
-    #   url = "github:NixOS/nixos-hardware/feefc78";
-    # };
     nixos-hardware = {
       url = "github:NixOS/nixos-hardware";
     };
@@ -75,9 +72,8 @@
                 #                inputs.nixgl.overlay
               ];
             };
-            extraSpecialArgs =
-              {
-              };
+            extraSpecialArgs = {
+            };
 
           }
           // {
@@ -86,6 +82,7 @@
         );
       username = builtins.getEnv "USER";
       system = builtins.currentSystem;
+      platform = builtins.getEnv "NIX_PLATFORM";
     in
     {
       default = { };
@@ -108,6 +105,10 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.benis.imports = [
+              ./users.nix
+              ./home.nix
+            ];
+            home-manager.users.talha.imports = [
               ./users.nix
               ./home.nix
             ];
@@ -174,6 +175,18 @@
         ];
       };
 
+      # homeConfigurations."${platform}.${username}" = mkHomeConfiguration {
+      #   inherit system;
+      #   inherit username;
+      #   extraSpecialArgs = {
+      #     inherit username;
+      #     inherit inputs;
+      #     inherit platform;
+      #     packagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
+      #     currentConfigSystem = "home";
+      #   };
+      # };
+
       homeConfigurations.linux = mkHomeConfiguration {
         inherit system;
         inherit username;
@@ -181,9 +194,11 @@
           inherit username;
           inherit inputs;
           platform = "non-nixos";
+          packagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
           currentConfigSystem = "home";
         };
       };
+
       homeConfigurations.ubuntu-headless = mkHomeConfiguration {
         inherit system;
         username = "ubuntu";

@@ -75,7 +75,10 @@ with lib;
         ''
         + optionalString (platform == "nixos") ''
           update-home() {
-            NIXPKGS_ALLOW_UNFREE=1 sudo nixos-rebuild switch --flake ~/.config/dotfiles/nix#surface --show-trace --impure
+            NIXPKGS_ALLOW_UNFREE=1 nix run home-manager -- switch --flake ~/.config/dotfiles/nix#"$NIX_PLATFORM.$USER" --show-trace --impure
+          }
+          update-system() {
+            NIXPKGS_ALLOW_UNFREE=1 sudo nixos-rebuild switch --flake ~/.config/dotfiles/nix#"$HOSTNAME" --show-trace --impure
           }
         ''
         + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
@@ -125,5 +128,6 @@ with lib;
   home.sessionVariables = {
     NIX_SYSTEM = pkgs.system;
     NIX_STORE = "/nix/store";
+    NIX_PLATFORM = "${platform}";
   };
 }
