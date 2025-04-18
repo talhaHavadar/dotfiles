@@ -63,7 +63,7 @@ with lib;
             NIXPKGS_ALLOW_UNFREE=1 home-manager switch --flake ~/.config/dotfiles/nix#ubuntu-headless --show-trace --impure -b backup
           }
         ''
-        + optionalString (platform != "macos") ''
+        + optionalString (platform == "non-nixos") ''
           update-home() {
             NIXPKGS_ALLOW_UNFREE=1 home-manager switch --flake ~/.config/dotfiles/nix#linux --show-trace --impure -b backup
           }
@@ -71,6 +71,11 @@ with lib;
         + optionalString (platform == "macos") ''
           update-home() {
             NIXPKGS_ALLOW_UNFREE=1 darwin-rebuild switch --flake ~/.config/dotfiles/nix#mac --show-trace --impure
+          }
+        ''
+        + optionalString (platform == "nixos") ''
+          update-home() {
+            NIXPKGS_ALLOW_UNFREE=1 sudo nixos-rebuild switch --flake ~/.config/dotfiles/nix#surface --show-trace --impure
           }
         ''
         + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
