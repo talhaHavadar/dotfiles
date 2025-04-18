@@ -28,7 +28,10 @@
     "surface_hid_core"
     "surface_hid"
   ];
-  boot.kernelModules = [ "kvm-intel" ];
+  boot.kernelModules = [
+    "kvm-intel"
+    "lz4"
+  ];
   boot.extraModulePackages = [ ];
 
   fileSystems."/" = {
