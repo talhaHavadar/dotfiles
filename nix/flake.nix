@@ -60,6 +60,7 @@
         home-manager.lib.homeManagerConfiguration (
           {
             modules = [
+              ./users.nix
               ./home.nix
             ];
             pkgs = import nixpkgs {
@@ -89,8 +90,12 @@
         system = "x86_64-linux";
         specialArgs = {
           inherit inputs;
+          username = "benis";
+          platform = "nixos";
+          currentConfigSystem = "nixos";
         };
         modules = [
+          ./users.nix
           nixos-hardware.nixosModules.microsoft-surface-common
           nixos-hardware.nixosModules.microsoft-surface-pro-intel
           (import ./machines/surface)
@@ -99,6 +104,7 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.benis.imports = [
+              ./users.nix
               ./home.nix
             ];
             home-manager.extraSpecialArgs = {
@@ -126,24 +132,18 @@
 
       # Build darwin flake using:
       # $ darwin-rebuild build --flake .#simple
-      darwinConfigurations.macmini = darwin.lib.darwinSystem {
-
-        system = "aarch64-darwin";
+      darwinConfigurations.mac = darwin.lib.darwinSystem {
+        inherit system;
         specialArgs = {
-          inherit self;
+          inherit inputs;
+          inherit username;
+          platform = "macos";
+          currentConfigSystem = "darwin";
         };
         modules = [
+          ./machines/mac
+          ./users.nix
           mac-app-util.darwinModules.default
-          ./machines/macmini
-          (
-            { ... }:
-            {
-              users.users.talha = {
-                name = "talha";
-                home = "/Users/talha";
-              };
-            }
-          )
           home-manager.darwinModules.home-manager
           {
             # To enable it for all users:
@@ -153,58 +153,18 @@
 
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.users.talha.imports = [
-              ./home.nix
-            ];
             # Optionally, use home-manager.extraSpecialArgs to pass
             # arguments to home.nix
             home-manager.extraSpecialArgs = {
               inherit inputs;
-              username = "talha";
-              system = "aarch64-darwin";
+              inherit username;
               platform = "macos";
+              currentConfigSystem = "home";
             };
-          }
-        ];
-      };
-
-      darwinConfigurations.talhaMacpro = darwin.lib.darwinSystem {
-        system = "aarch64-darwin";
-        specialArgs = {
-          inherit self;
-        };
-        modules = [
-          mac-app-util.darwinModules.default
-          ./machines/macpro
-          (
-            { ... }:
-            {
-              users.users.talha = {
-                name = "talha";
-                home = "/Users/talha";
-              };
-            }
-          )
-          home-manager.darwinModules.home-manager
-          {
-            # To enable it for all users:
-            home-manager.sharedModules = [
-              mac-app-util.homeManagerModules.default
-            ];
-
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
             home-manager.users.talha.imports = [
+              ./users.nix
               ./home.nix
             ];
-            # Optionally, use home-manager.extraSpecialArgs to pass
-            # arguments to home.nix
-            home-manager.extraSpecialArgs = {
-              inherit inputs;
-              username = "talha";
-              system = "aarch64-darwin";
-              platform = "macos";
-            };
           }
         ];
       };
@@ -216,6 +176,7 @@
           inherit username;
           inherit inputs;
           platform = "non-nixos";
+          currentConfigSystem = "home";
         };
       };
       homeConfigurations.ubuntu-headless = mkHomeConfiguration {
@@ -226,6 +187,7 @@
           inherit inputs;
           platform = "ubuntu-headless";
           packagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
+          currentConfigSystem = "home";
         };
       };
 

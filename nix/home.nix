@@ -11,15 +11,12 @@ let
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
 in
 {
-
   imports = [
     ./home/${platform}.nix # platform specific configuration [ nixos, non-nixos, macos ]
-    ./home/${username} # user specific configuration
     ./neovim
     ./terminal.nix
     ./tmux.nix
   ];
-
   home.file = {
     ".local/bin/git-stack-commits".source = mkOutOfStoreSymlink ../dot/bin/git-stack-commits;
     ".config/starship.toml".source = mkOutOfStoreSymlink ../dot/starship.toml;
@@ -66,5 +63,4 @@ in
     pyp.pipx
     sd-mux-ctrl
   ];
-
 }

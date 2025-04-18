@@ -3,6 +3,7 @@
   lib,
   pkgs,
   platform,
+  currentConfigSystem,
   ...
 }:
 let
@@ -12,29 +13,40 @@ let
 in
 with lib;
 {
-  home = {
-    username = "benis";
-    homeDirectory = "/home/benis";
-    stateVersion = "24.05";
-  };
+
   imports = [
     ./git.nix
   ];
+  config =
+    { }
+    // lib.optionalAttrs (currentConfigSystem == "home") {
+      home = {
+        username = "benis";
+        homeDirectory = "/home/benis";
+        stateVersion = "24.05";
+      };
 
-  programs.gpg = {
-    enable = true;
-    scdaemonSettings = {
-      pcsc-shared = true;
-      #disable-ccid = true;
+      programs.gpg = {
+        enable = true;
+        scdaemonSettings = {
+          pcsc-shared = true;
+          #disable-ccid = true;
+        };
+      };
+
+      home.packages =
+        with pkgs;
+        [
+          yubikey-manager
+          yubikey-personalization
+        ]
+        ++ optionals (platform != "macos") [
+          teams-for-linux
+        ];
+    }
+    // lib.optionalAttrs (currentConfigSystem == "darwin") {
+    }
+    // lib.optionalAttrs (currentConfigSystem == "nixos") {
     };
-  };
-  home.packages =
-    with pkgs;
-    [
-      yubikey-manager
-      yubikey-personalization
-    ]
-    ++ optionals (platform != "macos") [
-      teams-for-linux
-    ];
+
 }

@@ -68,6 +68,11 @@ with lib;
             NIXPKGS_ALLOW_UNFREE=1 home-manager switch --flake ~/.config/dotfiles/nix#linux --show-trace --impure -b backup
           }
         ''
+        + optionalString (platform == "macos") ''
+          update-home() {
+            NIXPKGS_ALLOW_UNFREE=1 darwin-rebuild switch --flake ~/.config/dotfiles/nix#mac --show-trace --impure
+          }
+        ''
         + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
       initExtra =
         ''

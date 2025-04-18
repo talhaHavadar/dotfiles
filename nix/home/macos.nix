@@ -14,10 +14,8 @@ in
 with lib;
 {
 
-host.home.applications.neovim.enable = true;
-  # imports = [
-  #   ../hyprland.nix
-  # ];
+  host.home.applications.neovim.enable = true;
+  host.home.applications.kitty.enable = true;
 
   programs.ssh = {
     enable = true;

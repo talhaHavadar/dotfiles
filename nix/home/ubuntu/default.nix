@@ -4,6 +4,7 @@
   pkgs,
   platform,
   packagingEnabled,
+  currentConfigSystem,
   ...
 }:
 let
@@ -12,38 +13,46 @@ let
 in
 with lib;
 {
-  home = {
-    username = "ubuntu";
-    homeDirectory = "/home/ubuntu";
-    stateVersion = "24.05";
-  };
-
   imports = [
     ./git.nix
   ];
 
-  home.file =
-    {
-      "workspace/.gitconfig".source = mkOutOfStoreSymlink ../../../dot/gitconfig.workspace;
-      "projects/.gitconfig".source = mkOutOfStoreSymlink ../../../dot/gitconfig.projects;
+  config =
+    { }
+    // lib.optionalAttrs (currentConfigSystem == "home") {
+      home = {
+        username = "ubuntu";
+        homeDirectory = "/home/ubuntu";
+        stateVersion = "24.05";
+      };
+
+      home.file =
+        {
+          "workspace/.gitconfig".source = mkOutOfStoreSymlink ../../../dot/gitconfig.workspace;
+          "projects/.gitconfig".source = mkOutOfStoreSymlink ../../../dot/gitconfig.projects;
+        }
+        // lib.optionalAttrs packagingEnabled {
+          ".devscripts".source = mkOutOfStoreSymlink ../../../dot/devscripts;
+          ".gbp.conf".source = mkOutOfStoreSymlink ../../../dot/gbp.conf;
+          ".mk-sbuild.rc".source = mkOutOfStoreSymlink ../../../dot/mk-sbuild.rc;
+          ".quiltrc-dpkg".source = mkOutOfStoreSymlink ../../../dot/quiltrc-dpkg;
+          ".sbuildrc".source = mkOutOfStoreSymlink ../../../dot/sbuildrc;
+          ".packaging.bashrc".source = mkOutOfStoreSymlink ../../../dot/packaging.bashrc;
+        };
+
+      home.sessionVariables = {
+        TERM = "xterm-256color";
+      };
+
+      home.packages = with pkgs; [
+        gcc13Stdenv
+        mtools
+        gcc-arm-embedded-13
+      ];
     }
-    // lib.optionalAttrs packagingEnabled {
-      ".devscripts".source = mkOutOfStoreSymlink ../../../dot/devscripts;
-      ".gbp.conf".source = mkOutOfStoreSymlink ../../../dot/gbp.conf;
-      ".mk-sbuild.rc".source = mkOutOfStoreSymlink ../../../dot/mk-sbuild.rc;
-      ".quiltrc-dpkg".source = mkOutOfStoreSymlink ../../../dot/quiltrc-dpkg;
-      ".sbuildrc".source = mkOutOfStoreSymlink ../../../dot/sbuildrc;
-      ".packaging.bashrc".source = mkOutOfStoreSymlink ../../../dot/packaging.bashrc;
+    // lib.optionalAttrs (currentConfigSystem == "darwin") {
+    }
+    // lib.optionalAttrs (currentConfigSystem == "nixos") {
     };
-
-  home.sessionVariables = {
-    TERM = "xterm-256color";
-  };
-
-  home.packages = with pkgs; [
-    gcc13Stdenv
-    mtools
-    gcc-arm-embedded-13
-  ];
 
 }
