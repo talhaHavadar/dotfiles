@@ -8,7 +8,6 @@
 }:
 let
   pyp = pkgs.python312Packages;
-  isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
 in
 with lib;
@@ -43,14 +42,11 @@ with lib;
         ++ optionals (platform != "macos") [
           teams-for-linux
           obsidian
+          google-chrome
         ];
     }
-    //
-      lib.optionalAttrs (currentConfigSystem == "darwin")
-        {
-        }
-    //
-      lib.optionalAttrs (currentConfigSystem == "nixos")
-        {
-        };
+    // lib.optionalAttrs (currentConfigSystem == "darwin") {
+    }
+    // lib.optionalAttrs (currentConfigSystem == "nixos") {
+    };
 }

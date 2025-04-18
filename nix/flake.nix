@@ -31,8 +31,11 @@
       url = "github:soupglasses/nix-system-graphics";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # nixos-hardware = {
+    #   url = "github:NixOS/nixos-hardware/feefc78";
+    # };
     nixos-hardware = {
-      url = "github:NixOS/nixos-hardware/feefc78";
+      url = "github:NixOS/nixos-hardware";
     };
     mac-app-util = {
       url = "github:hraban/mac-app-util";
@@ -72,8 +75,9 @@
                 #                inputs.nixgl.overlay
               ];
             };
-            extraSpecialArgs = {
-            };
+            extraSpecialArgs =
+              {
+              };
 
           }
           // {
@@ -112,6 +116,7 @@
               username = "benis";
               system = "x86_64-linux";
               platform = "nixos";
+              currentConfigSystem = "home";
             };
             home-manager.backupFileExtension = "backup";
           }
