@@ -68,6 +68,7 @@
       "render"
       "input"
       "tty"
+      "lxd"
     ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILkzdb7RdgSlGfBePdpnBmbT+7hjpyhrL5y5QhlDIAh5 talhahavadar@hotmail.com"
@@ -80,7 +81,6 @@
     settings = {
       default_session = {
         command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd Hyprland";
-        #command = "${pkgs.greetd.regreet}/bin/regreet";
         user = "greeter";
       };
     };
@@ -107,10 +107,71 @@
     helvum
     nwg-look
     yaru-theme
+    lz4
   ];
 
-  virtualisation.lxd.enable = true;
-  virtualisation.lxc.lxcfs.enable = true;
+  virtualisation.lxd = {
+    enable = true;
+    zfsSupport = true;
+    recommendedSysctlSettings = true;
+    # preseed = {
+    #   networks = [
+    #     {
+    #       name = "lxdbr0";
+    #       type = "bridge";
+    #       config = {
+    #         "ipv4.address" = "10.0.100.1/24";
+    #         "ipv4.nat" = "true";
+    #       };
+    #     }
+    #   ];
+    #   profiles = [
+    #     {
+    #       name = "default";
+    #       devices = {
+    #         eth0 = {
+    #           name = "eth0";
+    #           network = "lxdbr0";
+    #           type = "nic";
+    #         };
+    #         root = {
+    #           path = "/";
+    #           pool = "default";
+    #           size = "35GiB";
+    #           type = "disk";
+    #         };
+    #       };
+    #     }
+    #   ];
+    #   storage_pools = [
+    #     {
+    #       name = "default";
+    #       driver = "btrfs";
+    #       config = {
+    #         source = "/var/lib/lxd/storage-pools/default";
+    #       };
+    #     }
+    #   ];
+    # };
+  };
+  # networking.firewall.interfaces."lxdbr*".allowedTCPPorts = [ 53 ];
+  # networking.firewall.interfaces."lxdbr*".allowedUDPPorts = [
+  #   53
+  #   67
+  # ];
+  networking.firewall.interfaces.lxdbr0.allowedTCPPorts = [ 53 ];
+  networking.firewall.interfaces.lxdbr0.allowedUDPPorts = [
+    53
+    67
+  ];
+  virtualisation.lxc = {
+    enable = true;
+    lxcfs.enable = true;
+    defaultConfig = ''
+      lxc.include = ${pkgs.lxcfs}/share/lxc/config/common.conf.d/00-lxcfs.conf
+    '';
+  };
+
   fonts.packages = with pkgs; [
     font-awesome
     noto-fonts
@@ -118,7 +179,7 @@
     noto-fonts-emoji
     powerline-fonts
     powerline-symbols
-    (nerdfonts.override { fonts = [ "Meslo" ]; })
+    nerd-fonts.meslo-lg
   ];
 
   documentation.enable = true;
