@@ -47,6 +47,8 @@
   services.udev = {
     packages = [
       pkgs.yubikey-personalization
+      pkgs.iptsd
+      pkgs.surface-control
     ];
 
     # udev rules for legacy sdwire
@@ -120,6 +122,7 @@
     enable = true;
   };
   environment.systemPackages = with pkgs; [
+    iptsd
     coreutils
     wget
     vim
@@ -215,5 +218,11 @@
     enable = true;
     enableExtraSocket = true;
     enableSSHSupport = true;
+  };
+  services.iptsd.enable = true;
+  services.iptsd.config = {
+    Touchscreen.DisableOnStylus = true;
+    Touchscreen.DisableOnPalm = true;
+
   };
 }

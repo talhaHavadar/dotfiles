@@ -27,6 +27,7 @@ with lib;
           file =
             {
               "workspace/.gitconfig".source = mkOutOfStoreSymlink ../../../dot/gitconfig.workspace;
+              "projects/.gitconfig".source = mkOutOfStoreSymlink ../../../dot/gitconfig.projects;
             }
             // lib.optionalAttrs isPackagingEnabled {
               ".devscripts".source = mkOutOfStoreSymlink ../../../dot/devscripts;

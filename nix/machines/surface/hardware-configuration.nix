@@ -31,6 +31,7 @@
   boot.kernelModules = [
     "kvm-intel"
     "lz4"
+    "ipts"
   ];
   boot.extraModulePackages = [ ];
 
