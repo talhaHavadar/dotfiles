@@ -74,10 +74,43 @@ with lib;
           ssh = {
             enable = true;
             extraConfig = ''
+              IdentityFile ~/.ssh/id_ed25519_sk_mobil
+
               Host dev-amd64-unlock
                 User root
                 Port 2222
                 HostName dev-amd64.lan
+
+              Host macmini.lan
+                HostName 10.17.0.21
+                User talha
+                StreamLocalBindUnlink yes
+                PermitLocalCommand yes
+                LocalCommand unset SSH_AUTH_SOCK
+                RemoteForward /Users/talha/.gnupg/S.gpg-agent /run/user/1000/gnupg/S.gpg-agent
+                RemoteForward /Users/talha/.gnupg/S.gpg-agent.ssh /run/user/1000/gnupg/S.gpg-agent.ssh
+
+
+              Host pi-dev.local
+                User talha
+                StreamLocalBindUnlink yes
+                RemoteForward /run/user/1000/gnupg/S.gpg-agent /run/user/1000/gnupg/S.gpg-agent 
+
+              Host dev-amd64.lan
+                User ubuntu
+                StreamLocalBindUnlink yes
+                RemoteForward /run/user/1000/gnupg/S.gpg-agent /run/user/1000/gnupg/S.gpg-agent 
+                RemoteForward /run/user/1000/gnupg/S.gpg-agent.ssh /run/user/1000/gnupg/S.gpg-agent.ssh
+
+              Host badgerd-nl.jump
+                User ubuntu
+                HostName badgerd-nl.local
+                ProxyJump dev-amd64.lan
+                StreamLocalBindUnlink yes
+                RemoteForward /run/user/1000/gnupg/S.gpg-agent /run/user/1000/gnupg/S.gpg-agent 
+
+              Host launchpad.net
+                IdentityFile ~/.ssh/id_ed25519
             '';
           };
         }
