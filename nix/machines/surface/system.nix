@@ -55,25 +55,49 @@
     '';
   };
 
-  users.users.benis = {
-    isNormalUser = true;
-    initialPassword = "benis";
-    extraGroups = [
-      "wheel"
-      "dialout"
-      "networkmanager"
-      "sound"
-      "audio"
-      "video"
-      "render"
-      "input"
-      "tty"
-      "lxd"
-    ];
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILkzdb7RdgSlGfBePdpnBmbT+7hjpyhrL5y5QhlDIAh5 talhahavadar@hotmail.com"
-    ];
+  users.users = {
+    talha = {
+      isNormalUser = true;
+      initialPassword = "talha";
+      extraGroups = [
+        "wheel"
+        "dialout"
+        "networkmanager"
+        "sound"
+        "audio"
+        "video"
+        "render"
+        "input"
+        "tty"
+        "lxd"
+      ];
 
+      openssh.authorizedKeys.keys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILkzdb7RdgSlGfBePdpnBmbT+7hjpyhrL5y5QhlDIAh5 talhahavadar@hotmail.com"
+      ];
+
+    };
+    benis = {
+      isNormalUser = true;
+      initialPassword = "benis";
+      extraGroups = [
+        "wheel"
+        "dialout"
+        "networkmanager"
+        "sound"
+        "audio"
+        "video"
+        "render"
+        "input"
+        "tty"
+        "lxd"
+      ];
+
+      openssh.authorizedKeys.keys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILkzdb7RdgSlGfBePdpnBmbT+7hjpyhrL5y5QhlDIAh5 talhahavadar@hotmail.com"
+      ];
+
+    };
   };
   programs.regreet.enable = true;
   services.greetd = {

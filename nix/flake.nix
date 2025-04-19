@@ -105,16 +105,15 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.benis.imports = [
-              ./users.nix
+              ./home/benis
               ./home.nix
             ];
             home-manager.users.talha.imports = [
-              ./users.nix
+              ./home/talha
               ./home.nix
             ];
             home-manager.extraSpecialArgs = {
               inherit inputs;
-              username = "benis";
               system = "x86_64-linux";
               platform = "nixos";
               currentConfigSystem = "home";
