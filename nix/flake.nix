@@ -19,6 +19,10 @@
       url = "github:talhaHavadar/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-snapd = {
+      url = "github:nix-community/nix-snapd";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixvim = {
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -51,6 +55,7 @@
       nixos-hardware,
       system-manager,
       nix-system-graphics,
+      nix-snapd,
       ...
     }@inputs:
     let
@@ -99,6 +104,7 @@
           ./users.nix
           nixos-hardware.nixosModules.microsoft-surface-common
           nixos-hardware.nixosModules.microsoft-surface-pro-intel
+          nix-snapd.nixosModules.default
           (import ./machines/surface)
           home-manager.nixosModules.home-manager
           {
