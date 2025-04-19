@@ -55,7 +55,13 @@ with lib;
               yazi
             ]
             ++ optionals (platform == "nixos") [
-              google-chrome
+              (google-chrome.override {
+                commandLineArgs = [
+                  "--enable-features=UseOzonePlatform"
+                  "--ozone-platform=x11"
+                  "--force-device-scale-factor=2"
+                ];
+              })
               vlc
             ]
             ++ optionals (platform != "macos") [
