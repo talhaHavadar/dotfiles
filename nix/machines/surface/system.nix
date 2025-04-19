@@ -58,6 +58,7 @@
   users.users = {
     talha = {
       isNormalUser = true;
+      hashedPasswordFile = "/etc/talhapw";
       initialPassword = "talha";
       extraGroups = [
         "wheel"
@@ -79,6 +80,7 @@
     };
     benis = {
       isNormalUser = true;
+      hashedPasswordFile = "/etc/benispw";
       initialPassword = "benis";
       extraGroups = [
         "wheel"
@@ -113,7 +115,7 @@
   networking.networkmanager.enable = true;
   networking.hostName = "surface";
   services.openssh.enable = true;
-  programs.ssh.startAgent = true;
+  programs.ssh.startAgent = false;
   programs.dconf = {
     enable = true;
   };
@@ -132,6 +134,7 @@
     nwg-look
     yaru-theme
     lz4
+    yubikey-personalization
   ];
 
   virtualisation.lxd = {
@@ -210,5 +213,7 @@
 
   programs.gnupg.agent = {
     enable = true;
+    enableExtraSocket = true;
+    enableSSHSupport = true;
   };
 }

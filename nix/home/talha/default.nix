@@ -53,6 +53,9 @@ with lib;
               pass
               yazi
             ]
+            ++ optionals (platform == "nixos") [
+              google-chrome
+            ]
             ++ optionals (platform != "macos") [
               gnome.gvfs
               mtools
@@ -114,7 +117,16 @@ with lib;
             '';
           };
         }
-        // optionalAttrs (platform != "macos") {
+        // optionalAttrs (platform == "nixos") {
+          gpg = {
+            enable = true;
+            scdaemonSettings = {
+              pcsc-shared = true;
+              #disable-ccid = true;
+            };
+          };
+        }
+        // optionalAttrs (platform == "non-nixos") {
           waybar = {
             settings = {
               mainBar = {
@@ -126,7 +138,7 @@ with lib;
 
       wayland =
         { }
-        // optionalAttrs (platform != "macos") {
+        // optionalAttrs (platform == "non-nixos") {
           windowManager.hyprland.settings = {
             "$screenlocker" = mkForce "swaylock";
           };

@@ -80,7 +80,7 @@
             inherit (args) extraSpecialArgs;
           }
         );
-      username = builtins.getEnv "USER";
+      username = builtins.getEnv "NIX_MYUSER";
       system = builtins.currentSystem;
       platform = builtins.getEnv "NIX_PLATFORM";
     in
@@ -91,7 +91,7 @@
         system = "x86_64-linux";
         specialArgs = {
           inherit inputs;
-          username = "benis";
+          inherit username;
           platform = "nixos";
           currentConfigSystem = "nixos";
         };

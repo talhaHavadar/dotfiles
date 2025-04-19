@@ -8,6 +8,7 @@
 }:
 let
   homeDirectory = config.home.homeDirectory;
+  username = config.home.username;
   isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
 in
 with lib;
@@ -60,25 +61,22 @@ with lib;
         ''
         + optionalString (platform == "ubuntu-headless") ''
           update-home() {
-            NIXPKGS_ALLOW_UNFREE=1 home-manager switch --flake ~/.config/dotfiles/nix#ubuntu-headless --show-trace --impure -b backup
+            NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" home-manager switch --flake ~/.config/dotfiles/nix#ubuntu-headless --show-trace --impure -b backup
           }
         ''
         + optionalString (platform == "non-nixos") ''
           update-home() {
-            NIXPKGS_ALLOW_UNFREE=1 home-manager switch --flake ~/.config/dotfiles/nix#linux --show-trace --impure -b backup
+            NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" home-manager switch --flake ~/.config/dotfiles/nix#linux --show-trace --impure -b backup
           }
         ''
         + optionalString (platform == "macos") ''
           update-home() {
-            NIXPKGS_ALLOW_UNFREE=1 darwin-rebuild switch --flake ~/.config/dotfiles/nix#mac --show-trace --impure
+            NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" darwin-rebuild switch --flake ~/.config/dotfiles/nix#mac --show-trace --impure
           }
         ''
         + optionalString (platform == "nixos") ''
-          update-home() {
-            NIXPKGS_ALLOW_UNFREE=1 nix run home-manager -- switch --flake ~/.config/dotfiles/nix#"$NIX_PLATFORM.$USER" --show-trace --impure
-          }
           update-system() {
-            NIXPKGS_ALLOW_UNFREE=1 sudo nixos-rebuild switch --flake ~/.config/dotfiles/nix#"$HOSTNAME" --show-trace --impure
+            NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" sudo -E nixos-rebuild switch --flake ~/.config/dotfiles/nix#"$HOSTNAME" --show-trace --impure
           }
         ''
         + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
@@ -128,6 +126,7 @@ with lib;
   home.sessionVariables = {
     NIX_SYSTEM = pkgs.system;
     NIX_STORE = "/nix/store";
+    NIX_MYUSER = "${username}";
     NIX_PLATFORM = "${platform}";
   };
 }
