@@ -70,7 +70,13 @@ with lib;
               obs-studio
               godot
               mattermost-desktop
-              obsidian
+              (obsidian.override {
+                commandLineArgs = [
+                  "--enable-features=UseOzonePlatform"
+                  "--ozone-platform=x11"
+                  "--force-device-scale-factor=2"
+                ];
+              })
             ];
         }
         // optionalAttrs (platform == "macos") {
