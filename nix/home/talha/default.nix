@@ -55,6 +55,7 @@ with lib;
             ]
             ++ optionals (platform == "nixos") [
               google-chrome
+              vlc
             ]
             ++ optionals (platform != "macos") [
               gnome.gvfs
