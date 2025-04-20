@@ -8,7 +8,6 @@
 let
   home_config = config.host.home.windowManagers.hyprland;
   home = config.home;
-  hyprland = pkgs.hyprland;
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
 in
 with lib;
@@ -148,15 +147,16 @@ with lib;
       enable = true;
       xdgOpenUsePortal = true;
       config = {
-        common.default = [ "gtk" ];
-        hyprland.default = [
-          "gtk"
-          "hyprland"
-        ];
+        common.default = "*";
+        # common.default = [ "gtk" ];
+        # hyprland.default = [
+        #   "gtk"
+        #   "hyprland"
+        # ];
       };
       extraPortals = [
+        pkgs.xdg-desktop-portal
         pkgs.xdg-desktop-portal-gtk
-        pkgs.xdg-desktop-portal-wlr
         pkgs.xdg-desktop-portal-hyprland
       ];
 
@@ -164,7 +164,6 @@ with lib;
 
     wayland.windowManager.hyprland = {
       enable = true;
-      package = hyprland;
       xwayland.enable = true;
       systemd = {
         enable = true;

@@ -109,7 +109,7 @@
     enable = true;
     settings = {
       default_session = {
-        command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd Hyprland";
+        command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd 'dbus-run-session Hyprland'";
         user = "greeter";
       };
     };
@@ -220,6 +220,11 @@
     enableExtraSocket = true;
     enableSSHSupport = true;
   };
+  programs.hyprland = {
+    enable = true;
+    xwayland.enable = true;
+  };
+  security.rtkit.enable = true;
   services.iptsd.enable = true;
   services.iptsd.config = {
     Touchscreen.DisableOnStylus = true;
