@@ -62,6 +62,7 @@
       isNormalUser = true;
       hashedPasswordFile = "/etc/talhapw";
       initialPassword = "talha";
+      uid = 1002;
       extraGroups = [
         "wheel"
         "dialout"

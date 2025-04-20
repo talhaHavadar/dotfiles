@@ -10,6 +10,19 @@ let
   pyp = pkgs.python312Packages;
   isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
+  mkIfElse =
+    p: yes: no:
+    lib.mkMerge [
+      (lib.mkIf p yes)
+      (lib.mkIf (!p) no)
+    ];
+  gpgAgentPrefix =
+    if platform == "nixos" then
+      "/run/user/1002/gnupg"
+    else if platform == "macos" then
+      "/Users/talha/.gnupg"
+    else
+      "/run/user/1000/gnupg";
 in
 with lib;
 {
@@ -55,13 +68,14 @@ with lib;
               yazi
             ]
             ++ optionals (platform == "nixos") [
-              (google-chrome.override {
-                commandLineArgs = [
-                  "--enable-features=UseOzonePlatform"
-                  "--ozone-platform=x11"
-                  "--force-device-scale-factor=2"
-                ];
-              })
+              google-chrome
+              # (google-chrome.override {
+              #   commandLineArgs = [
+              #     "--enable-features=UseOzonePlatform"
+              #     "--ozone-platform=x11"
+              #     "--force-device-scale-factor=2"
+              #   ];
+              # })
               vlc
             ]
             ++ optionals (platform != "macos") [
@@ -104,27 +118,27 @@ with lib;
                 StreamLocalBindUnlink yes
                 PermitLocalCommand yes
                 LocalCommand unset SSH_AUTH_SOCK
-                RemoteForward /Users/talha/.gnupg/S.gpg-agent /run/user/1000/gnupg/S.gpg-agent
-                RemoteForward /Users/talha/.gnupg/S.gpg-agent.ssh /run/user/1000/gnupg/S.gpg-agent.ssh
+                RemoteForward /Users/talha/.gnupg/S.gpg-agent ${gpgAgentPrefix}/S.gpg-agent
+                RemoteForward /Users/talha/.gnupg/S.gpg-agent.ssh ${gpgAgentPrefix}/S.gpg-agent.ssh
 
 
               Host pi-dev.local
                 User talha
                 StreamLocalBindUnlink yes
-                RemoteForward /run/user/1000/gnupg/S.gpg-agent /run/user/1000/gnupg/S.gpg-agent 
+                RemoteForward /run/user/1000/gnupg/S.gpg-agent ${gpgAgentPrefix}/S.gpg-agent 
 
               Host dev-amd64.lan
                 User ubuntu
                 StreamLocalBindUnlink yes
-                RemoteForward /run/user/1000/gnupg/S.gpg-agent /run/user/1000/gnupg/S.gpg-agent 
-                RemoteForward /run/user/1000/gnupg/S.gpg-agent.ssh /run/user/1000/gnupg/S.gpg-agent.ssh
+                RemoteForward /run/user/1000/gnupg/S.gpg-agent ${gpgAgentPrefix}/S.gpg-agent 
+                RemoteForward /run/user/1000/gnupg/S.gpg-agent.ssh ${gpgAgentPrefix}/S.gpg-agent.ssh
 
               Host badgerd-nl.jump
                 User ubuntu
                 HostName badgerd-nl.local
                 ProxyJump dev-amd64.lan
                 StreamLocalBindUnlink yes
-                RemoteForward /run/user/1000/gnupg/S.gpg-agent /run/user/1000/gnupg/S.gpg-agent 
+                RemoteForward /run/user/1000/gnupg/S.gpg-agent ${gpgAgentPrefix}/S.gpg-agent 
 
               Host launchpad.net
                 IdentityFile ~/.ssh/id_ed25519
@@ -136,7 +150,6 @@ with lib;
             enable = true;
             scdaemonSettings = {
               pcsc-shared = true;
-              #disable-ccid = true;
             };
           };
         }

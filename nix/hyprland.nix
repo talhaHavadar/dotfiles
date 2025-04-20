@@ -146,9 +146,18 @@ with lib;
     };
     xdg.portal = {
       enable = true;
-      config.common.default = "*";
+      xdgOpenUsePortal = true;
+      config = {
+        common.default = [ "gtk" ];
+        hyprland.default = [
+          "gtk"
+          "hyprland"
+        ];
+      };
       extraPortals = [
         pkgs.xdg-desktop-portal-gtk
+        pkgs.xdg-desktop-portal-wlr
+        pkgs.xdg-desktop-portal-hyprland
       ];
 
     };
