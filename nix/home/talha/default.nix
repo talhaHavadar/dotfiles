@@ -68,6 +68,7 @@ with lib;
               yazi
             ]
             ++ optionals (platform == "nixos") [
+              nodejs_22
               google-chrome
               # (google-chrome.override {
               #   commandLineArgs = [
