@@ -94,8 +94,14 @@
 
       nixosConfigurations.blog = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-	modules = [
-          (import ./machines/vm-server)
+        specialArgs = {
+          inherit inputs;
+          platform = "nixos";
+          currentConfigSystem = "nixos";
+        };
+        modules = [
+          ./machines/vm-server
+          ./blogging
         ];
       };
 
