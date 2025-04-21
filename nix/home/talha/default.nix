@@ -15,7 +15,8 @@ in
 {
   imports = [
     ./common.nix
-  ] ++ (
+  ]
+  ++ (
     if isNixos then
       [ ./nixos.nix ]
     else if isDarwin then
