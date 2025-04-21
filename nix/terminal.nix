@@ -72,7 +72,7 @@ with lib;
         ''
         + optionalString (platform == "macos") ''
           update-home() {
-            NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" darwin-rebuild switch --flake ~/.config/dotfiles/nix#mac --show-trace --impure
+            NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" darwin-rebuild switch --flake ~/.config/dotfiles/nix#macpro --show-trace --impure
           }
         ''
         + optionalString (platform == "nixos") ''

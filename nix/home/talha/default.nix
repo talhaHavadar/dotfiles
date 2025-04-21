@@ -403,7 +403,7 @@ with lib;
 
         onActivation = {
           autoUpdate = false;
-          cleanup = "zap";
+          #cleanup = "zap";
           upgrade = false;
         };
 
