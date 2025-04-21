@@ -258,6 +258,58 @@
         ];
       };
 
+      darwinConfigurations.macpro = darwin.lib.darwinSystem {
+        inherit system;
+        specialArgs = {
+          inherit inputs;
+          inherit username;
+          platform = "macos";
+          currentConfigSystem = "darwin";
+        };
+        modules = [
+          ./machines/macpro
+          (
+            { ... }:
+            {
+              users.users.talha = {
+                name = "talha";
+                home = "/Users/talha";
+              };
+              users.users.benis = {
+                name = "benis";
+                home = "/Users/benis";
+              };
+            }
+          )
+          ./users.nix
+          mac-app-util.darwinModules.default
+          home-manager.darwinModules.home-manager
+          {
+            # To enable it for all users:
+            home-manager.sharedModules = [
+              mac-app-util.homeManagerModules.default
+            ];
+
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            # Optionally, use home-manager.extraSpecialArgs to pass
+            # arguments to home.nix
+            home-manager.extraSpecialArgs = {
+              inherit inputs;
+              platform = "macos";
+              currentConfigSystem = "home";
+            };
+            home-manager.users.benis.imports = [
+              ./home/benis
+              ./home.nix
+            ];
+            home-manager.users.talha.imports = [
+              ./home/talha
+              ./home.nix
+            ];
+          }
+        ];
+      };
       # homeConfigurations."${platform}.${username}" = mkHomeConfiguration {
       #   inherit system;
       #   inherit username;
