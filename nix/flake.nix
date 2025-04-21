@@ -92,6 +92,13 @@
     {
       default = { };
 
+      nixosConfigurations.blog = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+	modules = [
+          (import ./machines/vm-server)
+        ];
+      };
+
       nixosConfigurations.surface = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {
