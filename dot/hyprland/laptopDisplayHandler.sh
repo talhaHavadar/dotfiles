@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 
 
 laptop_display_conf="$HOME/.config/hypr/laptop_display.conf"

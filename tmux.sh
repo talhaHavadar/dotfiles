@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 
 query="$(zoxide query -l)"$'\n'"$(tmux list-sessions)"
 result=$(echo "$query" | fzf-tmux -p -w 62% -h 38% -m)
