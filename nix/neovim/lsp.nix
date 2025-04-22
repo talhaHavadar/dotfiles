@@ -3,6 +3,7 @@
   plugins = {
     none-ls = {
       enable = true;
+      enableLspFormat = false;
       sources = {
         formatting = {
           nixfmt = {
@@ -38,6 +39,14 @@
         end
       '';
     };
+
+    # lsp-format = {
+    #   enable = true;
+    #   lspServersToEnable = [
+    #     "ruff"
+    #   ];
+    # };
+
     lsp = {
       enable = true;
       servers = {

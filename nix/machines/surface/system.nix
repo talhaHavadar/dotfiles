@@ -124,6 +124,7 @@
     enable = true;
   };
   environment.systemPackages = with pkgs; [
+    gcr
     iptsd
     coreutils
     wget
@@ -220,6 +221,7 @@
     enable = true;
     enableExtraSocket = true;
     enableSSHSupport = true;
+    pinentryPackage = pkgs.pinentry-gnome3;
   };
   programs.hyprland = {
     enable = true;
