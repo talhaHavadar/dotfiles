@@ -84,22 +84,22 @@ with lib;
       pwvucontrol
       hyprsunset
     ];
-    programs.bash = {
-      initExtra = ''
-        export QT_IM_MODULE=fcitx
-        export XMODIFIERS=@im=fcitx
-      '';
-    };
+    # programs.bash = {
+    #   initExtra = ''
+    #     export QT_IM_MODULE=fcitx
+    #     export XMODIFIERS=@im=fcitx
+    #   '';
+    # };
 
-    i18n.inputMethod = {
-      enabled = "fcitx5";
-      fcitx5 = {
-        waylandFrontend = true;
-        addons = with pkgs; [
-          fcitx5-mozc
-        ];
-      };
-    };
+    # i18n.inputMethod = {
+    #   enabled = "fcitx5";
+    #   fcitx5 = {
+    #     waylandFrontend = true;
+    #     addons = with pkgs; [
+    #       fcitx5-mozc
+    #     ];
+    #   };
+    # };
 
     programs.wlogout = {
       enable = true;
