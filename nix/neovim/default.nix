@@ -12,14 +12,24 @@ let
 in
 with lib;
 {
-  imports = [ inputs.nixvim.homeManagerModules.nixvim ];
+  imports = [
+    inputs.nixvim.homeManagerModules.nixvim
+    ./copilot.nix
+  ];
 
   options = {
     host.home.applications.neovim = {
       enable = mkOption {
         default = false;
-        type = with types; bool;
+        type = types.bool;
         description = "Text editor";
+      };
+      copilot = {
+        enable = mkOption {
+          default = false;
+          type = types.bool;
+          description = "Enable Github Copilot";
+        };
       };
     };
   };
