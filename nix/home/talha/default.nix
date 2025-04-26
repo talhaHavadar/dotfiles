@@ -315,6 +315,7 @@ with lib;
           "libmagic"
           "wget"
           "openocd"
+          "gh"
         ];
 
         casks = [
