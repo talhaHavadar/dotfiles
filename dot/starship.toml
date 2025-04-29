@@ -104,7 +104,7 @@ format = '[[ $symbol( $context) ](fg:#83a598 bg:color_bg3)]($style)'
 
 [nix_shell]
 style = "bg:color_bg3"
-format = '[[ $symbol( $context) ](fg:#83a598 bg:color_bg3)]($style)'
+format = '[[ $symbol $state( \($name\)) ](fg:#83a598 bg:color_bg3)]($style)'
 
 [conda]
 style = "bg:color_bg3"
