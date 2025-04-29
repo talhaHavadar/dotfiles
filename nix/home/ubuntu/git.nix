@@ -17,8 +17,6 @@ with lib;
     // lib.optionalAttrs (currentConfigSystem == "home") {
       programs.git = mkIf packagingEnabled {
         enable = true;
-        userName = "Talha Can Havadar";
-        userEmail = "havadartalha@gmail.com";
         extraConfig = {
           rebase.autoSquash = true;
           commit.gpgSign = "true";
