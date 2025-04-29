@@ -85,6 +85,7 @@ with lib;
               obs-studio
               godot
               mattermost-desktop
+              rpi-imager
               (obsidian.override {
                 commandLineArgs = [
                   "--enable-features=UseOzonePlatform"
