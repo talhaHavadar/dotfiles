@@ -64,7 +64,6 @@ with lib;
           packages =
             with pkgs;
             [
-              pass
               yazi
             ]
             ++ optionals (platform == "nixos") [
@@ -94,6 +93,7 @@ with lib;
                 ];
               })
             ];
+
         }
         // optionalAttrs (platform == "macos") {
           homeDirectory = "/Users/talha";
@@ -104,6 +104,12 @@ with lib;
 
       programs =
         {
+          password-store = {
+            enable = true;
+            settings = {
+              PASSWORD_STORE_DIR = "${config.home.homeDirectory}/projects/pass";
+            };
+          };
           ssh = {
             enable = true;
             extraConfig = ''
