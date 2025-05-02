@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+readonly current_branch=$(git branch --show-current)
+readonly username=$(gh api user | jq -r '.login')
+readonly pr_commit="${1:-main}"
+
+branch_num=1
+number_of_commits=$(git rev-list $pr_commit.. | wc -l)
+base_branch="$pr_commit"
+pr_ids=()
+
+for rev in $(git rev-list $pr_commit.. | tac)
+do
+    new_branch="$username/$current_branch"
+    git checkout -B "$new_branch-$branch_num" "$rev"
+    # Create a new remote branch by the same name.
+    git -c push.default=current push --force-with-lease
+    body_message="
+This is a stacked PR please start merging from bottom of the stack.
+Check other PRs from branches with name '$current_branch-<n>' for full information.
+"
+    if [ $branch_num != 1 ]; then
+        base_branch="$new_branch-$((branch_num-1))"
+        body_message="This is a stacked PR please check other PRs from branches with name '$current_branch-<n>' for full information.\n This PR shouldn't be merged before PR from '$current_branch-$((branch_num-1))'"
+    fi
+
+    # Use GitHub's cli to create the PR from the branch.
+    # See: https://github.com/cli/cli
+    gh pr create -d -B "$base_branch" -f -b "$body_message"
+    pr="$(gh pr view --json url --jq .url)"
+    branch_num=$((branch_num+1))
+    pr_ids+=("$pr")
+done
+
+echo "Creating cross links..."
+for pr in ${pr_ids[*]}; do
+    echo "Editing message for $pr"
+    pr_message="
+This is a stacked PR please start merging from bottom of the stack.
+
+Stacked PRs:
+$(
+for p in ${pr_ids[*]}; do
+    if [ $p = $pr ]; then
+        echo "* __->__ $p"
+    else
+        echo "* $p"
+    fi
+done
+)
+"
+    echo "$pr_message" | gh pr edit $pr --body-file -
+done
+
+# Back to current branch
+git switch $current_branch

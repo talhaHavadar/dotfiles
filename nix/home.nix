@@ -18,7 +18,7 @@ in
     ./tmux.nix
   ];
   home.file = {
-    ".local/bin/git-stack-commits".source = mkOutOfStoreSymlink ../dot/bin/git-stack-commits;
+    ".local/bin/git-stack-pr".source = mkOutOfStoreSymlink ../dot/bin/git-stack-pr;
     ".config/starship.toml".source = mkOutOfStoreSymlink ../dot/starship.toml;
     ".complete_alias".source = mkOutOfStoreSymlink ../dot/complete_alias;
     ".tmux-completion".source = mkOutOfStoreSymlink ../dot/tmux-completion;
