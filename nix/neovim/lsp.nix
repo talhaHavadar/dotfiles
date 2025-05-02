@@ -33,7 +33,12 @@
                 group = fgroup,
                 buffer = bufnr,
                 callback = function()
-                    vim.lsp.buf.format()
+                    vim.lsp.buf.format({
+                      filter = function(client)
+                        -- ruff causing conflict with black
+                        return client.name ~= "ruff"
+                      end
+                    })
                 end,
             })
         end
