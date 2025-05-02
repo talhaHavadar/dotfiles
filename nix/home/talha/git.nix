@@ -7,6 +7,7 @@
 }:
 let
   homeDirectory = config.home.homeDirectory;
+  mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
 in
 with lib;
 {
@@ -14,6 +15,9 @@ with lib;
   config =
     { }
     // lib.optionalAttrs (currentConfigSystem == "home") {
+      home.file = {
+        ".local/bin/git-fpush".source = mkOutOfStoreSymlink ../../../dot/bin/git-fpush;
+      };
       programs.git = {
         enable = true;
         userName = "Talha Can Havadar";
