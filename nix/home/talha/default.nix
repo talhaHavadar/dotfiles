@@ -170,6 +170,14 @@ with lib;
             };
           };
         };
+      services =
+        { }
+        // optionalAttrs (platform == "nixos") {
+          flameshot = {
+            enable = true;
+            package = pkgs.flameshot.override { enableWlrSupport = true; };
+          };
+        };
 
       wayland =
         { }
