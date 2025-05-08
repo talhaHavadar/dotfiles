@@ -15,6 +15,7 @@ with lib;
 {
   imports = [
     ./kitty.nix
+    ./ghostty.nix
   ];
 
   programs = {

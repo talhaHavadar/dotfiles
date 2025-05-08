@@ -1,4 +1,5 @@
 {
+  inputs,
   config,
   lib,
   pkgs,
@@ -12,6 +13,7 @@ let
 in
 {
   imports = [
+    inputs.zen-browser.homeModules.beta
     ./home/${platform}.nix # platform specific configuration [ nixos, non-nixos, macos ]
     ./neovim
     ./terminal.nix

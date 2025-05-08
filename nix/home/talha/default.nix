@@ -26,6 +26,7 @@ let
 in
 with lib;
 {
+
   imports = [
     ./git.nix
   ];
@@ -33,6 +34,7 @@ with lib;
   config =
     { }
     // optionalAttrs (currentConfigSystem == "home") {
+      host.home.applications.ghostty.enable = true;
       home =
         {
           username = "talha";
@@ -154,6 +156,21 @@ with lib;
           };
         }
         // optionalAttrs (platform == "nixos") {
+          zen-browser = {
+            enable = true;
+            policies = {
+              AutofillAddressEnabled = true;
+              AutofillCreditCardEnabled = false;
+              DisableAppUpdate = true;
+              DisableFeedbackCommands = true;
+              DisableFirefoxStudies = true;
+              DisablePocket = true; # save webs for later reading
+              DisableTelemetry = true;
+              DontCheckDefaultBrowser = true;
+              NoDefaultBookmarks = true;
+              OfferToSaveLogins = false;
+            };
+          };
           gpg = {
             enable = true;
             scdaemonSettings = {
