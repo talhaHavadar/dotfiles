@@ -1,6 +1,16 @@
 { pkgs, ... }:
 {
+  keymaps = [
+    {
+      mode = "n";
+      key = "gnc";
+      action = ":lua require('neogen').generate()<CR>";
+    }
+  ];
   plugins = {
+    neogen = {
+      enable = true;
+    };
     none-ls = {
       enable = true;
       enableLspFormat = false;
