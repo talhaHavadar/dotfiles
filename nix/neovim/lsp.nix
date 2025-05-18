@@ -65,6 +65,7 @@
     lsp = {
       enable = true;
       servers = {
+        clangd.enable = true;
         lua_ls.enable = true;
         html.enable = true;
         jedi_language_server.enable = true;
