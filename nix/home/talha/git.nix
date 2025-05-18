@@ -17,6 +17,7 @@ with lib;
     // lib.optionalAttrs (currentConfigSystem == "home") {
       home.file = {
         ".local/bin/git-fpush".source = mkOutOfStoreSymlink ../../../dot/bin/git-fpush;
+        ".local/bin/git-wapply".source = mkOutOfStoreSymlink ../../../dot/bin/git-wapply;
       };
       programs.git = {
         enable = true;
