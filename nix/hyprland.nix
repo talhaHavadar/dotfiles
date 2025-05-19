@@ -175,7 +175,7 @@ with lib;
         ];
       };
       plugins = [
-        pkgs.hyprlandPlugins.hyprexpo
+        #pkgs.hyprlandPlugins.hyprexpo
       ];
       extraConfig = ''
         # This is an example Hyprland config file.

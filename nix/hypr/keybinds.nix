@@ -32,7 +32,7 @@ with lib;
         "$mainMod, up, movefocus, u"
         "$mainMod, down, movefocus, d"
         "$mainMod, U, togglespecialworkspace,"
-        "$mainMod, A, hyprexpo:expo, toggle"
+        #"$mainMod, A, hyprexpo:expo, toggle"
         "$mainMod, Return, exec, $term  # Launch terminal"
 
         # The following mappings use the key codes to better support various keyboard layouts
