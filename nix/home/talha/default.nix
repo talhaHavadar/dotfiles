@@ -122,6 +122,15 @@ with lib;
                 Port 2222
                 HostName dev-amd64.lan
 
+              Host macmini.tailscale
+                HostName talha-macmini
+                User talha
+                StreamLocalBindUnlink yes
+                PermitLocalCommand yes
+                LocalCommand unset SSH_AUTH_SOCK
+                RemoteForward /Users/talha/.gnupg/S.gpg-agent ${gpgAgentPrefix}/S.gpg-agent
+                RemoteForward /Users/talha/.gnupg/S.gpg-agent.ssh ${gpgAgentPrefix}/S.gpg-agent.ssh
+
               Host macmini.lan
                 HostName 10.17.0.21
                 User talha
@@ -136,6 +145,13 @@ with lib;
                 User talha
                 StreamLocalBindUnlink yes
                 RemoteForward /run/user/1000/gnupg/S.gpg-agent ${gpgAgentPrefix}/S.gpg-agent 
+
+              Host dev-amd64.tailscale
+                HostName dev-amd64
+                User ubuntu
+                StreamLocalBindUnlink yes
+                RemoteForward /run/user/1000/gnupg/S.gpg-agent ${gpgAgentPrefix}/S.gpg-agent 
+                RemoteForward /run/user/1000/gnupg/S.gpg-agent.ssh ${gpgAgentPrefix}/S.gpg-agent.ssh
 
               Host dev-amd64.lan
                 User ubuntu
@@ -405,6 +421,7 @@ with lib;
       };
     }
     // optionalAttrs (currentConfigSystem == "nixos") {
+      services.tailscale.enable = true;
       services.openvpn.servers = {
         tw-vpn = {
           config = ''config /etc/nixos/talha-vpn/tw-tchavadar.conf '';
