@@ -28,6 +28,10 @@ with lib;
             [
               yubikey-manager
               yubikey-personalization
+
+            ]
+            ++ optionals (platform == "macos") [
+              arc-browser
             ]
             ++ optionals (platform != "macos") [
               teams-for-linux
@@ -72,6 +76,7 @@ with lib;
           "ccache"
           "libmagic"
           "wget"
+          "zig"
         ];
 
         casks = [
@@ -93,6 +98,7 @@ with lib;
           "visual-studio-code"
           "godot"
           "poedit"
+          "ghostty"
         ];
 
         masApps = {
