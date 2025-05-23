@@ -44,6 +44,9 @@ in
     pipx-stack-pr = lib.hm.dag.entryAfter [ "installPackages" ] ''
       PATH="${pkgs.pipx}/bin:$HOME/.local/bin:$PATH" $DRY_RUN_CMD pipx install stack-pr
     '';
+    pipx-pre-commit = lib.hm.dag.entryAfter [ "installPackages" ] ''
+      PATH="${pkgs.pipx}/bin:$HOME/.local/bin:$PATH" $DRY_RUN_CMD pipx install pre-commit
+    '';
   };
 
   home.packages = with pkgs; [

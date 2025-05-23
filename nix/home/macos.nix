@@ -16,6 +16,7 @@ with lib;
 
   host.home.applications.neovim.enable = true;
   host.home.applications.neovim.copilot.enable = true;
+  #host.home.applications.ghostty.enable = true;
   host.home.applications.kitty.enable = true;
 
   programs.ssh = {
