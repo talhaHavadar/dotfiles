@@ -34,7 +34,6 @@ with lib;
   config =
     { }
     // optionalAttrs (currentConfigSystem == "home") {
-      host.home.applications.ghostty.enable = true;
       home =
         {
           username = "talha";
@@ -227,7 +226,7 @@ with lib;
       };
 
       services.aerospace = {
-        enable = true;
+        enable = false;
         settings = {
           on-focus-changed = [ "move-mouse window-lazy-center" ];
 
@@ -320,21 +319,6 @@ with lib;
         };
       };
 
-      services.jankyborders = {
-        enable = true;
-        width = 1.0;
-        active_color = "gradient(top_right=0xFF0D9BBF,bottom_left=0xFFB5E710)";
-        inactive_color = "0x99000000";
-        blur_radius = 2.0;
-        order = "above";
-      };
-
-      services.sketchybar = {
-        enable = false;
-        config = '''';
-        # extraPackages = [ pkgs.jq ];
-      };
-
       services.tailscale = {
         enable = true;
       };
@@ -382,24 +366,17 @@ with lib;
           "google-chrome"
           "obsidian"
           "kicad"
-          # "firefox"
           "wifiman"
           "jordanbaird-ice"
           "nordic-nrf-command-line-tools"
           "visual-studio-code"
           "godot"
           "poedit"
-          {
-            name = "librewolf";
-            args = {
-              no_quarantine = true;
-            };
-          }
           "obs"
+          "ghostty"
         ];
 
         masApps = {
-          "Mattermost" = 1614666244;
         };
 
         onActivation = {
