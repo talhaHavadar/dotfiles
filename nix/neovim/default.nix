@@ -45,6 +45,7 @@ with lib;
         ./cosmetics.nix
         ./lsp.nix
         ./cmp.nix
+        ./zig.nix
       ];
 
       opts = {

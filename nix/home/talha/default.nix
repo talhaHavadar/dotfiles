@@ -348,6 +348,7 @@ with lib;
           "wget"
           "openocd"
           "gh"
+          "zig"
         ];
 
         casks = [
