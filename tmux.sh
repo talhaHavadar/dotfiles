@@ -14,3 +14,4 @@ else
         tmux new -As $session_name
     fi
 fi
+
