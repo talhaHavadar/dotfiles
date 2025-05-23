@@ -21,6 +21,8 @@ in
   ];
   home.file = {
     ".local/bin/git-stack-pr".source = mkOutOfStoreSymlink ../dot/bin/git-stack-pr;
+    ".local/bin/git-fpush".source = mkOutOfStoreSymlink ../dot/bin/git-fpush;
+    ".local/bin/git-fixup".source = mkOutOfStoreSymlink ../dot/bin/git-fixup;
     ".config/starship.toml".source = mkOutOfStoreSymlink ../dot/starship.toml;
     ".complete_alias".source = mkOutOfStoreSymlink ../dot/complete_alias;
     ".tmux-completion".source = mkOutOfStoreSymlink ../dot/tmux-completion;
