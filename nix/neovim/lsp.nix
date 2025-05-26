@@ -88,6 +88,8 @@
       keymaps = {
         silent = true;
         lspBuf = {
+          gr = "rename";
+          ga = "code_action";
           K = "hover";
           "<C-k>" = "signature_help";
           gD = "references";
