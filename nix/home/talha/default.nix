@@ -32,7 +32,8 @@ with lib;
   ];
 
   config =
-    { }
+    {
+    }
     // optionalAttrs (currentConfigSystem == "home") {
       home =
         {
@@ -69,14 +70,6 @@ with lib;
             ]
             ++ optionals (platform == "nixos") [
               nodejs_22
-              google-chrome
-              # (google-chrome.override {
-              #   commandLineArgs = [
-              #     "--enable-features=UseOzonePlatform"
-              #     "--ozone-platform=x11"
-              #     "--force-device-scale-factor=2"
-              #   ];
-              # })
               vlc
             ]
             ++ optionals (platform != "macos") [
@@ -86,6 +79,7 @@ with lib;
               godot
               mattermost-desktop
               rpi-imager
+              zig
               (obsidian.override {
                 commandLineArgs = [
                   "--enable-features=UseOzonePlatform"
@@ -105,6 +99,24 @@ with lib;
 
       programs =
         {
+          zen-browser = {
+            enable = true;
+            nativeMessagingHosts = [ pkgs.firefoxpwa ];
+            # Add any other native connectors here
+            policies = {
+              AutofillAddressEnabled = true;
+              AutofillCreditCardEnabled = false;
+              DisableAppUpdate = true;
+              DisableFeedbackCommands = true;
+              DisableFirefoxStudies = true;
+              DisablePocket = true; # save webs for later reading
+              DisableTelemetry = true;
+              DontCheckDefaultBrowser = true;
+              NoDefaultBookmarks = true;
+              OfferToSaveLogins = false;
+            };
+          };
+
           password-store = {
             enable = true;
             settings = {

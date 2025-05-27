@@ -165,15 +165,15 @@ with lib;
           key = "<C-h>";
           action = "<cmd>UndotreeToggle<cr><cmd>UndotreeFocus<cr>";
         }
-        {
-          mode = "n";
-          key = "<C-p>";
-          action.__raw = ''
-            function()
-                require("telescope.builtin").find_files({ hidden = true, no_ignore = true })
-            end
-          '';
-        }
+        # {
+        #   mode = "n";
+        #   key = "<C-p>";
+        #   action.__raw = ''
+        #     function()
+        #         require("telescope.builtin").find_files({ hidden = true, no_ignore = true })
+        #     end
+        #   '';
+        # }
       ];
     };
   };

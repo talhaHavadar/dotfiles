@@ -53,6 +53,7 @@
         };
       };
       keymaps = {
+        "<C-p>" = "git_files";
         "<leader>fg" = "live_grep";
         "<C-f>" = "grep_string";
       };
