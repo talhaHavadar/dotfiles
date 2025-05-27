@@ -15,7 +15,7 @@ do
     # Create a new remote branch by the same name.
     git -c push.default=current push --force-with-lease
     body_message="
-This is a stacked PR please start merging from bottom of the stack.
+This is a stacked PR please start merging from top of the list below.
 Check other PRs from branches with name '$current_branch-<n>' for full information.
 "
     if [ $branch_num != 1 ]; then
@@ -35,7 +35,7 @@ echo "Creating cross links..."
 for pr in ${pr_ids[*]}; do
     echo "Editing message for $pr"
     pr_message="
-This is a stacked PR please start merging from bottom of the stack.
+This is a stacked PR please start merging from top of the list below.
 
 Stacked PRs:
 $(
