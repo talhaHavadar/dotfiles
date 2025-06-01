@@ -65,6 +65,7 @@
     lsp = {
       enable = true;
       servers = {
+        sourcekit.enable = true;
         clangd.enable = true;
         lua_ls.enable = true;
         html.enable = true;
