@@ -92,6 +92,11 @@ with lib;
         }
         // optionalAttrs (platform == "macos") {
           homeDirectory = "/Users/talha";
+          activation = {
+            mint-swift-bundler = lib.hm.dag.entryAfter [ "installPackages" ] ''
+              PATH="/opt/homebrew/bin:${pkgs.git}/bin:/usr/bin:$PATH" $DRY_RUN_CMD mint install stackotter/swift-bundler@main
+            '';
+          };
         }
         // optionalAttrs (platform != "macos") {
           homeDirectory = "/home/talha";

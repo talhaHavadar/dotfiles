@@ -96,7 +96,8 @@ with lib;
         ''
         + optionalString (platform == "macos") ''
           eval "$(/opt/homebrew/bin/brew shellenv)"
-          export PATH="$(brew --prefix)/opt/python/libexec/bin:$PATH";
+          export PATH="$HOME/.mint/bin:$(brew --prefix)/opt/python/libexec/bin:$PATH";
+
         ''
         + optionalString (platform != "macos") ''
           gpgconf --create-socketdir
