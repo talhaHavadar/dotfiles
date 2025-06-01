@@ -99,23 +99,6 @@ with lib;
 
       programs =
         {
-          zen-browser = {
-            enable = true;
-            nativeMessagingHosts = [ pkgs.firefoxpwa ];
-            # Add any other native connectors here
-            policies = {
-              AutofillAddressEnabled = true;
-              AutofillCreditCardEnabled = false;
-              DisableAppUpdate = true;
-              DisableFeedbackCommands = true;
-              DisableFirefoxStudies = true;
-              DisablePocket = true; # save webs for later reading
-              DisableTelemetry = true;
-              DontCheckDefaultBrowser = true;
-              NoDefaultBookmarks = true;
-              OfferToSaveLogins = false;
-            };
-          };
 
           password-store = {
             enable = true;
@@ -206,6 +189,24 @@ with lib;
           };
         }
         // optionalAttrs (platform == "non-nixos") {
+          zen-browser = {
+            enable = true;
+            nativeMessagingHosts = [ pkgs.firefoxpwa ];
+            # Add any other native connectors here
+            policies = {
+              AutofillAddressEnabled = true;
+              AutofillCreditCardEnabled = false;
+              DisableAppUpdate = true;
+              DisableFeedbackCommands = true;
+              DisableFirefoxStudies = true;
+              DisablePocket = true; # save webs for later reading
+              DisableTelemetry = true;
+              DontCheckDefaultBrowser = true;
+              NoDefaultBookmarks = true;
+              OfferToSaveLogins = false;
+            };
+          };
+
           waybar = {
             settings = {
               mainBar = {
@@ -361,6 +362,8 @@ with lib;
           "openocd"
           "gh"
           "zig"
+          # Swift package manager
+          "mint"
         ];
 
         casks = [
