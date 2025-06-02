@@ -68,7 +68,6 @@
         sourcekit.enable = true;
         lua_ls.enable = true;
         html.enable = true;
-        jedi_language_server.enable = true;
         ruff.enable = true;
         gopls.enable = true;
         yamlls.enable = true;
