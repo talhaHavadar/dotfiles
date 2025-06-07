@@ -6,6 +6,11 @@
       key = "gnc";
       action = ":lua require('neogen').generate()<CR>";
     }
+    {
+      mode = "i";
+      key = "<C-r>";
+      action = "<cmd>lua vim.lsp.buf.rename()<CR>";
+    }
   ];
   plugins = {
     neogen = {

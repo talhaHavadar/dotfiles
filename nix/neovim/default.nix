@@ -127,11 +127,6 @@ with lib;
           action = ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>";
         }
         {
-          mode = "i";
-          key = "<C-r>";
-          action = "<cmd>lua vim.lsp.buf.rename()<CR>";
-        }
-        {
           mode = "n";
           key = "<leader>x";
           action = "<cmd>!chmod +x %<CR>";
@@ -139,7 +134,6 @@ with lib;
             silent = true;
           };
         }
-
         {
           mode = "n";
           key = "<C-q>n";
