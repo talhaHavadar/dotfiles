@@ -68,5 +68,6 @@ in
     nerd-fonts.droid-sans-mono
     pyp.pipx
     sd-mux-ctrl
+    tree
   ];
 }
