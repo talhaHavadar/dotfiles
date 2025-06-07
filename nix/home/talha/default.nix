@@ -100,6 +100,7 @@ with lib;
         }
         // optionalAttrs (platform != "macos") {
           homeDirectory = "/home/talha";
+          host.home.applications.ghostty.enable = true;
         };
 
       programs =
