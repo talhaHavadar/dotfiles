@@ -15,6 +15,10 @@
     pkgs.gnupg
   ];
 
+  environment.variables = {
+    EDITOR = "vim";
+  };
+
   # nix.package = pkgs.nix;
 
   # Necessary for using flakes on this system.
