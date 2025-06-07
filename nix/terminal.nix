@@ -82,7 +82,16 @@ with lib;
         ''
         + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
       initExtra =
+        ''''
+        + optionalString (platform == "macos") ''
+          eval "$(/opt/homebrew/bin/brew shellenv)"
+          export PATH="$HOME/.mint/bin:$(brew --prefix)/opt/python/libexec/bin:$PATH";
+
         ''
+        + optionalString (platform != "macos") ''
+          gpgconf --create-socketdir
+        ''
+        + ''
           source ~/.tmux-completion
           source ~/.complete_alias
           # GPG-Agent
@@ -93,14 +102,6 @@ with lib;
           complete -F _complete_alias t
           export GPG_TTY="$(tty)"
           source ~/.extra_bashrc 2>/dev/null || true
-        ''
-        + optionalString (platform == "macos") ''
-          eval "$(/opt/homebrew/bin/brew shellenv)"
-          export PATH="$HOME/.mint/bin:$(brew --prefix)/opt/python/libexec/bin:$PATH";
-
-        ''
-        + optionalString (platform != "macos") ''
-          gpgconf --create-socketdir
         '';
 
       shellAliases =

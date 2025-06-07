@@ -12,6 +12,7 @@
 {
   environment.systemPackages = [
     pkgs.vim
+    pkgs.gnupg
   ];
 
   # nix.package = pkgs.nix;
@@ -36,5 +37,5 @@
   networking.localHostName = "talha-macmini";
   power.sleep.display = 60;
   programs.gnupg.agent.enable = true;
-
+  programs.gnupg.agent.enableSSHSupport = true;
 }

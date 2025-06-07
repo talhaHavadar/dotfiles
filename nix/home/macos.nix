@@ -13,7 +13,6 @@ let
 in
 with lib;
 {
-
   host.home.applications.neovim.enable = true;
   host.home.applications.neovim.copilot.enable = true;
   #host.home.applications.ghostty.enable = true;
@@ -61,8 +60,6 @@ with lib;
   };
 
   home.packages = with pkgs; [
-    gnupg
     yubikey-manager
-    #yubioath-flutter
   ];
 }
