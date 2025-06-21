@@ -2,6 +2,7 @@
 {
 
   plugins.friendly-snippets.enable = true;
+  plugins.luasnip.enable = true;
   plugins.cmp = {
     enable = true;
     autoEnableSources = true;
