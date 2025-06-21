@@ -23,6 +23,7 @@ with lib;
         userName = "Talha Can Havadar";
         userEmail = "havadartalha@gmail.com";
         extraConfig = {
+          sparse.user.id = "talhaHavadar";
           rebase.autoSquash = true;
           commit.gpgSign = "true";
           tag.gpgSign = true;
