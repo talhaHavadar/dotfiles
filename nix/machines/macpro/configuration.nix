@@ -14,7 +14,12 @@
   # $ nix-env -qaP | grep wget
   environment.systemPackages = [
     pkgs.vim
+    pkgs.gnupg
   ];
+
+  environment.variables = {
+    EDITOR = "vim";
+  };
 
   # Necessary for using flakes on this system.
   nix.settings.experimental-features = "nix-command flakes";
@@ -34,5 +39,6 @@
   power.sleep.display = 60;
 
   programs.gnupg.agent.enable = true;
+  programs.gnupg.agent.enableSSHSupport = true;
 
 }

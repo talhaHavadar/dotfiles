@@ -77,6 +77,8 @@ with lib;
           "libmagic"
           "wget"
           "zig"
+          # Swift package manager
+          "mint"
         ];
 
         casks = [
