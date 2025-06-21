@@ -21,9 +21,9 @@ with lib;
         userEmail = "bahanurenis@gmail.com";
         extraConfig = {
           # tag.gpgSign = "true"
-          #commit.gpgSign = "true";
+          commit.gpgSign = "true";
           log.showSignature = "true";
-
+          user.signingkey = "961F36F44EF82483";
         };
       };
     }
