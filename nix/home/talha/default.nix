@@ -377,7 +377,7 @@ with lib;
           "MonitorControl"
           "orbstack"
           "raspberry-pi-imager"
-          "tunnelblick"
+          "openvpn-connect"
           "karabiner-elements"
           {
             name = "middleclick";
