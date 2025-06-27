@@ -33,6 +33,7 @@ with lib;
 
   config =
     {
+      host.home.applications.ghostty.enable = true;
     }
     // optionalAttrs (currentConfigSystem == "home") {
       home =
@@ -73,6 +74,7 @@ with lib;
               vlc
             ]
             ++ optionals (platform != "macos") [
+              gnupg
               gnome.gvfs
               mtools
               obs-studio
@@ -100,7 +102,6 @@ with lib;
         }
         // optionalAttrs (platform != "macos") {
           homeDirectory = "/home/talha";
-          host.home.applications.ghostty.enable = true;
         };
 
       programs =
