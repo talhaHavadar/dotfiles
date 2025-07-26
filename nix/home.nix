@@ -52,6 +52,7 @@ in
   };
 
   home.packages = with pkgs; [
+    gnupg
     curl
     rustup
     stylua
