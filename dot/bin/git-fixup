@@ -3,7 +3,8 @@
 git_interactive_fixup() {
   local line=$(git -c log.showSignature=false log --oneline --color | fzf --ansi --multi --reverse)
   local sha=$(awk '{ print $1 }' <<< "$line")
-  git commit --fixup "$sha" "$@"
+
+  git commit --fixup "$sha" $@
 }
 
-git_interactive_fixup
+git_interactive_fixup $@
