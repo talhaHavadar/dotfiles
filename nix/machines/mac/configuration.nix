@@ -39,6 +39,7 @@
   networking.computerName = "Talha's MacMini";
   networking.hostName = "talha-macmini";
   networking.localHostName = "talha-macmini";
+  system.primaryUser = "talha";
   power.sleep.display = 60;
   programs.gnupg.agent.enable = true;
   programs.gnupg.agent.enableSSHSupport = true;
