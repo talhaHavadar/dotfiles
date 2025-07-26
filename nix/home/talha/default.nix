@@ -352,6 +352,7 @@ with lib;
         enable = true;
 
         brews = [
+          "git"
           "bash"
           "libfido2"
           "openssh"
