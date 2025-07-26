@@ -18,6 +18,8 @@ with lib;
       programs.git = mkIf packagingEnabled {
         enable = true;
         extraConfig = {
+          sparse.user.id = "talhaHavadar";
+          gitubuntu.lpuser = "tchavadar";
           rebase.autoSquash = true;
           commit.gpgSign = "true";
           tag.gpgSign = true;
