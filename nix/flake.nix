@@ -253,6 +253,19 @@
           flakeOutput = "mac";
         };
         modules = [
+          {
+            nixpkgs.overlays = [
+              (final: prev: {
+                claude-code = prev.claude-code.overrideAttrs (oldAttrs: {
+                  version = "1.0.61";
+                  src = prev.fetchurl {
+                    url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-1.0.61.tgz";
+                    sha256 = "sha256-CWZMiIFmWGZeSyAfwM25T2Zs6Rr2k4pGdFmN9d7Nx0A=";
+                  };
+                });
+              })
+            ];
+          }
           ./machines/mac
           ./users.nix
           mac-app-util.darwinModules.default
