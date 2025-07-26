@@ -7,7 +7,7 @@
 }:
 let
   neovim_option = config.host.home.applications.neovim;
-  claude_code_option = config.host.home.applications.neovim.copilot;
+  claude_code_option = config.host.home.applications.neovim.claude-code;
 in
 {
   config = lib.mkIf (neovim_option.enable && claude_code_option.enable) {
