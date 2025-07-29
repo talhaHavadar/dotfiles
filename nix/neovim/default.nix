@@ -85,6 +85,9 @@ with lib;
         autoread = true;
         list = true;
         listchars = "tab:  ,extends:>,precedes:<,trail:·";
+        foldmethod = "expr";
+        foldexpr = "nvim_treesitter#foldexpr()";
+        foldlevel = 99;
       };
 
       keymaps = [

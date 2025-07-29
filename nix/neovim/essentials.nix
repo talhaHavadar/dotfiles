@@ -25,6 +25,7 @@
         svelte
         toml
         gdscript
+        zig
       ];
       settings = {
         indent.enable = true;
