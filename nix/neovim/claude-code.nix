@@ -50,7 +50,7 @@ in
         require("claude-code").setup({
           window = {
             split_ratio = 0.3,
-            position = "vertical",
+            position = "float",
             enter_insert = true,
             hide_numbers = true,
             hide_signcolumn = true,
