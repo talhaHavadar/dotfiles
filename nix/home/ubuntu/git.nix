@@ -18,6 +18,7 @@ with lib;
       programs.git = mkIf packagingEnabled {
         enable = true;
         extraConfig = {
+          core.excludesfile = "~/.gitignore_global";
           sparse.user.id = "talhaHavadar";
           gitubuntu.lpuser = "tchavadar";
           rebase.autoSquash = true;
