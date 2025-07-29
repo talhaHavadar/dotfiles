@@ -16,6 +16,7 @@ with lib;
     inputs.nixvim.homeManagerModules.nixvim
     ./copilot.nix
     ./claude-code.nix
+    ./diffview.nix
   ];
 
   options = {
@@ -37,6 +38,13 @@ with lib;
           default = false;
           type = types.bool;
           description = "Enable Claude Code";
+        };
+      };
+      diffview = {
+        enable = mkOption {
+          default = true;
+          type = types.bool;
+          description = "Enable diffview";
         };
       };
     };
