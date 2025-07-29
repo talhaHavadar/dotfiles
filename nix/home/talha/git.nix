@@ -23,6 +23,7 @@ with lib;
         userName = "Talha Can Havadar";
         userEmail = "havadartalha@gmail.com";
         extraConfig = {
+          core.excludesfile = "~/.gitignore_global";
           sparse.user.id = "talhaHavadar";
           rebase.autoSquash = true;
           commit.gpgSign = "true";
