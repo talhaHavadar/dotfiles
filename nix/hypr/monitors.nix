@@ -7,7 +7,8 @@ with lib;
 {
   config = mkIf (home_config.enable) {
     home.file = {
-      ".config/hypr/scripts/laptopDisplayHandler.sh".source = mkOutOfStoreSymlink ../../dot/hyprland/laptopDisplayHandler.sh;
+      ".config/hypr/scripts/laptopDisplayHandler.sh".source =
+        mkOutOfStoreSymlink ../../dot/hyprland/laptopDisplayHandler.sh;
     };
     wayland.windowManager.hyprland.settings = {
       "$scriptsDir" = "$HOME/.config/hypr/scripts";
@@ -15,7 +16,7 @@ with lib;
 
       # See https://wiki.hyprland.org/Configuring/Monitors/
       monitor = [
-        "desc:LG Electronics LG ULTRAWIDE 207NTUW4Q462,preferred,auto,auto"
+        "desc:LG Electronics LG ULTRAWIDE 207NTUW4Q462,preferred,auto,1.333333"
         "desc:A/Vaux Electronics AVT GC553,2560x1080,auto,auto"
         #"desc:LG Electronics LG ULTRAWIDE 207NTUW4Q462,3840x2160,auto,auto"
         ",preferred,auto,auto"

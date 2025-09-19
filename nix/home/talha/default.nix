@@ -165,7 +165,7 @@ with lib;
             StreamLocalBindUnlink yes
             RemoteForward /run/user/1000/gnupg/S.gpg-agent ${gpgAgentPrefix}/S.gpg-agent 
 
-          Host launchpad.net
+          Host *launchpad.net
             IdentityFile ~/.ssh/id_ed25519
         '';
       };
