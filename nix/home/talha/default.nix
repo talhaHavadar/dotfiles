@@ -348,6 +348,10 @@ with lib;
     homebrew = {
       enable = true;
 
+      taps = [
+        "cameroncooke/axe"
+      ];
+
       brews = [
         "git"
         "bash"
@@ -369,6 +373,11 @@ with lib;
         "zig"
         # Swift package manager
         "mint"
+        "uv"
+        # https://github.com/cameroncooke/XcodeBuildMCP/tree/v26.0.0?tab=readme-ov-file
+        "node"
+        "go"
+        "stripe-cli"
       ];
 
       casks = [
@@ -395,6 +404,7 @@ with lib;
         "poedit"
         "obs"
         "ghostty"
+        "swiftformat-for-xcode"
       ];
 
       masApps = {
@@ -402,7 +412,7 @@ with lib;
 
       onActivation = {
         autoUpdate = false;
-        cleanup = "zap";
+        #cleanup = "zap";
         upgrade = false;
       };
 
