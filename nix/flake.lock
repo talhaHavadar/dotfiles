@@ -409,11 +409,11 @@
         "zig-nixpkgs": "zig-nixpkgs"
       },
       "locked": {
-        "lastModified": 1758318343,
-        "narHash": "sha256-Ltg1xs813SXqqQCCSHMxidWdrwADBjeSuJ5r01Vz0Zc=",
+        "lastModified": 1758320453,
+        "narHash": "sha256-5JX7iBcztuMdHHzUWOPDKCrM5VQl3kbE0idXcfUYCC0=",
         "owner": "Orca-The-Company",
         "repo": "sparse",
-        "rev": "ca09b95bc0fe1ca9e19b3cd25083488f5b3b2773",
+        "rev": "6413120fd88e335e8a6a0811bb8ee31fe0d9a846",
         "type": "github"
       },
       "original": {
