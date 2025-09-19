@@ -53,6 +53,7 @@ in
   };
 
   home.packages = with pkgs; [
+    inputs.sparse.packages.${system}.default
     gnupg
     curl
     rustup

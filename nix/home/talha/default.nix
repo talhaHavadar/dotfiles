@@ -73,6 +73,8 @@ with lib;
           claude-code
         ]
         ++ optionals (platform != "macos") [
+          uv
+          go
           gnupg
           gnome.gvfs
           mtools
@@ -81,6 +83,7 @@ with lib;
           mattermost-desktop
           rpi-imager
           zig
+          claude-code
           (obsidian.override {
             commandLineArgs = [
               "--enable-features=UseOzonePlatform"

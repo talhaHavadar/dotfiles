@@ -10,6 +10,11 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    sparse = {
+      url = "github:Orca-The-Company/sparse";
+      # url = "github:Orca-The-Company/sparse/sparse/talhaHavadar/unknown-commands/slice/2";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     home-manager = {
       url = "github:nix-community/home-manager/release-25.05";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -84,10 +89,10 @@
               overlays = [
                 (final: prev: {
                   claude-code = prev.claude-code.overrideAttrs (oldAttrs: {
-                    version = "1.0.61";
+                    version = "1.0.119";
                     src = prev.fetchurl {
-                      url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-1.0.61.tgz";
-                      sha256 = "sha256-CWZMiIFmWGZeSyAfwM25T2Zs6Rr2k4pGdFmN9d7Nx0A=";
+                      url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-1.0.119.tgz";
+                      sha256 = "sha256-xAqdGLJrJVPGyhrYZen8iNCSbSLa76iodxjhQnCQp6Q=";
                     };
                   });
                 })
@@ -185,10 +190,10 @@
             nixpkgs.overlays = [
               (final: prev: {
                 claude-code = prev.claude-code.overrideAttrs (oldAttrs: {
-                  version = "1.0.61";
+                  version = "1.0.119";
                   src = prev.fetchurl {
-                    url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-1.0.61.tgz";
-                    sha256 = "sha256-CWZMiIFmWGZeSyAfwM25T2Zs6Rr2k4pGdFmN9d7Nx0A=";
+                    url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-1.0.119.tgz";
+                    sha256 = "sha256-xAqdGLJrJVPGyhrYZen8iNCSbSLa76iodxjhQnCQp6Q=";
                   };
                 });
               })

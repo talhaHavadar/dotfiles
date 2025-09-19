@@ -15,7 +15,9 @@ with lib;
 
   host.home.applications.neovim.enable = true;
   host.home.applications.kitty.enable = true;
+  host.home.applications.ghostty.enable = true;
   host.home.windowManagers.hyprland.enable = true;
+  host.home.applications.neovim.claude-code.enable = true;
 
   imports = [
     ../hyprland.nix
