@@ -1,14 +1,19 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.8"
+# dependencies = [
+#     "distro-info",
+#     "colorzero",
+#     "python-debian",
+#     "launchpadlib",
+# ]
+# ///
 
 """
-THIS FILE TAKEN FROM https://github.com/waveform80/dotfiles/blob/050bdfc95aa7ed0359679c1c817905ec1b539787/get-uploads
+THIS FILE IS ORIGINATED FROM https://github.com/waveform80/dotfiles/blob/050bdfc95aa7ed0359679c1c817905ec1b539787/get-uploads
 But may have differences because of my needs
 
 Thanks Dave!
-
-TODO: convert this into a small application that handles its own dependency management
-and maybe use poetry run to run it so I dont have to install dependencies into my system
-they will be kept in venv.
 
 List the upload history of a specific package (and optionally a specific
 version). Defaults to retrieving the history from the current development
