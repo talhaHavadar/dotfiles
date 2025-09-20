@@ -72,7 +72,7 @@ with lib;
           NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" sudo -E darwin-rebuild switch --flake ~/.config/dotfiles/nix#mac --show-trace --impure
         }
       ''
-      + optionalString (platform == "nixos") ''
+      + optionalString (platform == "nixos" || platform == "nixos-container") ''
         update-system() {
           NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" sudo -E nixos-rebuild switch --flake ~/.config/dotfiles/nix#"$HOSTNAME" --show-trace --impure
         }
@@ -85,16 +85,16 @@ with lib;
           export PATH="$HOME/.mint/bin:$(brew --prefix)/opt/python/libexec/bin:$PATH";
 
         ''
-        + optionalString (platform != "macos") ''
+        + optionalString (platform != "macos" && platform != "nixos-container") ''
           gpgconf --create-socketdir
-        ''
-        + ''
-          source ~/.tmux-completion
-          source ~/.complete_alias
           # GPG-Agent
           unset SSH_AGENT_PID
           unset SSH_AUTH_SOCK
           export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+        ''
+        + ''
+          source ~/.tmux-completion
+          source ~/.complete_alias
 
           complete -F _complete_alias t
           export GPG_TTY="$(tty)"
