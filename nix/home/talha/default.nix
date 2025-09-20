@@ -63,7 +63,6 @@ with lib;
       packages =
         with pkgs;
         [
-          yazi
         ]
         ++ optionals (platform == "nixos") [
           nodejs_22
@@ -72,7 +71,13 @@ with lib;
         ++ optionals (platform == "macos") [
           claude-code
         ]
-        ++ optionals (platform != "macos") [
+        ++ optionals (platform == "nixos-container") [
+          uv
+          go
+          gnupg
+          claude-code
+        ]
+        ++ optionals (platform != "macos" && platform != "nixos-container") [
           uv
           go
           gnupg
@@ -84,6 +89,7 @@ with lib;
           rpi-imager
           zig
           claude-code
+          yazi
           (obsidian.override {
             commandLineArgs = [
               "--enable-features=UseOzonePlatform"

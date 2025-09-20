@@ -62,5 +62,10 @@ with lib;
 
   home.packages = with pkgs; [
     yubikey-manager
+    ubuntu-classic
+    nerd-fonts.hack
+    nerd-fonts.noto
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.droid-sans-mono
   ];
 }

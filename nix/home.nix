@@ -58,11 +58,6 @@ in
     git
     tio
     dosfstools
-    ubuntu-classic
-    nerd-fonts.hack
-    nerd-fonts.noto
-    nerd-fonts.jetbrains-mono
-    nerd-fonts.droid-sans-mono
     pyp.pipx
     sd-mux-ctrl
     tree

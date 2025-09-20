@@ -24,6 +24,11 @@ with lib;
   home.packages = with pkgs; [
     yubioath-flutter
     wl-clipboard
+    ubuntu-classic
+    nerd-fonts.hack
+    nerd-fonts.noto
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.droid-sans-mono
   ];
 
 }

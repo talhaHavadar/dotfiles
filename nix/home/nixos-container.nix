@@ -13,7 +13,6 @@ let
 in
 with lib;
 {
-
   host.home.applications.neovim.enable = true;
   host.home.applications.neovim.claude-code.enable = true;
   host.home.applications.kitty.enable = false;
@@ -23,11 +22,5 @@ with lib;
   ];
 
   home.packages = with pkgs; [
-    ubuntu-classic
-    nerd-fonts.hack
-    nerd-fonts.noto
-    nerd-fonts.jetbrains-mono
-    nerd-fonts.droid-sans-mono
   ];
-
 }

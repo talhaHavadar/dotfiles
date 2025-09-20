@@ -86,17 +86,6 @@
               config = {
                 allowUnfree = true;
               };
-              overlays = [
-                (final: prev: {
-                  claude-code = prev.claude-code.overrideAttrs (oldAttrs: {
-                    version = "1.0.119";
-                    src = prev.fetchurl {
-                      url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-1.0.119.tgz";
-                      sha256 = "sha256-xAqdGLJrJVPGyhrYZen8iNCSbSLa76iodxjhQnCQp6Q=";
-                    };
-                  });
-                })
-              ];
             };
             extraSpecialArgs = {
             };
@@ -112,6 +101,48 @@
     in
     {
       default = { };
+
+      nixosConfigurations.nixos-ai-crawler = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = {
+          inherit inputs;
+          platform = "nixos-container";
+          currentConfigSystem = "nixos";
+        };
+        modules = [
+          {
+            nixpkgs.overlays = [
+              (final: prev: {
+                claude-code = prev.claude-code.overrideAttrs (oldAttrs: {
+                  version = "1.0.119";
+                  src = prev.fetchurl {
+                    url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-1.0.119.tgz";
+                    sha256 = "sha256-xAqdGLJrJVPGyhrYZen8iNCSbSLa76iodxjhQnCQp6Q=";
+                  };
+                });
+              })
+            ];
+          }
+          ./machines/nixos-container
+          ./ai-crawler
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.talha.imports = [
+              ./home/talha
+              ./home.nix
+            ];
+            home-manager.extraSpecialArgs = {
+              inherit inputs;
+              system = "x86_64-linux";
+              platform = "nixos-container";
+              currentConfigSystem = "home";
+            };
+            home-manager.backupFileExtension = "backup";
+          }
+        ];
+      };
 
       nixosConfigurations.blog = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
