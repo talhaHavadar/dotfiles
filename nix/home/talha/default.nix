@@ -391,6 +391,7 @@ with lib;
       ];
 
       casks = [
+        "container"
         "yubico-authenticator"
         "MonitorControl"
         "orbstack"
