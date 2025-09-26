@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+series=$1
+arch=$2
+
+mk-sbuild "$series" --arch="$arch" && \
+sudo sed -i 's/^union-type=.*/union-type=overlay/' \
+    /etc/schroot/chroot.d/sbuild-$series-$arch && \
+sbuild-update -udcar "$series"-"$arch"

@@ -48,7 +48,9 @@ with lib;
         ".quiltrc-dpkg".source = mkOutOfStoreSymlink ../../../dot/quiltrc-dpkg;
         ".sbuildrc".source = mkOutOfStoreSymlink ../../../dot/sbuildrc;
         ".packaging.bashrc".source = mkOutOfStoreSymlink ../../../dot/packaging.bashrc;
-        ".local/bin/get-uploads".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/get-uploads;
+        ".local/bin/packaging-get-uploads".source =
+          mkOutOfStoreSymlink ../../../dot/bin/packaging/get-uploads;
+        ".local/bin/packaging-mk-sbuild".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/mk-sbuild;
       };
       # pkgs.stdenv.isDarwin
       sessionVariables = {
