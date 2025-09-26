@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Check if at least one argument is provided
+if [ $# -eq 0 ]; then
+    echo "Usage: packaging <command> [arguments...]"
+    echo "Example: packaging get-uploads --help"
+    exit 1
+fi
+
+command="$1"
+
+# Shift to remove the first argument, leaving only the remaining arguments
+shift
+full_command="packaging-${command}"
+
+exec "$full_command" "$@"
