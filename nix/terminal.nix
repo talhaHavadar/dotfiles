@@ -74,7 +74,7 @@ with lib;
       ''
       + optionalString (platform == "nixos" || platform == "nixos-container") ''
         update-system() {
-          NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" sudo -E nixos-rebuild switch --flake ~/.config/dotfiles/nix#"$HOSTNAME" --show-trace --impure
+          INCLUDE_PACKAGING=${toString isPackagingEnabled} NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" sudo -E nixos-rebuild switch --flake ~/.config/dotfiles/nix#"$HOSTNAME" --show-trace --impure
         }
       ''
       + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
