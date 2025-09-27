@@ -34,6 +34,7 @@ with lib;
   config = {
     host.features.yubikey.enable = true;
     host.features.tailscale.enable = true;
+    host.features.zen-browser.enable = true;
   }
   // optionalAttrs (currentConfigSystem == "home") {
     home = {
@@ -190,21 +191,6 @@ with lib;
       };
     }
     // optionalAttrs (platform == "nixos") {
-      zen-browser = {
-        enable = true;
-        policies = {
-          AutofillAddressEnabled = true;
-          AutofillCreditCardEnabled = false;
-          DisableAppUpdate = true;
-          DisableFeedbackCommands = true;
-          DisableFirefoxStudies = true;
-          DisablePocket = true; # save webs for later reading
-          DisableTelemetry = true;
-          DontCheckDefaultBrowser = true;
-          NoDefaultBookmarks = true;
-          OfferToSaveLogins = false;
-        };
-      };
       gpg = {
         enable = true;
         scdaemonSettings = {
@@ -214,23 +200,6 @@ with lib;
       };
     }
     // optionalAttrs (platform == "non-nixos") {
-      zen-browser = {
-        enable = true;
-        nativeMessagingHosts = [ pkgs.firefoxpwa ];
-        # Add any other native connectors here
-        policies = {
-          AutofillAddressEnabled = true;
-          AutofillCreditCardEnabled = false;
-          DisableAppUpdate = true;
-          DisableFeedbackCommands = true;
-          DisableFirefoxStudies = true;
-          DisablePocket = true; # save webs for later reading
-          DisableTelemetry = true;
-          DontCheckDefaultBrowser = true;
-          NoDefaultBookmarks = true;
-          OfferToSaveLogins = false;
-        };
-      };
 
       waybar = {
         settings = {
