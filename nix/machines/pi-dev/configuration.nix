@@ -3,6 +3,7 @@
   imports = with nixos-raspberrypi.nixosModules; [
     raspberry-pi-5.base
     raspberry-pi-5.bluetooth
+    usb-gadget-ethernet # Configures USB Gadget/Ethernet - Ethernet emulation over USB
   ];
 
   fileSystems = {
