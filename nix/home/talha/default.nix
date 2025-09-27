@@ -201,7 +201,6 @@ with lib;
       };
     }
     // optionalAttrs (platform == "non-nixos") {
-
       waybar = {
         settings = {
           mainBar = {
@@ -231,10 +230,6 @@ with lib;
     users.users.talha = {
       name = "talha";
       home = "/Users/talha";
-    };
-
-    services.tailscale = {
-      enable = true;
     };
 
     # services.karabiner-elements = {
