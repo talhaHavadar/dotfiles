@@ -174,6 +174,7 @@
           currentConfigSystem = "nixos";
         };
         modules = [
+          ./yubikey.nix
           ./users.nix
           nixos-hardware.nixosModules.microsoft-surface-common
           nixos-hardware.nixosModules.microsoft-surface-pro-intel
