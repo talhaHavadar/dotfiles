@@ -141,7 +141,6 @@
     nwg-look
     yaru-theme
     lz4
-    yubikey-personalization
   ];
 
   virtualisation.lxd = {

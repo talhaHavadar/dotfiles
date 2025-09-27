@@ -32,6 +32,7 @@ with lib;
   ];
 
   config = {
+    host.features.yubikey.enable = true;
   }
   // optionalAttrs (currentConfigSystem == "home") {
     home = {
@@ -450,7 +451,6 @@ with lib;
     };
   }
   // optionalAttrs (currentConfigSystem == "nixos") {
-    host.yubikey.enable = true;
     services.tailscale.enable = true;
     services.openvpn.servers = {
       tw-vpn = {

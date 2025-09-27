@@ -19,7 +19,6 @@
     nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
     sparse = {
       url = "github:Orca-The-Company/sparse";
-      # url = "github:Orca-The-Company/sparse/sparse/talhaHavadar/unknown-commands/slice/2";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
@@ -126,6 +125,7 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.talha.imports = [
+              ./features
               ./home/talha
               ./home.nix
             ];
@@ -164,7 +164,6 @@
         };
         modules = [
           ./features
-          ./yubikey.nix
           ./users.nix
           nixos-hardware.nixosModules.microsoft-surface-common
           nixos-hardware.nixosModules.microsoft-surface-pro-intel
@@ -175,10 +174,12 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.benis.imports = [
+              ./features
               ./home/benis
               ./home.nix
             ];
             home-manager.users.talha.imports = [
+              ./features
               ./home/talha
               ./home.nix
             ];
@@ -216,7 +217,6 @@
         };
         modules = [
           ./features
-          ./yubikey.nix
           ./home/talha
           nix-snapd.nixosModules.default
           (import ./machines/pi-dev)
@@ -225,6 +225,7 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.talha.imports = [
+              ./features
               ./home/talha
               ./home.nix
             ];
