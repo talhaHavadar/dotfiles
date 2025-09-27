@@ -1,0 +1,10 @@
+{
+  pkgs,
+  modulesPath,
+  ...
+}:
+{
+  imports = [
+    ../overlays
+  ];
+}
