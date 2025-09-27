@@ -81,11 +81,11 @@
     }@inputs:
     let
       mkHomeConfiguration =
-
         { system, username, ... }@args:
         home-manager.lib.homeManagerConfiguration (
           {
             modules = [
+              ./features
               ./users.nix
               ./home.nix
             ];
@@ -118,19 +118,7 @@
           currentConfigSystem = "nixos";
         };
         modules = [
-          {
-            nixpkgs.overlays = [
-              (final: prev: {
-                claude-code = prev.claude-code.overrideAttrs (oldAttrs: {
-                  version = "1.0.119";
-                  src = prev.fetchurl {
-                    url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-1.0.119.tgz";
-                    sha256 = "sha256-xAqdGLJrJVPGyhrYZen8iNCSbSLa76iodxjhQnCQp6Q=";
-                  };
-                });
-              })
-            ];
-          }
+          ./features
           ./machines/nixos-container
           ./ai-crawler
           home-manager.nixosModules.home-manager
@@ -160,6 +148,7 @@
           currentConfigSystem = "nixos";
         };
         modules = [
+          ./features
           ./machines/vm-server
           ./blogging
         ];
@@ -174,6 +163,7 @@
           currentConfigSystem = "nixos";
         };
         modules = [
+          ./features
           ./yubikey.nix
           ./users.nix
           nixos-hardware.nixosModules.microsoft-surface-common
@@ -202,6 +192,7 @@
           }
         ];
       };
+
       systemConfigs.default = system-manager.lib.makeSystemConfig {
         modules = [
           nix-system-graphics.systemModules.default
@@ -224,6 +215,7 @@
           currentConfigSystem = "nixos";
         };
         modules = [
+          ./features
           ./yubikey.nix
           ./home/talha
           nix-snapd.nixosModules.default
@@ -258,19 +250,7 @@
           currentConfigSystem = "darwin";
         };
         modules = [
-          {
-            nixpkgs.overlays = [
-              (final: prev: {
-                claude-code = prev.claude-code.overrideAttrs (oldAttrs: {
-                  version = "1.0.119";
-                  src = prev.fetchurl {
-                    url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-1.0.119.tgz";
-                    sha256 = "sha256-xAqdGLJrJVPGyhrYZen8iNCSbSLa76iodxjhQnCQp6Q=";
-                  };
-                });
-              })
-            ];
-          }
+          ./features
           ./machines/mac
           ./users.nix
           mac-app-util.darwinModules.default
@@ -386,6 +366,5 @@
           currentConfigSystem = "home";
         };
       };
-
     };
 }
