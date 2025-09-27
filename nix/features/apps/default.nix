@@ -5,9 +5,6 @@
 }:
 {
   imports = [
-    ../overlays
-    ./apps
-    ./yubikey
-    ./tailscale
+    ./zen-browser
   ];
 }
