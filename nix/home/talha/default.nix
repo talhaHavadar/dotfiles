@@ -207,6 +207,7 @@ with lib;
         enable = true;
         scdaemonSettings = {
           pcsc-shared = true;
+          disable-ccid = true;
         };
       };
     }
@@ -449,6 +450,7 @@ with lib;
     };
   }
   // optionalAttrs (currentConfigSystem == "nixos") {
+    host.yubikey.enable = true;
     services.tailscale.enable = true;
     services.openvpn.servers = {
       tw-vpn = {

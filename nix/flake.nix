@@ -6,10 +6,17 @@
       "nix-command"
       "flakes"
     ];
+    extra-substituters = [
+      "https://nixos-raspberrypi.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
+    ];
   };
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
     sparse = {
       url = "github:Orca-The-Company/sparse";
       # url = "github:Orca-The-Company/sparse/sparse/talhaHavadar/unknown-commands/slice/2";
@@ -69,6 +76,7 @@
       system-manager,
       nix-system-graphics,
       nix-snapd,
+      nixos-raspberrypi,
       ...
     }@inputs:
     let
@@ -203,6 +211,38 @@
               system-graphics.enable = true;
             };
           })
+        ];
+      };
+
+      nixosConfigurations.pi-dev = nixos-raspberrypi.lib.nixosSystem {
+        inherit system;
+        specialArgs = inputs // {
+          inherit inputs;
+          inherit username;
+          platform = "nixos";
+          currentConfigSystem = "nixos";
+        };
+        modules = [
+          ./yubikey.nix
+          ./home/talha
+          nix-snapd.nixosModules.default
+          (import ./machines/pi-dev)
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.talha.imports = [
+              ./home/talha
+              ./home.nix
+            ];
+            home-manager.extraSpecialArgs = {
+              inherit inputs;
+              inherit system;
+              platform = "nixos-container";
+              currentConfigSystem = "home";
+            };
+            home-manager.backupFileExtension = "backup";
+          }
         ];
       };
 

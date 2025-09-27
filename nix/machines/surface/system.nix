@@ -24,6 +24,7 @@
     jack.enable = true;
     wireplumber.enable = true;
   };
+
   hardware = {
     graphics.enable = true;
     gpgSmartcards.enable = true;
