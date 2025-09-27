@@ -7,6 +7,7 @@
   imports = [
     ../overlays
     ./apps
+    ./aerospace
     ./yubikey
     ./tailscale
   ];
