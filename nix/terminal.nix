@@ -59,22 +59,22 @@ with lib;
       ''
       + optionalString (platform == "ubuntu-headless") ''
         update-home() {
-          NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" home-manager switch --flake ~/.config/dotfiles/nix#ubuntu-headless --show-trace --impure -b backup
+          INCLUDE_PACKAGING=${toString isPackagingEnabled} NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" home-manager switch --flake ~/.config/dotfiles/nix#ubuntu-headless --show-trace --impure -b backup
         }
       ''
       + optionalString (platform == "non-nixos") ''
         update-home() {
-          NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" home-manager switch --flake ~/.config/dotfiles/nix#linux --show-trace --impure -b backup
+          INCLUDE_PACKAGING=${toString isPackagingEnabled} NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" home-manager switch --flake ~/.config/dotfiles/nix#linux --show-trace --impure -b backup
         }
       ''
       + optionalString (platform == "macos") ''
         update-home() {
-          NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" sudo -E darwin-rebuild switch --flake ~/.config/dotfiles/nix#mac --show-trace --impure
+          INCLUDE_PACKAGING=${toString isPackagingEnabled} NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" sudo -E darwin-rebuild switch --flake ~/.config/dotfiles/nix#mac --show-trace --impure
         }
       ''
       + optionalString (platform == "nixos" || platform == "nixos-container") ''
         update-system() {
-          NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" sudo -E nixos-rebuild switch --flake ~/.config/dotfiles/nix#"$HOSTNAME" --show-trace --impure
+          INCLUDE_PACKAGING=${toString isPackagingEnabled} NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" sudo -E nixos-rebuild switch --flake ~/.config/dotfiles/nix#"$HOSTNAME" --show-trace --impure
         }
       ''
       + optionalString isPackagingEnabled ". ~/.packaging.bashrc";
@@ -112,9 +112,6 @@ with lib;
         tf = "tmux_find_or_create_prompt";
         tp = "tmux list-panes -a -F '#D #T #{pane_tty} #{pane_current_command} #{pane_current_path}'";
         gvim = "nvim --listen ~/.cache/nvim/godot.pipe .";
-      }
-      // optionalAttrs isPackagingEnabled {
-        update-home = "INCLUDE_PACKAGING=\"true\" update-home";
       };
     };
   };
