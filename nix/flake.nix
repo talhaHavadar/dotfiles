@@ -124,6 +124,7 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.talha.imports = [
+              ./features
               ./home/talha
               ./home.nix
             ];
