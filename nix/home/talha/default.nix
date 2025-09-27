@@ -33,6 +33,7 @@ with lib;
 
   config = {
     host.features.yubikey.enable = true;
+    host.features.tailscale.enable = true;
   }
   // optionalAttrs (currentConfigSystem == "home") {
     home = {
@@ -451,7 +452,6 @@ with lib;
     };
   }
   // optionalAttrs (currentConfigSystem == "nixos") {
-    services.tailscale.enable = true;
     services.openvpn.servers = {
       tw-vpn = {
         config = ''config /etc/nixos/talha-vpn/tw-tchavadar.conf '';
