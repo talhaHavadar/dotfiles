@@ -51,8 +51,10 @@ in
       userEmail = "bahanurenis@gmail.com";
       extraConfig = {
         # tag.gpgSign = "true"
+        sparse.user.id = "bahanurenis";
         commit.gpgSign = "true";
         log.showSignature = "true";
+        rebase.autoSquash = true;
         user.signingkey = "961F36F44EF82483";
       };
     };
