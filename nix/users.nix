@@ -14,6 +14,7 @@ in
 {
 
   imports = [
+    ./features
     ./home/${username} # user specific configuration
   ];
 

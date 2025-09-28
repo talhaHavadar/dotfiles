@@ -84,8 +84,6 @@
         home-manager.lib.homeManagerConfiguration (
           {
             modules = [
-              ./features
-              ./users.nix
               ./home.nix
             ];
             pkgs = import nixpkgs {
@@ -125,7 +123,6 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.talha.imports = [
-              ./features
               ./home/talha
               ./home.nix
             ];
@@ -163,7 +160,6 @@
           currentConfigSystem = "nixos";
         };
         modules = [
-          ./features
           ./users.nix
           nixos-hardware.nixosModules.microsoft-surface-common
           nixos-hardware.nixosModules.microsoft-surface-pro-intel
@@ -174,13 +170,9 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.benis.imports = [
-              ./features
-              ./home/benis
               ./home.nix
             ];
             home-manager.users.talha.imports = [
-              ./features
-              ./home/talha
               ./home.nix
             ];
             home-manager.extraSpecialArgs = {
@@ -216,8 +208,7 @@
           currentConfigSystem = "nixos";
         };
         modules = [
-          ./features
-          ./home/talha
+          ./users.nix
           nix-snapd.nixosModules.default
           (import ./machines/pi-dev)
           home-manager.nixosModules.home-manager
@@ -225,8 +216,6 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.talha.imports = [
-              ./features
-              ./home/talha
               ./home.nix
             ];
             home-manager.extraSpecialArgs = {
@@ -251,7 +240,6 @@
           currentConfigSystem = "darwin";
         };
         modules = [
-          ./features
           ./machines/mac
           ./users.nix
           mac-app-util.darwinModules.default
@@ -273,8 +261,6 @@
               currentConfigSystem = "home";
             };
             home-manager.users.talha.imports = [
-              ./features
-              ./users.nix
               ./home.nix
             ];
           }
@@ -323,27 +309,16 @@
               currentConfigSystem = "home";
             };
             home-manager.users.benis.imports = [
-              ./home/benis
               ./home.nix
+              ./home/benis
             ];
             home-manager.users.talha.imports = [
-              ./home/talha
               ./home.nix
+              ./home/talha
             ];
           }
         ];
       };
-      # homeConfigurations."${platform}.${username}" = mkHomeConfiguration {
-      #   inherit system;
-      #   inherit username;
-      #   extraSpecialArgs = {
-      #     inherit username;
-      #     inherit inputs;
-      #     inherit platform;
-      #     packagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
-      #     currentConfigSystem = "home";
-      #   };
-      # };
 
       homeConfigurations.linux = mkHomeConfiguration {
         inherit system;
