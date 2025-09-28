@@ -9,5 +9,6 @@
     ./neovim
     ./ghostty
     ./kitty
+    ./zed-editor
   ];
 }
