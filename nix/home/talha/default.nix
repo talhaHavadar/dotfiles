@@ -126,6 +126,7 @@ with lib;
       ssh = {
         enable = true;
         extraConfig = ''
+          Include ~/.orbstack/ssh/config
           IdentityFile ~/.ssh/id_ed25519_sk_mobil
 
           Host dev-amd64-unlock
@@ -151,7 +152,6 @@ with lib;
             RemoteForward /Users/talha/.gnupg/S.gpg-agent ${gpgAgentPrefix}/S.gpg-agent
             RemoteForward /Users/talha/.gnupg/S.gpg-agent.ssh ${gpgAgentPrefix}/S.gpg-agent.ssh
 
-
           Host pi-dev.local
             User talha
             StreamLocalBindUnlink yes
@@ -169,6 +169,11 @@ with lib;
             StreamLocalBindUnlink yes
             RemoteForward /run/user/1000/gnupg/S.gpg-agent ${gpgAgentPrefix}/S.gpg-agent 
             RemoteForward /run/user/1000/gnupg/S.gpg-agent.ssh ${gpgAgentPrefix}/S.gpg-agent.ssh
+
+          Host orb
+            StreamLocalBindUnlink yes
+            RemoteForward /run/user/501/gnupg/S.gpg-agent ${gpgAgentPrefix}/S.gpg-agent 
+            RemoteForward /run/user/501/gnupg/S.gpg-agent.ssh ${gpgAgentPrefix}/S.gpg-agent.ssh
 
           Host badgerd-nl.jump
             User ubuntu
@@ -395,6 +400,7 @@ with lib;
 
       casks = [
         "container"
+        "multipass"
         "yubico-authenticator"
         "MonitorControl"
         "orbstack"
