@@ -10,11 +10,12 @@ in
 {
 
   imports = [
-    ./apps
     ./aerospace
-    ./yubikey
-    ./tailscale
+    ./apps
+    ./bash-integration
     ./devtools
+    ./tailscale
+    ./yubikey
   ]
   ++ (if !isHome then [ ../overlays ] else [ ]);
 }
