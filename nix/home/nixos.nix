@@ -13,11 +13,11 @@ let
 in
 with lib;
 {
-  host.home.applications.neovim.enable = true;
-  host.home.applications.neovim.claude-code.enable = true;
+  host.features.apps.neovim.enable = true;
+  host.features.apps.neovim.claude-code.enable = true;
+  host.features.apps.ghostty.enable = true;
   host.home.applications.kitty.enable = true;
   host.home.windowManagers.hyprland.enable = true;
-  host.home.applications.ghostty.enable = true;
 
   imports = [
     ../hyprland.nix

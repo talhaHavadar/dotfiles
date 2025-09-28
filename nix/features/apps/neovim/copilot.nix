@@ -6,8 +6,8 @@
   ...
 }:
 let
-  neovim_option = config.host.home.applications.neovim;
-  copilot_option = config.host.home.applications.neovim.copilot;
+  neovim_option = config.host.features.apps.neovim;
+  copilot_option = neovim_option.copilot;
 in
 {
   config = lib.mkIf (neovim_option.enable && copilot_option.enable) {

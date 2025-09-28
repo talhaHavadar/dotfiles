@@ -13,14 +13,9 @@ let
 in
 with lib;
 {
-  host.home.applications.neovim.enable = true;
-  host.home.applications.neovim.copilot.enable = true;
-  host.home.applications.neovim.claude-code.enable = true;
-  #host.home.applications.ghostty.enable = true;
   host.home.applications.kitty.enable = true;
 
   home.packages = with pkgs; [
-    yubikey-manager
     ubuntu-classic
     nerd-fonts.hack
     nerd-fonts.noto

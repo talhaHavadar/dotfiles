@@ -1,29 +1,16 @@
 {
-  config,
   inputs,
+  config,
   lib,
   pkgs,
-  platform,
   ...
 }:
 let
-  home_config = config.host.home.applications.ghostty;
-  home = config.home;
+  ghostty_config = config.host.features.apps.ghostty;
+  isDarwin = pkgs.stdenv.isDarwin;
 in
-with lib;
 {
-
-  options = {
-    host.home.applications.ghostty = {
-      enable = mkOption {
-        default = false;
-        type = with types; bool;
-        description = "Terminal Emulator";
-      };
-    };
-  };
-
-  config = mkIf (home_config.enable) {
+  config = lib.mkIf (ghostty_config.enable && !isDarwin) {
     programs.ghostty = {
       enable = true;
       # enableBashIntegration = true;
@@ -81,5 +68,4 @@ with lib;
       '';
     };
   };
-
 }
