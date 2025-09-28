@@ -10,5 +10,6 @@
     ./aerospace
     ./yubikey
     ./tailscale
+    ./devtools
   ];
 }

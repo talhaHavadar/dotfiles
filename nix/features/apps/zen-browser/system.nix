@@ -5,11 +5,11 @@
   ...
 }:
 let
-  zen-browser_config = config.host.features.zen-browser;
+  zen-browser_config = config.host.features.apps.zen-browser;
 in
 {
   options = {
-    host.features.zen-browser = {
+    host.features.apps.zen-browser = {
       enable = lib.mkOption {
         default = false;
         type = with lib.types; bool;
