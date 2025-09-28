@@ -26,6 +26,7 @@
   };
 
   hardware = {
+    microsoft-surface.kernelVersion = "stable";
     graphics.enable = true;
     gpgSmartcards.enable = true;
     ledger.enable = true;
