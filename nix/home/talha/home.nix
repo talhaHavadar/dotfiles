@@ -62,6 +62,8 @@ in
         ]
         ++ lib.optionals (isNixOS) [
           vlc
+          gnome.gvfs
+          mtools
         ]
         ++ lib.optionals (isDarwin) [
         ]
@@ -70,7 +72,6 @@ in
           mtools
           godot
           mattermost-desktop
-          rpi-imager
           yazi
           (obsidian.override {
             commandLineArgs = [
