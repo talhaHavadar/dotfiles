@@ -273,6 +273,7 @@
               currentConfigSystem = "home";
             };
             home-manager.users.talha.imports = [
+              ./features
               ./users.nix
               ./home.nix
             ];

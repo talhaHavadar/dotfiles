@@ -1,12 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
-let
-  tailscale_config = config.host.features.tailscale;
-in
+{ lib, ... }:
 {
   options = {
     host.features.tailscale = {
@@ -16,9 +8,5 @@ in
         description = "tailscale VPN system";
       };
     };
-  };
-
-  config = lib.mkIf tailscale_config.enable {
-    services.tailscale.enable = true;
   };
 }
