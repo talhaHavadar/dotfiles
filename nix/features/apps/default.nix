@@ -8,5 +8,6 @@
     ./zen-browser
     ./neovim
     ./ghostty
+    ./kitty
   ];
 }

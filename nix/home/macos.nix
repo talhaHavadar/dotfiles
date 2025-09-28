@@ -13,8 +13,6 @@ let
 in
 with lib;
 {
-  host.home.applications.kitty.enable = true;
-
   home.packages = with pkgs; [
     ubuntu-classic
     nerd-fonts.hack
