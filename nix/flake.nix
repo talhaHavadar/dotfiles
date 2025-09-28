@@ -173,14 +173,19 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
+            home-manager.users.benis.home.username = nixpkgs.lib.mkForce "benis";
+            home-manager.users.benis.home.homeDirectory = nixpkgs.lib.mkForce "/home/benis";
             home-manager.users.benis.imports = [
               ./home.nix
             ];
+            home-manager.users.talha.home.username = nixpkgs.lib.mkForce "talha";
+            home-manager.users.talha.home.homeDirectory = nixpkgs.lib.mkForce "/home/talha";
             home-manager.users.talha.imports = [
               ./home.nix
             ];
             home-manager.extraSpecialArgs = {
               inherit inputs;
+              inherit username;
               system = "x86_64-linux";
               platform = "nixos";
               currentConfigSystem = "home";
