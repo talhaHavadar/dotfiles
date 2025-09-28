@@ -13,9 +13,9 @@ let
 in
 {
   imports = [
-    ./home/${platform}.nix # platform specific configuration [ nixos, non-nixos, macos ]
     ./terminal.nix
     ./tmux.nix
+    ./home/${platform}.nix # platform specific configuration [ nixos, non-nixos, macos ]
   ];
   home.file = {
     ".local/bin/git-stack-pr".source = mkOutOfStoreSymlink ../dot/bin/git-stack-pr;
