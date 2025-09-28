@@ -8,6 +8,7 @@
 }:
 {
   config = {
+    system.primaryUser = "talha";
     users.users.talha = {
       name = "talha";
       home = "/Users/talha";

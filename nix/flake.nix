@@ -113,6 +113,7 @@
           inherit inputs;
           platform = "nixos-container";
           currentConfigSystem = "nixos";
+          flakeOutput = "nixos-ai-crawler";
         };
         modules = [
           ./features
@@ -131,6 +132,7 @@
               system = "x86_64-linux";
               platform = "nixos-container";
               currentConfigSystem = "home";
+              flakeOutput = "nixos-ai-crawler";
             };
             home-manager.backupFileExtension = "backup";
           }
@@ -143,6 +145,7 @@
           inherit inputs;
           platform = "nixos";
           currentConfigSystem = "nixos";
+          flakeOutput = "blog";
         };
         modules = [
           ./features
@@ -158,6 +161,7 @@
           inherit username;
           platform = "nixos";
           currentConfigSystem = "nixos";
+          flakeOutput = "surface";
         };
         modules = [
           ./users.nix
@@ -180,6 +184,7 @@
               system = "x86_64-linux";
               platform = "nixos";
               currentConfigSystem = "home";
+              flakeOutput = "surface";
             };
             home-manager.backupFileExtension = "backup";
           }
@@ -206,6 +211,7 @@
           inherit username;
           platform = "nixos";
           currentConfigSystem = "nixos";
+          flakeOutput = "pi-dev";
         };
         modules = [
           ./users.nix
@@ -223,6 +229,7 @@
               inherit system;
               platform = "nixos-container";
               currentConfigSystem = "home";
+              flakeOutput = "pi-dev";
             };
             home-manager.backupFileExtension = "backup";
           }
@@ -238,6 +245,7 @@
           inherit username;
           platform = "macos";
           currentConfigSystem = "darwin";
+          flakeOutput = "mac";
         };
         modules = [
           ./machines/mac
@@ -259,6 +267,7 @@
               inherit username;
               platform = "macos";
               currentConfigSystem = "home";
+              flakeOutput = "mac";
             };
             home-manager.users.talha.imports = [
               ./home.nix
@@ -274,9 +283,10 @@
           inherit username;
           platform = "macos";
           currentConfigSystem = "darwin";
+          flakeOutput = "macpro";
         };
         modules = [
-          ./machines/macpro
+          ./machines/mac
           (
             { ... }:
             {
@@ -307,6 +317,7 @@
               inherit inputs;
               platform = "macos";
               currentConfigSystem = "home";
+              flakeOutput = "macpro";
             };
             home-manager.users.benis.imports = [
               ./home.nix
@@ -329,6 +340,7 @@
           platform = "non-nixos";
           packagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
           currentConfigSystem = "home";
+          flakeOutput = "linux";
         };
       };
 
@@ -341,6 +353,7 @@
           platform = "ubuntu-headless";
           packagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
           currentConfigSystem = "home";
+          flakeOutput = "ubuntu-headless";
         };
       };
     };

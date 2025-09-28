@@ -8,6 +8,7 @@
     host.features.tailscale.enable = true;
     host.features.devtools.enable = true;
     host.features.aerospace.enable = false;
+    host.features.bash-integration.enable = true;
 
     host.features.apps.ghostty.enable = true;
     host.features.apps.neovim.enable = true;

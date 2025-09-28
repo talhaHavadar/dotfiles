@@ -10,16 +10,15 @@
 }:
 
 {
+  # List packages installed in system profile. To search by name, run:
   environment.systemPackages = [
     pkgs.vim
     pkgs.gnupg
   ];
 
   environment.variables = {
-    EDITOR = "vim";
+    EDITOR = "nvim";
   };
-
-  # nix.package = pkgs.nix;
 
   # Necessary for using flakes on this system.
   nix.settings.experimental-features = "nix-command flakes";
@@ -36,11 +35,9 @@
   nixpkgs.hostPlatform = "aarch64-darwin";
   nixpkgs.config.allowUnfree = true;
 
-  networking.computerName = "Talha's MacMini";
-  networking.hostName = "talha-macmini";
-  networking.localHostName = "talha-macmini";
-  system.primaryUser = "talha";
   power.sleep.display = 60;
+
   programs.gnupg.agent.enable = true;
   programs.gnupg.agent.enableSSHSupport = true;
+
 }
