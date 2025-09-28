@@ -18,7 +18,7 @@ with lib;
       "$UserScripts" = "$HOME/.config/hypr/UserScripts";
 
       "$files" = "thunar";
-      "$term" = "kitty";
+      "$term" = "ghostty";
       "$screenlocker" = "hyprlock";
 
       bind = [

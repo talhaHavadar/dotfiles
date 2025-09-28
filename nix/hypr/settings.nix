@@ -92,7 +92,7 @@ with lib;
         #vrr = 0
         mouse_move_enables_dpms = true;
         enable_swallow = true;
-        swallow_regex = "^(kitty)$";
+        swallow_regex = "^(ghostty)$";
         focus_on_activate = false;
       };
 
