@@ -290,10 +290,6 @@
           (
             { ... }:
             {
-              users.users.talha = {
-                name = "talha";
-                home = "/Users/talha";
-              };
               users.users.benis = {
                 name = "benis";
                 home = "/Users/benis";
@@ -315,17 +311,13 @@
             # arguments to home.nix
             home-manager.extraSpecialArgs = {
               inherit inputs;
+              inherit username;
               platform = "macos";
               currentConfigSystem = "home";
               flakeOutput = "macpro";
             };
             home-manager.users.benis.imports = [
               ./home.nix
-              ./home/benis
-            ];
-            home-manager.users.talha.imports = [
-              ./home.nix
-              ./home/talha
             ];
           }
         ];

@@ -16,6 +16,7 @@ in
       brews = [
         "bash"
         "git"
+        "curl"
         "openssh"
         "mint"
         "libmagic"
@@ -30,7 +31,6 @@ in
         "nordic-nrf-command-line-tools"
         "poedit"
         "godot"
-        "obs"
         "swiftformat-for-xcode"
         "kicad"
         "wifiman"
