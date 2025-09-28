@@ -6,5 +6,7 @@
 {
   imports = [
     ./zen-browser
+    ./neovim
+    ./ghostty
   ];
 }

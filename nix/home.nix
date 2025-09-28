@@ -14,7 +14,6 @@ in
 {
   imports = [
     ./home/${platform}.nix # platform specific configuration [ nixos, non-nixos, macos ]
-    ./neovim
     ./terminal.nix
     ./tmux.nix
   ];

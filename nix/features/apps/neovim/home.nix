@@ -1,14 +1,12 @@
 {
   config,
-  nixvim,
   lib,
   pkgs,
   inputs,
   ...
 }:
 let
-  home_config = config.host.home.applications.neovim;
-  home = config.home;
+  home_config = config.host.features.apps.neovim;
 in
 with lib;
 {
@@ -18,37 +16,6 @@ with lib;
     ./claude-code.nix
     ./diffview.nix
   ];
-
-  options = {
-    host.home.applications.neovim = {
-      enable = mkOption {
-        default = false;
-        type = types.bool;
-        description = "Text editor";
-      };
-      copilot = {
-        enable = mkOption {
-          default = false;
-          type = types.bool;
-          description = "Enable Github Copilot";
-        };
-      };
-      claude-code = {
-        enable = mkOption {
-          default = false;
-          type = types.bool;
-          description = "Enable Claude Code";
-        };
-      };
-      diffview = {
-        enable = mkOption {
-          default = true;
-          type = types.bool;
-          description = "Enable diffview";
-        };
-      };
-    };
-  };
 
   config = mkIf home_config.enable {
     programs.nixvim = {
@@ -81,7 +48,7 @@ with lib;
         wrap = false;
         swapfile = false;
         backup = false;
-        undodir = "${home.homeDirectory}/.vim/undodir";
+        undodir = "${config.home.homeDirectory}/.vim/undodir";
         undofile = true;
         hlsearch = false;
         incsearch = true;

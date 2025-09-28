@@ -31,7 +31,6 @@ in
         "poedit"
         "godot"
         "obs"
-        "ghostty"
         "swiftformat-for-xcode"
         "kicad"
         "wifiman"
