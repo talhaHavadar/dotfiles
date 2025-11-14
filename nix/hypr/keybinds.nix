@@ -86,7 +86,7 @@ with lib;
         "$mainMod CTRL, B, exec, $scriptsDir/WaybarStyles.sh # Waybar Styles Menu"
         "$mainMod CTRL, D, layoutmsg, removemaster"
         "$mainMod CTRL, Return, layoutmsg, swapwithmaster"
-        "$mainMod CTRL, Print, exec, $scriptsDir/ScreenShot.sh --in5 #screenshot in 5 secs"
+        ", PRINT, exec, hyprshot -m region --clipboard-only"
         "$mainMod CTRL, left, movewindow, l"
         "$mainMod CTRL, right, movewindow, r"
         "$mainMod CTRL, up, movewindow, u"

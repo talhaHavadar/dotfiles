@@ -84,6 +84,7 @@ with lib;
       bibata-cursors
       pwvucontrol
       hyprsunset
+      hyprshot
     ];
     # programs.bash = {
     #   initExtra = ''
