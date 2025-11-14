@@ -17,5 +17,5 @@ in
     ./tailscale
     ./yubikey
   ]
-  ++ (if !isHome then [ ../overlays ] else [ ]);
+  ++ (if !isHome then [ ../overlays ] else [ ../overlays ]);
 }
