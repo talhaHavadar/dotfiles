@@ -119,7 +119,7 @@ in
       ssh = {
         enable = true;
         extraConfig = ''
-          Include ~/.orbstack/ssh/config
+          Include ~/.ssh/extra_config
           IdentityFile ~/.ssh/id_ed25519_sk_mobil
 
           Host dev-amd64-unlock
