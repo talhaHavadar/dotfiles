@@ -24,6 +24,7 @@ in
         "background-blur" = 5;
         "unfocused-split-opacity" = 0.9;
         "macos-option-as-alt" = "left";
+        "command" = "/usr/bin/env bash --login";
         keybind = [
           # Keybinds to match macOS since this is a VM
           "super+c=copy_to_clipboard"
