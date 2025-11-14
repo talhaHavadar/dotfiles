@@ -25,7 +25,7 @@ in
     home.sessionVariables = {
       NIX_SYSTEM = pkgs.system;
       NIX_STORE = "/nix/store";
-      NIX_MYUSER = "talha";
+      NIX_MYUSER = "${username}";
       NIX_PLATFORM = "${platform}";
     };
 
@@ -69,7 +69,7 @@ in
         ''
         + lib.optionalString (isLinuxNonNixOS) ''
           update-home() {
-            INCLUDE_PACKAGING=${toString isPackagingEnabled} NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="talha" home-manager switch --flake ~/.config/dotfiles/nix#${flakeOutput} --show-trace --impure -b backup
+            INCLUDE_PACKAGING=${toString isPackagingEnabled} NIXPKGS_ALLOW_UNFREE=1 NIX_MYUSER="$USER" home-manager switch --flake ~/.config/dotfiles/nix#${flakeOutput} --show-trace --impure -b backup
           }
         ''
         + lib.optionalString (isDarwin) ''
