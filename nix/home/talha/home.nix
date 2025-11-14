@@ -7,10 +7,10 @@
 let
   isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
-  isDarwin = false; #pkgs.stdenv.isDarwin;
-  isNixOS = false; #pkgs.stdenv.isLinux && builtins.pathExists /etc/NIXOS;
-  isLinuxNonNixOS = true; #pkgs.stdenv.isLinux && !builtins.pathExists /etc/NIXOS;
-  isLinux = true; #pkgs.stdenv.isLinux;
+  isDarwin = pkgs.stdenv.isDarwin;
+  isNixOS = pkgs.stdenv.isLinux && builtins.pathExists /etc/NIXOS;
+  isLinuxNonNixOS = pkgs.stdenv.isLinux && !builtins.pathExists /etc/NIXOS;
+  isLinux = pkgs.stdenv.isLinux;
   gpgAgentPrefix =
     if isNixOS then
       "/run/user/1002/gnupg" # TODO: need a better way to inject user id here
@@ -22,7 +22,7 @@ in
 {
   config = {
     home = {
-      username = "talha.can.havadar@canonical.com";
+      username = "talha";
       stateVersion = "24.05";
       file = {
         "workspace/.gitconfig".source = mkOutOfStoreSymlink ../../../dot/gitconfig.workspace;
@@ -92,7 +92,7 @@ in
       };
     }
     // lib.optionalAttrs (isLinux) {
-      homeDirectory = "/home/talha.can.havadar@canonical.com";
+      homeDirectory = "/home/talha";
     };
 
     programs = {
