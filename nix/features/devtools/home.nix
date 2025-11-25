@@ -28,6 +28,7 @@ in
         stripe-cli
         wget
         gperf
+        viu
       ]
       ++ lib.optionals (!isDarwin) [
         rpi-imager
