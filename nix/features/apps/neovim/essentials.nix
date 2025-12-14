@@ -1,6 +1,19 @@
 { pkgs, ... }:
 {
   plugins = {
+    trouble = {
+      enable = true;
+      settings = {
+        auto_preview = true;
+        auto_refresh = false;
+        indent_guides = true;
+        preview = {
+          scratch = true;
+          type = "main";
+        };
+      };
+    };
+    lint.enable = true;
     lazy.enable = true;
     commentary.enable = true;
     undotree.enable = true;

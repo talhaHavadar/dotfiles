@@ -15,6 +15,7 @@ with lib;
     ./copilot.nix
     ./claude-code.nix
     ./diffview.nix
+    ./swift.nix
   ];
 
   config = mkIf home_config.enable {
@@ -144,6 +145,16 @@ with lib;
           mode = "n";
           key = "<C-h>";
           action = "<cmd>UndotreeToggle<cr><cmd>UndotreeFocus<cr>";
+        }
+        {
+          mode = "n";
+          key = "<leader>tt";
+          action = "<cmd>Trouble diagnostics toggle<cr>";
+        }
+        {
+          mode = "n";
+          key = "<leader>tq";
+          action = "<cmd>Trouble qflist toggle<cr>";
         }
         # {
         #   mode = "n";
