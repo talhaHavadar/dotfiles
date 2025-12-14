@@ -43,6 +43,7 @@
         }
         "obsidian"
         "jordanbaird-ice"
+        "discord"
       ];
 
       masApps = {
