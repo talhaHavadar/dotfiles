@@ -17,7 +17,7 @@ with lib;
     // lib.optionalAttrs (currentConfigSystem == "home") {
       programs.git = mkIf packagingEnabled {
         enable = true;
-        extraConfig = {
+        settings = {
           core.excludesfile = "~/.gitignore_global";
           sparse.user.id = "talhaHavadar";
           gitubuntu.lpuser = "tchavadar";

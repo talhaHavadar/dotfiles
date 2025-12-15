@@ -26,7 +26,8 @@ in
   config = lib.mkIf zen-browser_config.enable {
     programs.zen-browser = {
       enable = true;
-      nativeMessagingHosts = [ pkgs.firefoxpwa ];
+      # TODO: firefoxpwa failing in macos 15/12/2025
+      # nativeMessagingHosts = [ pkgs.firefoxpwa ];
       # Add any other native connectors here
       policies = {
         AutofillAddressEnabled = true;

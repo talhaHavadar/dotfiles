@@ -1,10 +1,10 @@
 { pkgs, ... }:
 {
-
   plugins.friendly-snippets.enable = true;
   plugins.luasnip.enable = true;
   plugins.cmp = {
     enable = true;
+    autoLoad = true;
     autoEnableSources = true;
     settings = {
       sources = [

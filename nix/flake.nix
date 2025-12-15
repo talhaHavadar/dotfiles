@@ -15,18 +15,18 @@
   };
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs";
     nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
     sparse = {
       url = "github:Orca-The-Company/sparse";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.05";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     darwin = {
-      url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
+      url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     zen-browser = {
@@ -43,7 +43,7 @@
     };
     nixvim = {
       url = "github:nix-community/nixvim";
-      inputs.nixpkgs.follows = "nixpkgs";
+      # inputs.nixpkgs.follows = "nixpkgs";
     };
     system-manager = {
       url = "github:numtide/system-manager";
@@ -57,10 +57,10 @@
       url = "github:NixOS/nixos-hardware";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    mac-app-util = {
-      url = "github:hraban/mac-app-util";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # mac-app-util = {
+    #   url = "github:hraban/mac-app-util";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
   };
 
   outputs =
@@ -70,7 +70,7 @@
       home-manager,
       darwin,
       nixvim,
-      mac-app-util,
+      # mac-app-util,
       nixos-hardware,
       system-manager,
       nix-system-graphics,
@@ -255,12 +255,12 @@
         modules = [
           ./machines/mac
           ./users.nix
-          mac-app-util.darwinModules.default
+          # mac-app-util.darwinModules.default
           home-manager.darwinModules.home-manager
           {
             # To enable it for all users:
             home-manager.sharedModules = [
-              mac-app-util.homeManagerModules.default
+              # mac-app-util.homeManagerModules.default
             ];
 
             home-manager.useGlobalPkgs = true;
@@ -302,12 +302,12 @@
             }
           )
           ./users.nix
-          mac-app-util.darwinModules.default
+          # mac-app-util.darwinModules.default
           home-manager.darwinModules.home-manager
           {
             # To enable it for all users:
             home-manager.sharedModules = [
-              mac-app-util.homeManagerModules.default
+              # mac-app-util.homeManagerModules.default
             ];
 
             home-manager.useGlobalPkgs = true;

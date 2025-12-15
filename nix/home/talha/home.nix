@@ -104,9 +104,9 @@ in
       };
       git = {
         enable = true;
-        userName = "Talha Can Havadar";
-        userEmail = "havadartalha@gmail.com";
-        extraConfig = {
+        settings = {
+          user.name = "Talha Can Havadar";
+          user.email = "havadartalha@gmail.com";
           core.excludesfile = "~/.gitignore_global";
           sparse.user.id = "talhaHavadar";
           rebase.autoSquash = true;

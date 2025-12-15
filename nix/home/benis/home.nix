@@ -47,9 +47,9 @@ in
 
     programs.git = {
       enable = true;
-      userName = "Bahanur Enis";
-      userEmail = "bahanurenis@gmail.com";
-      extraConfig = {
+      settings = {
+        user.name = "Bahanur Enis";
+        user.email = "bahanurenis@gmail.com";
         # tag.gpgSign = "true"
         sparse.user.id = "bahanurenis";
         commit.gpgSign = "true";

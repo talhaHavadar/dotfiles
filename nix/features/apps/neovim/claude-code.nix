@@ -14,10 +14,10 @@ in
     programs.nixvim = {
       extraPackages = [
         (pkgs.claude-code.overrideAttrs (oldAttrs: {
-          version = "1.0.119";
+          version = "2.0.69";
           src = pkgs.fetchurl {
-            url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-1.0.119.tgz";
-            sha256 = "sha256-xAqdGLJrJVPGyhrYZen8iNCSbSLa76iodxjhQnCQp6Q=";
+            url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-2.0.69.tgz";
+            sha256 = "sha256-bJKc0kkcgZu/kmnp/vmgg/r6+dtBH4IuT2a8tRKbLzM=";
           };
         }))
       ];

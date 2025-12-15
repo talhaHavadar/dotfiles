@@ -14,7 +14,6 @@
       };
     };
     lint.enable = true;
-    lazy.enable = true;
     commentary.enable = true;
     undotree.enable = true;
     fidget.enable = true;

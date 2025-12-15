@@ -11,7 +11,7 @@ in
 with lib;
 {
   imports = [
-    inputs.nixvim.homeManagerModules.nixvim
+    inputs.nixvim.homeModules.nixvim
     ./copilot.nix
     ./claude-code.nix
     ./diffview.nix
@@ -21,7 +21,6 @@ with lib;
   config = mkIf home_config.enable {
     programs.nixvim = {
       enable = true;
-      package = pkgs.neovim-unwrapped;
       globals.mapleader = " ";
 
       imports = [

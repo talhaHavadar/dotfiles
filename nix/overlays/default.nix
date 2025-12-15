@@ -1,6 +1,6 @@
 let
   gnupg = "2.4.7";
-  claude-code = "1.0.119";
+  claude-code = "2.0.67";
 in
 {
   # keep this magic handy
@@ -21,7 +21,7 @@ in
         version = claude-code;
         src = prev.fetchurl {
           url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${claude-code}.tgz";
-          sha256 = "sha256-xAqdGLJrJVPGyhrYZen8iNCSbSLa76iodxjhQnCQp6Q=";
+          sha256 = "sha256-HwT9YfoX44b18Sr1VdXMo0X7nIBrai1AAGPbV9l0zv8=";
         };
       });
     })
