@@ -38,6 +38,7 @@
         toml
         gdscript
         zig
+        swift
       ];
       settings = {
         indent.enable = true;
