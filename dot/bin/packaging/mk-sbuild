@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
+set -e
+
+# Check arguments
+if [[ $# -lt 2 ]]; then
+  echo "Usage: $0 <series> <arch> [name] [extra-args...]" >&2
+  exit 1
+fi
 
 series=$1
 arch=$2
+name=${3:-$series}
 
-mk-sbuild "$series" --arch="$arch" && \
+mk-sbuild "$series" --arch="$arch" --name="$name" "${@:4}" && \
 sudo sed -i 's/^union-type=.*/union-type=overlay/' \
-    /etc/schroot/chroot.d/sbuild-$series-$arch && \
-sbuild-update -udcar "$series"-"$arch"
+    /etc/schroot/chroot.d/sbuild-$name-$arch && \
+sbuild-update -udcar "$name-$arch"

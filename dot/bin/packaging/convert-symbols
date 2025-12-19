@@ -1,0 +1,159 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.8"
+# dependencies = []
+# ///
+
+"""
+Convert mangled C++ symbols in Debian symbols files to (c++) format.
+
+This script converts raw mangled C++ symbols (like _ZN10rocalution...)
+to the more readable and maintainable (c++) format that dpkg-gensymbols
+can better handle across architectures.
+"""
+
+import os
+import sys
+import argparse
+import subprocess
+import re
+from pathlib import Path
+from typing import Optional
+
+
+def demangle_symbol(symbol: str) -> str:
+    """Demangle a C++ symbol using c++filt."""
+    try:
+        result = subprocess.run(
+            ['c++filt', symbol],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        return result.stdout.strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        # If c++filt fails or doesn't exist, return original
+        return symbol
+
+
+def convert_symbols_file(input_path: Path, output_path: Optional[Path] = None) -> Path:
+    """
+    Convert a Debian symbols file from mangled to (c++) format.
+
+    Args:
+        input_path: Path to input symbols file
+        output_path: Path to output file (default: input.converted)
+
+    Returns:
+        Path to the converted file
+    """
+    if output_path is None:
+        output_path = input_path.with_suffix(input_path.suffix + '.converted')
+
+    with input_path.open('r') as infile, output_path.open('w') as outfile:
+        for line in infile:
+            # Check if line contains a mangled C++ symbol (starts with space(s) and _Z)
+            if re.match(r'^\s+_Z', line):
+                # Parse the line components
+                match = re.match(r'^(\s+)(_Z[^\s@]+)(.*)$', line)
+                if match:
+                    leading_space = match.group(1)
+                    mangled = match.group(2)
+                    rest = match.group(3)
+
+                    # Demangle the symbol
+                    demangled = demangle_symbol(mangled)
+
+                    # Write in (c++) format
+                    outfile.write(f'{leading_space} (c++)"{demangled}{rest}\n')
+                else:
+                    # Couldn't parse, write as-is
+                    outfile.write(line)
+            else:
+                # Not a mangled symbol, write as-is
+                outfile.write(line)
+
+    return output_path
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Convert Debian symbols files from mangled to (c++) format'
+    )
+    parser.add_argument(
+        'input',
+        type=Path,
+        help='Input symbols file (e.g., debian/libfoo.symbols)'
+    )
+    parser.add_argument(
+        '-o', '--output',
+        type=Path,
+        help='Output file (default: input.converted)'
+    )
+    parser.add_argument(
+        '-i', '--in-place',
+        action='store_true',
+        help='Modify the input file in place'
+    )
+    parser.add_argument(
+        '-b', '--backup',
+        action='store_true',
+        help='Create a backup when using --in-place (saves as input.orig)'
+    )
+
+    args = parser.parse_args()
+
+    # Validate input file
+    if not args.input.exists():
+        print(f"Error: Input file '{args.input}' does not exist", file=sys.stderr)
+        sys.exit(1)
+
+    if not args.input.is_file():
+        print(f"Error: '{args.input}' is not a file", file=sys.stderr)
+        sys.exit(1)
+
+    # Check if c++filt is available
+    try:
+        subprocess.run(['c++filt', '--version'], capture_output=True, check=True)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        print("Warning: c++filt not found, symbols will not be demangled", file=sys.stderr)
+
+    # Determine output path
+    if args.in_place:
+        if args.backup:
+            backup_path = args.input.with_suffix(args.input.suffix + '.orig')
+            args.input.rename(backup_path)
+            print(f"Backup saved to: {backup_path}")
+            # Copy backup to original location for processing
+            backup_path.rename(args.input)
+        output_path = args.input
+    else:
+        output_path = args.output or args.input.with_suffix(args.input.suffix + '.converted')
+
+    # Convert the file
+    temp_output = None
+    try:
+        if args.in_place and not args.backup:
+            # Need to use a temporary file for in-place modification without backup
+            temp_output = args.input.with_suffix(args.input.suffix + '.tmp')
+            result_path = convert_symbols_file(args.input, temp_output)
+            temp_output.rename(args.input)
+            result_path = args.input
+        else:
+            result_path = convert_symbols_file(args.input, output_path)
+
+        print(f"Converted symbols written to: {result_path}")
+
+        if not args.in_place:
+            print(f"\nTo review changes: diff -u {args.input} {result_path}")
+            print(f"To apply changes: mv {result_path} {args.input}")
+
+    except Exception as e:
+        print(f"Error converting file: {e}", file=sys.stderr)
+        if temp_output and temp_output.exists():
+            temp_output.unlink()
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()
