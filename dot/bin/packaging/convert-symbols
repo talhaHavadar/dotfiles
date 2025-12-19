@@ -54,18 +54,27 @@ def convert_symbols_file(input_path: Path, output_path: Optional[Path] = None) -
         for line in infile:
             # Check if line contains a mangled C++ symbol (starts with space(s) and _Z)
             if re.match(r'^\s+_Z', line):
-                # Parse the line components
-                match = re.match(r'^(\s+)(_Z[^\s@]+)(.*)$', line)
+                # Parse the line components - capture @Base as part of the symbol
+                match = re.match(r'^(\s+)(_Z[^\s]+)(\s+.*)$', line)
                 if match:
                     leading_space = match.group(1)
-                    mangled = match.group(2)
-                    rest = match.group(3)
+                    mangled_with_base = match.group(2)
+                    version_info = match.group(3)
 
-                    # Demangle the symbol
-                    demangled = demangle_symbol(mangled)
+                    # Check if @Base is present
+                    base_match = re.match(r'^(.+?)(@Base)?$', mangled_with_base)
+                    if base_match:
+                        mangled = base_match.group(1)
+                        base_suffix = base_match.group(2) or ''
 
-                    # Write in (c++) format
-                    outfile.write(f'{leading_space} (c++)"{demangled}"{rest}\n')
+                        # Demangle the symbol (without @Base)
+                        demangled = demangle_symbol(mangled)
+
+                        # Write in (c++) format with @Base inside quotes
+                        outfile.write(f'{leading_space}(c++)"{demangled}{base_suffix}"{version_info}\n')
+                    else:
+                        # Shouldn't happen, but fallback
+                        outfile.write(line)
                 else:
                     # Couldn't parse, write as-is
                     outfile.write(line)

@@ -25,5 +25,20 @@ in
         };
       });
     })
+    # (final: prev: {
+    #   # Fix xdg-desktop-portal-gnome GVFS library loading error
+    #   # Wrap the portal to prevent it from loading incompatible GVFS modules
+    #   xdg-desktop-portal-gnome = prev.xdg-desktop-portal-gnome.overrideAttrs (oldAttrs: {
+    #     # Set environment variable to prevent GVFS module loading
+    #     preFixup = (oldAttrs.preFixup or "") + ''
+    #       # Disable GIO module loading to prevent GVFS symbol errors
+    #       gappsWrapperArgs+=(
+    #         --unset GIO_EXTRA_MODULES
+    #         --set GIO_USE_VFS "local"
+    #         --set GSETTINGS_BACKEND "memory"
+    #       )
+    #     '';
+    #   });
+    # })
   ];
 }

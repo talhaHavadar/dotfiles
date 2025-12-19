@@ -7,10 +7,12 @@
 let
   isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
-  isDarwin = pkgs.stdenv.isDarwin;
-  isNixOS = pkgs.stdenv.isLinux && builtins.pathExists /etc/NIXOS;
-  isLinuxNonNixOS = pkgs.stdenv.isLinux && !builtins.pathExists /etc/NIXOS;
-  isLinux = pkgs.stdenv.isLinux;
+  # Use builtins.currentSystem to determine platform without evaluating pkgs
+  system = builtins.currentSystem;
+  isDarwin = builtins.match ".*-darwin" system != null;
+  isLinux = builtins.match ".*-linux" system != null;
+  isNixOS = isLinux && builtins.pathExists /etc/NIXOS;
+  isLinuxNonNixOS = isLinux && !builtins.pathExists /etc/NIXOS;
   gpgAgentPrefix =
     if isNixOS then
       "/run/user/1002/gnupg" # TODO: need a better way to inject user id here
@@ -101,7 +103,7 @@ in
       password-store = {
         enable = true;
         settings = {
-          PASSWORD_STORE_DIR = "${config.home.homeDirectory}/projects/pass";
+          PASSWORD_STORE_DIR = "${if isDarwin then "/Users/talha" else "/home/talha"}/projects/pass";
         };
       };
       git = {

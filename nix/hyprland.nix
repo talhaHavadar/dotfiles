@@ -85,6 +85,7 @@ with lib;
       pwvucontrol
       hyprsunset
       hyprshot
+      xdg-desktop-portal-gnome
     ];
     # programs.bash = {
     #   initExtra = ''
@@ -148,17 +149,18 @@ with lib;
     xdg.portal = {
       enable = true;
       xdgOpenUsePortal = true;
-      config = {
-        common.default = "*";
-        # common.default = [ "gtk" ];
-        # hyprland.default = [
-        #   "gtk"
-        #   "hyprland"
-        # ];
-      };
+      #   config = {
+      #     common.default = "*";
+      #     # common.default = [ "gtk" ];
+      #     # hyprland.default = [
+      #     #   "gtk"
+      #     #   "hyprland"
+      #     # ];
+      #   };
       extraPortals = [
         pkgs.xdg-desktop-portal
         pkgs.xdg-desktop-portal-gtk
+        pkgs.xdg-desktop-portal-gnome
         pkgs.xdg-desktop-portal-hyprland
       ];
 
