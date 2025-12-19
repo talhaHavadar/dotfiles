@@ -41,6 +41,8 @@ with lib;
         ".local/bin/packaging-get-uploads".source =
           mkOutOfStoreSymlink ../../../dot/bin/packaging/get-uploads;
         ".local/bin/packaging-mk-sbuild".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/mk-sbuild;
+        ".local/bin/packaging-convert-symbols".source =
+          mkOutOfStoreSymlink ../../../dot/bin/packaging/convert-symbols;
       };
 
       home.sessionVariables = {
