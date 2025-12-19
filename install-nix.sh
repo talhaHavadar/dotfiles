@@ -86,6 +86,7 @@ if [ -n "$is_linux" ]; then
             lintian
             git-buildpackage
             config-package-dev
+            lxc-templates
 	    dh-sequence-gir
         )
 
