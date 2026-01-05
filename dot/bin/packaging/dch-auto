@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -e
+
+VERSION="$(dpkg-parsechangelog -S Version)+dev$(git rev-list --count HEAD)git$(date +%Y%m%d%H%M).$(git rev-parse --short HEAD)"
+dch -v "$VERSION" -D resolute -b "Auto build."

@@ -1,0 +1,228 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.8"
+# dependencies = [
+#     "requests",
+#     "graphviz",
+# ]
+# ///
+"""Big thanks to https://github.com/hkhonming for sharing this tool with me.
+
+This script can/may be changed to fit my needs. Please use with caution.
+"""
+import argparse
+import requests
+import gzip
+import lzma
+import re
+import sys
+from graphviz import Digraph
+
+
+def fetch_packages_file(base_url, dist, arch):
+    """Fetches and decompresses the Packages file from the PPA."""
+    extensions = ["xz", "gz"]
+    # Ensure URL ends with /
+    if not base_url.endswith("/"):
+        base_url += "/"
+
+    base_path = f"dists/{dist}/main/binary-{arch}/Packages"
+
+    for ext in extensions:
+        url = f"{base_url}{base_path}.{ext}"
+        try:
+            print(f"[-] Attempting to fetch: {url}")
+            response = requests.get(url, timeout=10)
+            if response.status_code == 200:
+                print(f"[+] Successfully fetched {url}")
+                if ext == "xz":
+                    return lzma.decompress(response.content).decode("utf-8")
+                else:
+                    return gzip.decompress(response.content).decode("utf-8")
+        except Exception as e:
+            print(f"[!] Connection error: {e}")
+            continue
+
+    print(f"[!] Error: Could not find or download Packages file at {base_url}")
+    sys.exit(1)
+
+
+def parse_packages(content):
+    """Parses the Packages file content into a list of dictionaries."""
+    packages = []
+    current_pkg = {}
+    for line in content.splitlines():
+        if line.strip() == "":
+            if "Package" in current_pkg:
+                packages.append(current_pkg)
+            current_pkg = {}
+            continue
+        if ": " in line:
+            key, value = line.split(": ", 1)
+            current_pkg[key] = value.strip()
+
+    # Capture the last package if the file doesn't end with a newline
+    if "Package" in current_pkg:
+        packages.append(current_pkg)
+    return packages
+
+
+def get_source_name(pkg_info):
+    """Extracts the Source package name."""
+    if "Source" in pkg_info:
+        return pkg_info["Source"].split(" ")[0].strip()
+    return pkg_info["Package"]
+
+
+def clean_dependency_name(dep_str):
+    """Removes version constraints."""
+    return re.sub(r"\s*\(.*?\)", "", dep_str).strip()
+
+
+def build_binary_graph(packages):
+    """Generates a graph based on Binary Package dependencies."""
+    dot = Digraph(comment="PPA Binary Dependency Chart")
+    dot.attr(rankdir="LR")
+    dot.attr("node", shape="box", style="filled", fillcolor="lightblue")
+
+    # Map of all binaries available in this PPA
+    ppa_binaries = {p["Package"] for p in packages}
+
+    # Track added nodes to avoid duplicates
+    added_nodes = set()
+
+    for pkg in packages:
+        pkg_name = pkg["Package"]
+
+        if pkg_name not in added_nodes:
+            dot.node(pkg_name, pkg_name)
+            added_nodes.add(pkg_name)
+
+        depends_raw = pkg.get("Depends", "")
+        if not depends_raw:
+            continue
+
+        for dep in depends_raw.split(","):
+            dep = dep.strip()
+            if not dep:
+                continue
+            if "|" in dep:
+                dep = dep.split("|")[0].strip()
+
+            target_bin = clean_dependency_name(dep)
+
+            # ONLY draw if target is also in the PPA
+            if target_bin in ppa_binaries:
+                dot.edge(pkg_name, target_bin)
+
+    return dot
+
+
+def build_source_graph(packages):
+    """Generates a graph based on Source Package aggregation."""
+    dot = Digraph(comment="PPA Source Dependency Chart")
+    dot.attr(rankdir="LR")
+    dot.attr("node", shape="component", style="filled", fillcolor="#E0E0E0")
+
+    # Map Binary -> Source
+    bin_to_source_map = {}
+    ppa_sources = set()
+
+    for pkg in packages:
+        bin_name = pkg["Package"]
+        src_name = get_source_name(pkg)
+        bin_to_source_map[bin_name] = src_name
+        ppa_sources.add(src_name)
+
+    edges = set()
+
+    for pkg in packages:
+        src_from = get_source_name(pkg)
+        depends_raw = pkg.get("Depends", "")
+        if not depends_raw:
+            continue
+
+        for dep in depends_raw.split(","):
+            dep = dep.strip()
+            if not dep:
+                continue
+            if "|" in dep:
+                dep = dep.split("|")[0].strip()
+
+            bin_target = clean_dependency_name(dep)
+
+            # Resolve target binary to target source
+            # If bin_target is not in map, it's external (system) -> Skip
+            if bin_target in bin_to_source_map:
+                src_to = bin_to_source_map[bin_target]
+
+                if src_from != src_to:
+                    edges.add((src_from, src_to))
+
+    for src in ppa_sources:
+        dot.node(src, src)
+
+    for src_from, src_to in edges:
+        dot.edge(src_from, src_to)
+
+    return dot
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Generate PPA Dependency Charts")
+
+    # Required Args
+    parser.add_argument(
+        "--ppa",
+        required=True,
+        help="The base URL of the PPA (e.g., https://ppa.../ubuntu/)",
+    )
+
+    # Optional Args with Defaults
+    parser.add_argument(
+        "--dist", default="noble", help="Distribution codename (default: noble)"
+    )
+    parser.add_argument("--arch", default="arm64", help="Architecture (default: arm64)")
+    parser.add_argument(
+        "--output",
+        default="dependency_graph",
+        help="Output filename (without extension)",
+    )
+    parser.add_argument(
+        "--mode",
+        choices=["binary", "source"],
+        default="binary",
+        help="Graph mode: 'binary' (package-to-package) or 'source' (aggregated by source)",
+    )
+
+    args = parser.parse_args()
+
+    # 1. Fetch
+    print(f"[*] Fetching metadata for {args.dist}/{args.arch}...")
+    content = fetch_packages_file(args.ppa, args.dist, args.arch)
+
+    # 2. Parse
+    packages = parse_packages(content)
+    print(f"[*] Found {len(packages)} packages.")
+
+    # 3. Build Graph
+    if args.mode == "binary":
+        print("[*] Generating BINARY level dependency graph...")
+        dot = build_binary_graph(packages)
+    else:
+        print("[*] Generating SOURCE level dependency graph...")
+        dot = build_source_graph(packages)
+
+    # 4. Render
+    try:
+        output_path = dot.render(args.output, format="png", cleanup=True)
+        print(f"[SUCCESS] Chart saved to: {output_path}")
+    except Exception as e:
+        print(f"[!] Error rendering graph: {e}")
+        print(
+            "    Ensure 'graphviz' is installed on your system (e.g., 'sudo apt install graphviz')"
+        )
+
+
+if __name__ == "__main__":
+    main()
