@@ -19,17 +19,15 @@ import sys
 from graphviz import Digraph
 
 
-def fetch_packages_file(base_url, dist, arch):
-    """Fetches and decompresses the Packages file from the PPA."""
+def fetch_repo_file(base_url, dist, path):
+    """Fetches and decompresses a repository file (Packages or Sources)."""
     extensions = ["xz", "gz"]
     # Ensure URL ends with /
     if not base_url.endswith("/"):
         base_url += "/"
 
-    base_path = f"dists/{dist}/main/binary-{arch}/Packages"
-
     for ext in extensions:
-        url = f"{base_url}{base_path}.{ext}"
+        url = f"{base_url}{path}.{ext}"
         try:
             print(f"[-] Attempting to fetch: {url}")
             response = requests.get(url, timeout=10)
@@ -43,8 +41,20 @@ def fetch_packages_file(base_url, dist, arch):
             print(f"[!] Connection error: {e}")
             continue
 
-    print(f"[!] Error: Could not find or download Packages file at {base_url}")
+    print(f"[!] Error: Could not find or download file at {base_url}{path}")
     sys.exit(1)
+
+
+def fetch_packages_file(base_url, dist, arch):
+    """Fetches and decompresses the Packages file from the PPA."""
+    base_path = f"dists/{dist}/main/binary-{arch}/Packages"
+    return fetch_repo_file(base_url, dist, base_path)
+
+
+def fetch_sources_file(base_url, dist):
+    """Fetches and decompresses the Sources file from the PPA."""
+    base_path = f"dists/{dist}/main/source/Sources"
+    return fetch_repo_file(base_url, dist, base_path)
 
 
 def parse_packages(content):
@@ -67,6 +77,40 @@ def parse_packages(content):
     return packages
 
 
+def parse_sources(content):
+    """Parses the Sources file content into a list of dictionaries.
+
+    Handles multi-line fields (continuation lines starting with whitespace).
+    """
+    sources = []
+    current_src = {}
+    current_key = None
+
+    for line in content.splitlines():
+        if line.strip() == "":
+            if "Package" in current_src:
+                sources.append(current_src)
+            current_src = {}
+            current_key = None
+            continue
+
+        # Continuation line (starts with whitespace)
+        if line.startswith(" ") or line.startswith("\t"):
+            if current_key and current_key in current_src:
+                current_src[current_key] += " " + line.strip()
+            continue
+
+        if ": " in line:
+            key, value = line.split(": ", 1)
+            current_src[key] = value.strip()
+            current_key = key
+
+    # Capture the last source if the file doesn't end with a newline
+    if "Package" in current_src:
+        sources.append(current_src)
+    return sources
+
+
 def get_source_name(pkg_info):
     """Extracts the Source package name."""
     if "Source" in pkg_info:
@@ -77,6 +121,15 @@ def get_source_name(pkg_info):
 def clean_dependency_name(dep_str):
     """Removes version constraints."""
     return re.sub(r"\s*\(.*?\)", "", dep_str).strip()
+
+
+def get_build_depends(src_info):
+    """Extracts Build-Depends from source package info (case-insensitive)."""
+    # Check for Build-Depends (case-insensitive)
+    for key in src_info:
+        if key.lower() == "build-depends":
+            return src_info[key]
+    return ""
 
 
 def build_binary_graph(packages):
@@ -118,38 +171,47 @@ def build_binary_graph(packages):
     return dot
 
 
-def build_source_graph(packages):
-    """Generates a graph based on Source Package aggregation."""
+def build_source_graph(sources):
+    """Generates a graph based on Source Package Build-Depends."""
     dot = Digraph(comment="PPA Source Dependency Chart")
     dot.attr(rankdir="LR")
     dot.attr("node", shape="component", style="filled", fillcolor="#E0E0E0")
 
-    # Map Binary -> Source
+    # Map Binary -> Source (from the Binary field in Sources)
     bin_to_source_map = {}
     ppa_sources = set()
 
-    for pkg in packages:
-        bin_name = pkg["Package"]
-        src_name = get_source_name(pkg)
-        bin_to_source_map[bin_name] = src_name
+    for src in sources:
+        src_name = src["Package"]
         ppa_sources.add(src_name)
+
+        # The Binary field lists all binary packages built from this source
+        binaries = src.get("Binary", "")
+        for bin_name in binaries.split(","):
+            bin_name = bin_name.strip()
+            if bin_name:
+                bin_to_source_map[bin_name] = src_name
 
     edges = set()
 
-    for pkg in packages:
-        src_from = get_source_name(pkg)
-        depends_raw = pkg.get("Depends", "")
-        if not depends_raw:
+    for src in sources:
+        src_from = src["Package"]
+        build_depends_raw = get_build_depends(src)
+        if not build_depends_raw:
             continue
 
-        for dep in depends_raw.split(","):
+        for dep in build_depends_raw.split(","):
             dep = dep.strip()
             if not dep:
                 continue
+            # Handle alternatives (pick first one)
             if "|" in dep:
                 dep = dep.split("|")[0].strip()
 
+            # Remove architecture qualifiers like :any, :native
             bin_target = clean_dependency_name(dep)
+            if ":" in bin_target:
+                bin_target = bin_target.split(":")[0]
 
             # Resolve target binary to target source
             # If bin_target is not in map, it's external (system) -> Skip
@@ -197,21 +259,25 @@ def main():
 
     args = parser.parse_args()
 
-    # 1. Fetch
-    print(f"[*] Fetching metadata for {args.dist}/{args.arch}...")
-    content = fetch_packages_file(args.ppa, args.dist, args.arch)
-
-    # 2. Parse
-    packages = parse_packages(content)
-    print(f"[*] Found {len(packages)} packages.")
-
-    # 3. Build Graph
+    # 1. Fetch and Parse
     if args.mode == "binary":
+        print(f"[*] Fetching Packages metadata for {args.dist}/{args.arch}...")
+        content = fetch_packages_file(args.ppa, args.dist, args.arch)
+        packages = parse_packages(content)
+        print(f"[*] Found {len(packages)} binary packages.")
+
+        # 2. Build Graph
         print("[*] Generating BINARY level dependency graph...")
         dot = build_binary_graph(packages)
     else:
-        print("[*] Generating SOURCE level dependency graph...")
-        dot = build_source_graph(packages)
+        print(f"[*] Fetching Sources metadata for {args.dist}...")
+        content = fetch_sources_file(args.ppa, args.dist)
+        sources = parse_sources(content)
+        print(f"[*] Found {len(sources)} source packages.")
+
+        # 2. Build Graph
+        print("[*] Generating SOURCE level dependency graph (using Build-Depends)...")
+        dot = build_source_graph(sources)
 
     # 4. Render
     try:
