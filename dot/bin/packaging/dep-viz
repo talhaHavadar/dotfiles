@@ -172,7 +172,11 @@ def build_binary_graph(packages):
 
 
 def build_source_graph(sources):
-    """Generates a graph based on Source Package Build-Depends."""
+    """Generates a graph based on Source Package Build-Depends.
+
+    Returns:
+        tuple: (Digraph, set of edges, set of source names)
+    """
     dot = Digraph(comment="PPA Source Dependency Chart")
     dot.attr(rankdir="LR")
     dot.attr("node", shape="component", style="filled", fillcolor="#E0E0E0")
@@ -227,7 +231,65 @@ def build_source_graph(sources):
     for src_from, src_to in edges:
         dot.edge(src_from, src_to)
 
-    return dot
+    return dot, edges, ppa_sources
+
+
+def compute_dependency_groups(sources, edges):
+    """Computes dependency groups (topological levels) for source packages.
+
+    Group 1: Packages with no dependencies within the PPA
+    Group 2: Packages that only depend on Group 1 packages
+    Group N: Packages that only depend on packages in groups < N
+
+    Returns:
+        list of lists: Each inner list contains package names at that level
+    """
+    # Build adjacency list: src -> set of dependencies
+    dependencies = {src: set() for src in sources}
+    for src_from, src_to in edges:
+        dependencies[src_from].add(src_to)
+
+    groups = []
+    assigned = set()
+
+    while len(assigned) < len(sources):
+        # Find all packages whose dependencies are all in assigned set
+        current_group = []
+        for src in sources:
+            if src in assigned:
+                continue
+            # Check if all dependencies are already assigned
+            if dependencies[src].issubset(assigned):
+                current_group.append(src)
+
+        if not current_group:
+            # Circular dependency detected - add remaining as final group
+            remaining = [src for src in sources if src not in assigned]
+            print(f"[!] Warning: Circular dependency detected among: {', '.join(sorted(remaining))}")
+            groups.append(sorted(remaining))
+            break
+
+        current_group.sort()
+        groups.append(current_group)
+        assigned.update(current_group)
+
+    return groups
+
+
+def print_dependency_groups(groups):
+    """Prints dependency groups in a formatted way."""
+    print("\n" + "=" * 60)
+    print("BUILD ORDER (Dependency Groups)")
+    print("=" * 60)
+    print("Packages in the same group can be built in parallel.")
+    print("Groups must be built in order (Group 1 first, then Group 2, etc.)")
+    print("-" * 60)
+
+    for i, group in enumerate(groups, 1):
+        print(f"\nGroup {i} ({len(group)} packages):")
+        print(f"  {', '.join(group)}")
+
+    print("\n" + "=" * 60)
 
 
 def main():
@@ -277,7 +339,11 @@ def main():
 
         # 2. Build Graph
         print("[*] Generating SOURCE level dependency graph (using Build-Depends)...")
-        dot = build_source_graph(sources)
+        dot, edges, ppa_sources = build_source_graph(sources)
+
+        # 3. Compute and print dependency groups
+        groups = compute_dependency_groups(ppa_sources, edges)
+        print_dependency_groups(groups)
 
     # 4. Render
     try:
