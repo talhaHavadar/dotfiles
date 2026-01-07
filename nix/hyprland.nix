@@ -85,7 +85,6 @@ with lib;
       pwvucontrol
       hyprsunset
       hyprshot
-      xdg-desktop-portal-gnome
     ];
     # programs.bash = {
     #   initExtra = ''
@@ -157,12 +156,12 @@ with lib;
       #     #   "hyprland"
       #     # ];
       #   };
-      extraPortals = [
-        pkgs.xdg-desktop-portal
-        pkgs.xdg-desktop-portal-gtk
-        pkgs.xdg-desktop-portal-gnome
-        pkgs.xdg-desktop-portal-hyprland
-      ];
+      # extraPortals = [
+      #   pkgs.xdg-desktop-portal
+      #   pkgs.xdg-desktop-portal-gtk
+      #   pkgs.xdg-desktop-portal-gnome
+      #   pkgs.xdg-desktop-portal-hyprland
+      # ];
 
     };
 
