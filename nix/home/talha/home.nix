@@ -17,7 +17,7 @@ let
     if isNixOS then
       "/run/user/1002/gnupg" # TODO: need a better way to inject user id here
     else if isDarwin then
-      "/Users/talha/.gnupg"
+      "${config.home.homeDirectory}/.gnupg"
     else
       "/run/user/1607672815/gnupg";
 in
@@ -88,7 +88,7 @@ in
 
     }
     // lib.optionalAttrs (isDarwin) {
-      homeDirectory = "/Users/talha";
+      homeDirectory = "/Users/${config.home.username}";
       activation = {
         mint-swift-bundler = lib.hm.dag.entryAfter [ "installPackages" ] ''
           PATH="/opt/homebrew/bin:${pkgs.git}/bin:/usr/bin:$PATH" $DRY_RUN_CMD mint install stackotter/swift-bundler@main
@@ -96,14 +96,14 @@ in
       };
     }
     // lib.optionalAttrs (isLinux) {
-      homeDirectory = "/home/talha";
+      homeDirectory = "/home/${config.home.username}";
     };
 
     programs = {
       password-store = {
         enable = true;
         settings = {
-          PASSWORD_STORE_DIR = "${if isDarwin then "/Users/talha" else "/home/talha"}/projects/pass";
+          PASSWORD_STORE_DIR = "${config.home.homeDirectory}/projects/pass";
         };
       };
       git = {
