@@ -43,6 +43,8 @@ in
         ".local/bin/packaging-mk-sbuild".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/mk-sbuild;
         ".local/bin/packaging-convert-symbols".source =
           mkOutOfStoreSymlink ../../../dot/bin/packaging/convert-symbols;
+        ".local/bin/packaging-dch-auto".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/dch-auto;
+        ".local/bin/packaging-dep-viz".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/dep-viz;
       };
 
       # - pkgs.stdenv.isLinux
