@@ -14,6 +14,8 @@ with lib;
 {
 
   host.home.windowManagers.hyprland.enable = true;
+  # TODO: Swift build is failing on ubuntu
+  host.features.apps.neovim.swift.enable = lib.mkForce false;
 
   imports = [
     ../hyprland.nix
