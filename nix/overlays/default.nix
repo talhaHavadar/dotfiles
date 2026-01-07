@@ -25,6 +25,37 @@ in
         };
       });
     })
+    # TODO: disabled checks for xdg-desktop-portal 19 Dec. 2025
+    # > (/build/source/build/src/xdg-desktop-portal:5143): xdg-desktop-portal-WARNING **: 14:35:52.293: Failed connect to PipeWire: Couldn't connect to PipeWire
+    # >   ----------------------------- Captured stderr call -----------------------------
+    # >   bwrap: loopback: Failed RTM_NEWADDR: Operation not permitted
+    # >
+    # >   (/build/source/build/src/xdg-desktop-portal:5143): xdg-desktop-portal-WARNING **: 14:35:52.493: Sound validation: Rejecting sound because validator failed: Child process exited with code 1
+    # >   =========================== short test summary info ============================
+    # >   FAILED ../tests/test_notification.py::TestNotification::test_sound_fd - gi.re...
+    # >   ======================== 1 failed, 18 passed in 10.83s =========================
+    # >
+    # >
+    # >   24/27 xdg-desktop-portal:integration / integration/screenshot               OK              9.74s
+    # >   25/27 xdg-desktop-portal:integration / integration/filechooser              OK             13.95s
+    # >   26/27 xdg-desktop-portal:integration / integration/settings                 OK             12.18s
+    # >   27/27 xdg-desktop-portal:integration / integration/usb                      OK             14.65s
+    # >
+    # >   Summary of Failures:
+    # >
+    # >    6/27 xdg-desktop-portal:integration / integration/dynamiclauncher  FAIL            1.46s   exit status 1
+    # >   23/27 xdg-desktop-portal:integration / integration/notification     FAIL           11.21s   exit status 1
+    # >
+    # >   Ok:                23
+    # >   Fail:              2
+    # >   Skipped:           2
+    # >
+    # >   Full log written to /build/source/build/meson-logs/testlog.txt
+    (final: prev: {
+      xdg-desktop-portal = prev.xdg-desktop-portal.overrideAttrs (old: {
+        doCheck = false;
+      });
+    })
     # (final: prev: {
     #   # Fix xdg-desktop-portal-gnome GVFS library loading error
     #   # Wrap the portal to prevent it from loading incompatible GVFS modules
