@@ -1,11 +1,21 @@
 { pkgs, ... }:
 {
+  diagnostic = {
+    settings = {
+      virtual_lines = {
+        current_line = true;
+      };
+      virtual_text = false;
+
+    };
+  };
+
   plugins = {
     trouble = {
       enable = true;
       settings = {
         auto_preview = true;
-        auto_refresh = false;
+        auto_refresh = true;
         indent_guides = true;
         preview = {
           scratch = true;
