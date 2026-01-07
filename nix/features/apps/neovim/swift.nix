@@ -7,13 +7,21 @@
 }:
 let
   neovim_option = config.host.features.apps.neovim;
+  swift = neovim_option.swift;
 in
 {
-  config = lib.mkIf (neovim_option.enable) {
+  config = lib.mkIf (neovim_option.enable && swift.enable) {
     programs.nixvim = {
       keymaps = [
       ];
       plugins = {
+        lsp = {
+          enable = true;
+          servers = {
+            sourcekit.enable = true;
+          };
+        };
+
         conform-nvim = {
           enable = true;
           settings = {

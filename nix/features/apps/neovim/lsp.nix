@@ -70,7 +70,6 @@
     lsp = {
       enable = true;
       servers = {
-        sourcekit.enable = true;
         lua_ls.enable = true;
         html.enable = true;
         ruff.enable = true;

@@ -21,6 +21,13 @@
           description = "Enable Claude Code";
         };
       };
+      swift = {
+        enable = lib.mkOption {
+          default = false;
+          type = lib.types.bool;
+          description = "Enable Swift Language Support";
+        };
+      };
       diffview = {
         enable = lib.mkOption {
           default = true;
