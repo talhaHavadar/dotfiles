@@ -14,7 +14,7 @@
     host.features.apps.neovim.enable = true;
     host.features.apps.neovim.copilot.enable = true;
     host.features.apps.neovim.claude-code.enable = true;
-    host.features.apps.zen-browser.enable = true;
+    # host.features.apps.zen-browser.enable = true;
     host.features.apps.zed-editor.enable = true;
   };
 }
