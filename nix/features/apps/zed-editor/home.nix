@@ -11,6 +11,9 @@ let
 in
 {
   config = lib.mkIf (zed-editor_config.enable) {
-    programs.zed-editor.enable = true;
+    # it is fucking taking ages
+    # so better disable zed-editor from nix
+    # improve compile times rust!!
+    programs.zed-editor.enable = false;
   };
 }
