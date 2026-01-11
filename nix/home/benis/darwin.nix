@@ -29,8 +29,10 @@
       ];
 
       casks = [
+        "zen"
         "obsidian"
         "jordanbaird-ice"
+        "multipass"
       ];
 
       masApps = {

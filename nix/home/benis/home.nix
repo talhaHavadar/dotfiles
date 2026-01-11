@@ -30,12 +30,10 @@ in
         [
         ]
         ++ lib.optionals (isDarwin) [
-          arc-browser
         ]
         ++ lib.optionals (!isDarwin) [
           teams-for-linux
           obsidian
-          google-chrome
         ];
     }
     // lib.optionalAttrs (isDarwin) {
