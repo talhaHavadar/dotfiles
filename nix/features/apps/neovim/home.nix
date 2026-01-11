@@ -20,7 +20,7 @@ with lib;
 
   config = mkIf home_config.enable {
     programs.nixvim = {
-      enable = true;
+      enable = false;
       globals.mapleader = " ";
 
       imports = [

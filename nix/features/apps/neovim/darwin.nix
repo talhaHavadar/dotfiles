@@ -11,12 +11,16 @@ let
 in
 with lib;
 {
-  config = mkIf (neovim_config.enable && swift.enable) {
+  config = mkIf (neovim_config.enable) {
     homebrew = {
       enable = true;
       taps = [ ];
 
       brews = [
+        "nvim"
+        "nixfmt"
+      ]
+      ++ optionals (swift.enable) [
         "xcp"
         "xcode-build-server"
         "coreutils"
@@ -31,5 +35,25 @@ with lib;
       };
     };
   };
+  #config = mkIf (neovim_config.enable && swift.enable) {
+  #  homebrew = {
+  #    enable = true;
+  #    taps = [ ];
+
+  #    brews = [
+  #      "xcp"
+  #      "xcode-build-server"
+  #      "coreutils"
+  #      "swiftlint"
+  #      "swiftformat"
+  #    ];
+
+  #    casks = [
+  #    ];
+
+  #    masApps = {
+  #    };
+  #  };
+  #};
 
 }
