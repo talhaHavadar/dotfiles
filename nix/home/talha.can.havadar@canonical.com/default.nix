@@ -9,6 +9,9 @@ let
   isHome = currentConfigSystem == "home";
 in
 {
+  # Override username - all other paths derive from this automatically
+  config.home.username = lib.mkForce "talha.can.havadar@canonical.com";
+
   imports = [
     ../talha
   ]
@@ -25,6 +28,4 @@ in
       throw "Invalid config system: ${currentConfigSystem}"
   );
 
-  # Override username - all other paths derive from this automatically
-  config.home.username = lib.mkForce "talha.can.havadar@canonical.com";
 }

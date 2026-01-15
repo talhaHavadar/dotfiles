@@ -217,6 +217,24 @@ in
     wayland =
       { }
       // lib.optionalAttrs (isLinuxNonNixOS) {
+        windowManager.river = {
+          enable = true;
+          settings = {
+            border-width = 2;
+            map = {
+              normal = {
+                "Mod1 Q" = "close";
+                "Mod1 Return" = "ghostty";
+              };
+            };
+            set-cursor-warp = "on-output-change";
+            set-repeat = "50 300";
+            spawn = [
+              "ghostty"
+            ];
+            xcursor-theme = "Bibata-Modern-Classic 12";
+          };
+        };
         windowManager.hyprland.settings = {
           "$screenlocker" = lib.mkForce "swaylock";
         };
