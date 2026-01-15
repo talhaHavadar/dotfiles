@@ -234,6 +234,55 @@ def build_source_graph(sources):
     return dot, edges, ppa_sources
 
 
+def find_strongly_connected_components(sources, edges):
+    """Finds strongly connected components using Tarjan's algorithm.
+
+    Returns:
+        list of sets: Each set contains package names in one SCC
+    """
+    # Build adjacency list
+    graph = {src: set() for src in sources}
+    for src_from, src_to in edges:
+        graph[src_from].add(src_to)
+
+    index_counter = [0]
+    stack = []
+    lowlinks = {}
+    index = {}
+    on_stack = {}
+    sccs = []
+
+    def strongconnect(node):
+        index[node] = index_counter[0]
+        lowlinks[node] = index_counter[0]
+        index_counter[0] += 1
+        stack.append(node)
+        on_stack[node] = True
+
+        for successor in graph[node]:
+            if successor not in index:
+                strongconnect(successor)
+                lowlinks[node] = min(lowlinks[node], lowlinks[successor])
+            elif on_stack.get(successor, False):
+                lowlinks[node] = min(lowlinks[node], index[successor])
+
+        if lowlinks[node] == index[node]:
+            scc = set()
+            while True:
+                successor = stack.pop()
+                on_stack[successor] = False
+                scc.add(successor)
+                if successor == node:
+                    break
+            sccs.append(scc)
+
+    for node in sources:
+        if node not in index:
+            strongconnect(node)
+
+    return sccs
+
+
 def compute_dependency_groups(sources, edges):
     """Computes dependency groups (topological levels) for source packages.
 
@@ -241,43 +290,130 @@ def compute_dependency_groups(sources, edges):
     Group 2: Packages that only depend on Group 1 packages
     Group N: Packages that only depend on packages in groups < N
 
+    Handles cyclic dependencies by detecting SCCs and marking them appropriately.
+
     Returns:
-        list of lists: Each inner list contains package names at that level
+        tuple: (groups, cycles_info)
+            - groups: list of dicts with 'packages' and 'is_cycle' keys
+            - cycles_info: dict mapping cycle packages to their cycle members
     """
+    # Find strongly connected components
+    sccs = find_strongly_connected_components(sources, edges)
+
+    # Identify cycles (SCCs with more than one node)
+    cycles = [scc for scc in sccs if len(scc) > 1]
+    cycle_packages = set()
+    cycles_info = {}
+    for cycle in cycles:
+        for pkg in cycle:
+            cycle_packages.add(pkg)
+            cycles_info[pkg] = cycle
+
+    if cycles:
+        cycle_names = [', '.join(sorted(c)) for c in cycles]
+        print(f"[!] Warning: Circular dependencies detected:")
+        for i, cycle in enumerate(cycles, 1):
+            print(f"    Cycle {i}: {', '.join(sorted(cycle))}")
+
     # Build adjacency list: src -> set of dependencies
     dependencies = {src: set() for src in sources}
     for src_from, src_to in edges:
         dependencies[src_from].add(src_to)
 
+    # Create a mapping from package to its SCC representative
+    pkg_to_scc = {}
+    scc_to_pkgs = {}
+    for i, scc in enumerate(sccs):
+        rep = f"__scc_{i}__"
+        scc_to_pkgs[rep] = scc
+        for pkg in scc:
+            pkg_to_scc[pkg] = rep
+
+    # Build contracted graph (SCCs as nodes)
+    contracted_deps = {f"__scc_{i}__": set() for i in range(len(sccs))}
+    for src_from, src_to in edges:
+        rep_from = pkg_to_scc[src_from]
+        rep_to = pkg_to_scc[src_to]
+        if rep_from != rep_to:
+            contracted_deps[rep_from].add(rep_to)
+
+    # Topological sort on contracted graph
     groups = []
     assigned = set()
+    scc_reps = set(contracted_deps.keys())
 
-    while len(assigned) < len(sources):
-        # Find all packages whose dependencies are all in assigned set
-        current_group = []
-        for src in sources:
-            if src in assigned:
+    while len(assigned) < len(scc_reps):
+        current_group_reps = []
+        for rep in scc_reps:
+            if rep in assigned:
                 continue
-            # Check if all dependencies are already assigned
-            if dependencies[src].issubset(assigned):
-                current_group.append(src)
+            if contracted_deps[rep].issubset(assigned):
+                current_group_reps.append(rep)
 
-        if not current_group:
-            # Circular dependency detected - add remaining as final group
-            remaining = [src for src in sources if src not in assigned]
-            print(f"[!] Warning: Circular dependency detected among: {', '.join(sorted(remaining))}")
-            groups.append(sorted(remaining))
+        if not current_group_reps:
+            # This shouldn't happen after SCC contraction, but handle it
+            remaining = [rep for rep in scc_reps if rep not in assigned]
+            for rep in remaining:
+                pkgs = scc_to_pkgs[rep]
+                is_cycle = len(pkgs) > 1
+                groups.append({'packages': sorted(pkgs), 'is_cycle': is_cycle, 'cycles': []})
             break
 
-        current_group.sort()
-        groups.append(current_group)
-        assigned.update(current_group)
+        # Collect all packages at this level, tracking which are cyclic
+        level_packages = []
+        level_cycles = []  # List of cycle sets at this level
 
-    return groups
+        for rep in current_group_reps:
+            pkgs = scc_to_pkgs[rep]
+            if len(pkgs) > 1:
+                # Cyclic SCC - sort by internal dependency count
+                pkg_dep_count = {}
+                for pkg in pkgs:
+                    internal_deps = dependencies[pkg] & pkgs
+                    pkg_dep_count[pkg] = len(internal_deps)
+                sorted_pkgs = sorted(pkgs, key=lambda p: (pkg_dep_count[p], p))
+                level_packages.extend(sorted_pkgs)
+                level_cycles.append(pkgs)
+            else:
+                level_packages.extend(pkgs)
+
+        # Sort non-cyclic packages alphabetically, keep cyclic packages in their order
+        cyclic_pkg_set = set()
+        for cycle in level_cycles:
+            cyclic_pkg_set.update(cycle)
+
+        non_cyclic = sorted([p for p in level_packages if p not in cyclic_pkg_set])
+        cyclic_ordered = [p for p in level_packages if p in cyclic_pkg_set]
+
+        # Combine: non-cyclic first, then cyclic
+        final_packages = non_cyclic + cyclic_ordered
+
+        groups.append({
+            'packages': final_packages,
+            'is_cycle': bool(level_cycles),
+            'cycles': level_cycles
+        })
+
+        assigned.update(current_group_reps)
+
+    return groups, cycles_info
 
 
-def print_dependency_groups(groups):
-    """Prints dependency groups in a formatted way."""
+def print_dependency_groups(groups, cycles_info, edges):
+    """Prints dependency groups in a formatted way.
+
+    Args:
+        groups: list of dicts with 'packages', 'is_cycle', and 'cycles' keys
+        cycles_info: dict mapping cycle packages to their cycle members
+        edges: set of (from, to) tuples representing dependencies
+    """
+    # Build dependency lookup
+    deps_map = {}
+    for src_from, src_to in edges:
+        if src_from not in deps_map:
+            deps_map[src_from] = set()
+        deps_map[src_from].add(src_to)
+
     print("\n" + "=" * 60)
     print("BUILD ORDER (Dependency Groups)")
     print("=" * 60)
@@ -285,9 +421,49 @@ def print_dependency_groups(groups):
     print("Groups must be built in order (Group 1 first, then Group 2, etc.)")
     print("-" * 60)
 
-    for i, group in enumerate(groups, 1):
-        print(f"\nGroup {i} ({len(group)} packages):")
-        print(f"  {', '.join(group)}")
+    group_num = 1
+    for group_info in groups:
+        packages = group_info['packages']
+        cycles = group_info.get('cycles', [])
+
+        # Build set of all cyclic packages in this group
+        cyclic_pkgs = set()
+        for cycle in cycles:
+            cyclic_pkgs.update(cycle)
+
+        has_cycles = bool(cyclic_pkgs)
+        non_cyclic_pkgs = [p for p in packages if p not in cyclic_pkgs]
+
+        if has_cycles:
+            print(f"\nGroup {group_num} ({len(packages)} packages) [contains CYCLIC dependencies]:")
+
+            # Show non-cyclic packages first
+            if non_cyclic_pkgs:
+                print(f"  Regular packages:")
+                print(f"    {', '.join(non_cyclic_pkgs)}")
+
+            # Show cyclic packages with their dependencies
+            print(f"  Cyclic packages (require bootstrapping):")
+            for pkg in packages:
+                if pkg in cyclic_pkgs:
+                    cycle_deps = deps_map.get(pkg, set()) & cyclic_pkgs
+                    if cycle_deps:
+                        print(f"    {pkg} -> depends on: {', '.join(sorted(cycle_deps))}")
+                    else:
+                        print(f"    {pkg}")
+        else:
+            print(f"\nGroup {group_num} ({len(packages)} package{'s' if len(packages) > 1 else ''}):")
+            print(f"  {', '.join(packages)}")
+
+        group_num += 1
+
+    # Print summary if there were cycles
+    if cycles_info:
+        print("\n" + "-" * 60)
+        print("CYCLE RESOLUTION NOTES:")
+        print("  Packages marked as cyclic require bootstrapping:")
+        print("  1. Build with reduced features or stub dependencies")
+        print("  2. Rebuild with full dependencies after initial pass")
 
     print("\n" + "=" * 60)
 
@@ -342,8 +518,8 @@ def main():
         dot, edges, ppa_sources = build_source_graph(sources)
 
         # 3. Compute and print dependency groups
-        groups = compute_dependency_groups(ppa_sources, edges)
-        print_dependency_groups(groups)
+        groups, cycles_info = compute_dependency_groups(ppa_sources, edges)
+        print_dependency_groups(groups, cycles_info, edges)
 
     # 4. Render
     try:
