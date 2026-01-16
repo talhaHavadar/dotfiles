@@ -4,6 +4,7 @@
 # dependencies = [
 #     "requests",
 #     "graphviz",
+#     "python-debian",
 # ]
 # ///
 """Big thanks to https://github.com/hkhonming for sharing this tool with me.
@@ -14,9 +15,9 @@ import argparse
 import requests
 import gzip
 import lzma
-import re
 import sys
 from graphviz import Digraph
+from debian.deb822 import Sources, Packages, PkgRelation
 
 
 def fetch_repo_file(base_url, dist, path):
@@ -58,57 +59,13 @@ def fetch_sources_file(base_url, dist):
 
 
 def parse_packages(content):
-    """Parses the Packages file content into a list of dictionaries."""
-    packages = []
-    current_pkg = {}
-    for line in content.splitlines():
-        if line.strip() == "":
-            if "Package" in current_pkg:
-                packages.append(current_pkg)
-            current_pkg = {}
-            continue
-        if ": " in line:
-            key, value = line.split(": ", 1)
-            current_pkg[key] = value.strip()
-
-    # Capture the last package if the file doesn't end with a newline
-    if "Package" in current_pkg:
-        packages.append(current_pkg)
-    return packages
+    """Parses the Packages file content using python-debian."""
+    return list(Packages.iter_paragraphs(content))
 
 
 def parse_sources(content):
-    """Parses the Sources file content into a list of dictionaries.
-
-    Handles multi-line fields (continuation lines starting with whitespace).
-    """
-    sources = []
-    current_src = {}
-    current_key = None
-
-    for line in content.splitlines():
-        if line.strip() == "":
-            if "Package" in current_src:
-                sources.append(current_src)
-            current_src = {}
-            current_key = None
-            continue
-
-        # Continuation line (starts with whitespace)
-        if line.startswith(" ") or line.startswith("\t"):
-            if current_key and current_key in current_src:
-                current_src[current_key] += " " + line.strip()
-            continue
-
-        if ": " in line:
-            key, value = line.split(": ", 1)
-            current_src[key] = value.strip()
-            current_key = key
-
-    # Capture the last source if the file doesn't end with a newline
-    if "Package" in current_src:
-        sources.append(current_src)
-    return sources
+    """Parses the Sources file content using python-debian."""
+    return list(Sources.iter_paragraphs(content))
 
 
 def get_source_name(pkg_info):
@@ -118,18 +75,44 @@ def get_source_name(pkg_info):
     return pkg_info["Package"]
 
 
-def clean_dependency_name(dep_str):
-    """Removes version constraints."""
-    return re.sub(r"\s*\(.*?\)", "", dep_str).strip()
+def parse_dependency_names(dep_field):
+    """Parses a dependency field and returns a list of package names.
 
+    Uses python-debian's PkgRelation to properly handle:
+    - Version constraints: (>= 1.0)
+    - Architecture qualifiers: [amd64 arm64]
+    - Build profiles: <!nocheck>, <!pkg.foo.bar>
+    - Alternatives: pkg1 | pkg2 (returns first alternative)
+    - Architecture qualifiers on package: pkg:any, pkg:native
 
-def get_build_depends(src_info):
-    """Extracts Build-Depends from source package info (case-insensitive)."""
-    # Check for Build-Depends (case-insensitive)
-    for key in src_info:
-        if key.lower() == "build-depends":
-            return src_info[key]
-    return ""
+    Args:
+        dep_field: Raw dependency string from Depends/Build-Depends field
+
+    Returns:
+        List of package names (strings)
+    """
+    if not dep_field:
+        return []
+
+    try:
+        relations = PkgRelation.parse_relations(dep_field)
+    except Exception:
+        # Fallback to empty if parsing fails
+        return []
+
+    pkg_names = []
+    for relation in relations:
+        # Each relation is a list of alternatives, pick the first one
+        if relation:
+            first_alt = relation[0]
+            pkg_name = first_alt.get("name", "")
+            if pkg_name:
+                # Remove architecture qualifier suffix (:any, :native, etc.)
+                if ":" in pkg_name:
+                    pkg_name = pkg_name.split(":")[0]
+                pkg_names.append(pkg_name)
+
+    return pkg_names
 
 
 def build_binary_graph(packages):
@@ -152,18 +135,9 @@ def build_binary_graph(packages):
             added_nodes.add(pkg_name)
 
         depends_raw = pkg.get("Depends", "")
-        if not depends_raw:
-            continue
+        dep_names = parse_dependency_names(depends_raw)
 
-        for dep in depends_raw.split(","):
-            dep = dep.strip()
-            if not dep:
-                continue
-            if "|" in dep:
-                dep = dep.split("|")[0].strip()
-
-            target_bin = clean_dependency_name(dep)
-
+        for target_bin in dep_names:
             # ONLY draw if target is also in the PPA
             if target_bin in ppa_binaries:
                 dot.edge(pkg_name, target_bin)
@@ -200,23 +174,10 @@ def build_source_graph(sources):
 
     for src in sources:
         src_from = src["Package"]
-        build_depends_raw = get_build_depends(src)
-        if not build_depends_raw:
-            continue
+        build_depends_raw = src.get("Build-Depends", "")
+        dep_names = parse_dependency_names(build_depends_raw)
 
-        for dep in build_depends_raw.split(","):
-            dep = dep.strip()
-            if not dep:
-                continue
-            # Handle alternatives (pick first one)
-            if "|" in dep:
-                dep = dep.split("|")[0].strip()
-
-            # Remove architecture qualifiers like :any, :native
-            bin_target = clean_dependency_name(dep)
-            if ":" in bin_target:
-                bin_target = bin_target.split(":")[0]
-
+        for bin_target in dep_names:
             # Resolve target binary to target source
             # If bin_target is not in map, it's external (system) -> Skip
             if bin_target in bin_to_source_map:
