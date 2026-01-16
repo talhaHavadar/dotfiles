@@ -19,6 +19,10 @@ with lib;
   ];
 
   config = mkIf home_config.enable {
+    home.packages = with pkgs; [
+      nixfmt
+      neovim
+    ];
     programs.nixvim = {
       enable = false;
       globals.mapleader = " ";
