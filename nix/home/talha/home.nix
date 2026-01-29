@@ -45,6 +45,8 @@ in
           mkOutOfStoreSymlink ../../../dot/bin/packaging/convert-symbols;
         ".local/bin/packaging-dch-auto".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/dch-auto;
         ".local/bin/packaging-dep-viz".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/dep-viz;
+        ".local/bin/packaging-copy-from-ubuntu".source =
+          mkOutOfStoreSymlink ../../../dot/bin/packaging/copy-from-ubuntu;
       };
 
       # - pkgs.stdenv.isLinux

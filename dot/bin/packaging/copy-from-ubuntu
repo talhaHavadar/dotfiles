@@ -1,0 +1,143 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.8"
+# dependencies = [
+#     "python-debian",
+#     "launchpadlib",
+#     "keyring",
+# ]
+# ///
+"""Big thanks @baioc https://gist.github.com/baioc/4fba03153b511f0a8c48386db59329f5
+Example usage:
+
+$ ./copy-from-ubuntu --dry-run ppa:$USER/$PPANAME noble < pkglist.txt
+
+
+This script can/may be changed to fit my needs. Please use with caution.
+"""
+import argparse
+import re
+import sys
+from debian import debian_support
+from launchpadlib.launchpad import Launchpad
+
+
+cli = argparse.ArgumentParser(
+    description="Copy packages (read from stdin) from the Ubuntu archive to a target PPA",
+)
+cli.add_argument(
+    "ppa",
+    help="target PPA (e.g. ppa:~user/name)",
+)
+cli.add_argument(
+    "series",
+    help="chosen series to copy from/to (e.g. noble)",
+)
+cli.add_argument(
+    "-d", "--dry-run",
+    help="don't actually copy anything",
+    action="store_true",
+)
+cli.add_argument(
+    "-b", "--rebuild",
+    help="rebuild binary packages in the target PPA",
+    action="store_true",
+)
+cli.add_argument(
+    "-u", "--update",
+    help="update the package even if it already exists in the PPA (and the archive's version is more recent)",
+    action="store_true",
+)
+
+
+def log(*args):
+    print(*args, file=sys.stderr)
+
+
+def extract_ppa_components(ppa):
+    ppa_re = re.compile(
+        r'^(ppa:)?(~)?(?P<user>[^/]+)/((?P<distro>[^/]+)/)?(?P<name>[^/]+)$'
+    )
+    m = ppa_re.match(ppa)
+    if not m:
+        return None
+    distro = m.group('distro')
+    if distro is None:
+        distro = 'ubuntu'
+    return (m.group('user'), distro, m.group('name'))
+
+
+if __name__ == "__main__":
+    args = cli.parse_args()
+    (ppa_owner, ppa_dist, ppa_name) = extract_ppa_components(args.ppa)
+
+    lp = Launchpad.login_with("lpcopy", "production", version="devel")
+
+    ubuntu = lp.distributions['ubuntu']
+    ubuntu_archive = ubuntu.main_archive
+    series = ubuntu.getSeries(name_or_version=args.series)
+    log(f"SOURCE: distro=ubuntu series={args.series}")
+
+    dest_ppa = lp.people[ppa_owner].getPPAByName(name=ppa_name, distribution=lp.distributions[ppa_dist])
+    dest_series = lp.distributions[ppa_dist].getSeries(name_or_version=args.series)
+    log(f"TARGET: owner={ppa_owner} distro={ppa_dist} ppa={ppa_name} series={args.series}")
+
+    errcount = 0
+    for line in sys.stdin:
+        pkg_name = line.strip()
+
+        new_pkg = None
+        new_version = None
+        for srcpkg in ubuntu_archive.getPublishedSources(distro_series=series, source_name=pkg_name, exact_match=True):
+            if srcpkg.pocket not in ['Release', 'Security', 'Updates']: continue
+            srcpkg_version = debian_support.Version(srcpkg.source_package_version)
+            if new_version is None or srcpkg_version > new_version:
+                new_pkg = srcpkg
+                new_version = srcpkg_version
+
+        if new_pkg is None:
+            log(f"ERROR: source package {pkg_name} not found in Ubuntu archive")
+            errcount += 1
+            continue
+
+        old_pkg = None
+        old_version = None # actually, latest version of package in the target PPA, if any
+        for srcpkg in dest_ppa.getPublishedSources(distro_series=dest_series, source_name=pkg_name, exact_match=True):
+            if srcpkg.status not in ("Published", "Pending"): continue
+            srcpkg_version = debian_support.Version(srcpkg.source_package_version)
+            if old_version is None or srcpkg_version > old_version:
+                old_pkg = srcpkg
+                old_version = srcpkg_version
+
+        if old_pkg is not None:
+            if not args.update:
+                log(
+                    f"SKIP: package {pkg_name} already exists in {args.ppa}",
+                    f"with version {old_pkg.source_package_version} (status={old_pkg.status})",
+                )
+                continue
+            elif old_version >= new_version:
+                log(
+                    f"SKIP: package {pkg_name} {old_pkg.source_package_version} in {args.ppa}",
+                    f"is at least as recent as archive's {new_pkg.source_package_version}",
+                )
+                continue
+
+        action = "COPY" if old_pkg is None else "UPDATE"
+        if args.dry_run: action += "(dry)"
+        previous_version = 'none' if old_pkg is None else old_pkg.source_package_version
+        log(f"{action}: package={pkg_name} previous={previous_version} new={new_pkg.source_package_version} rebuild={args.rebuild}")
+
+        if not args.dry_run:
+            include_binaries = not args.rebuild
+            dest_ppa.copyPackage(
+                from_archive=ubuntu_archive,
+                source_name=pkg_name,
+                include_binaries=include_binaries,
+                to_pocket="Release",
+                to_series=args.series,
+                version=new_pkg.source_package_version,
+            )
+
+    exit(errcount)
+
