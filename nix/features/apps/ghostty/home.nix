@@ -15,7 +15,7 @@ in
       enable = true;
       # enableBashIntegration = true;
       settings = {
-        theme = "catppuccin-frappe";
+        theme = "Catppuccin Frappe";
         #font-size = 10;
         "gtk-titlebar" = false;
         "cursor-style" = "block";
