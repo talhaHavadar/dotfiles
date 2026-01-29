@@ -12,6 +12,7 @@
 This script can/may be changed to fit my needs. Please use with caution.
 """
 import argparse
+import json
 import requests
 import gzip
 import lzma
@@ -20,7 +21,7 @@ from graphviz import Digraph
 from debian.deb822 import Sources, Packages, PkgRelation
 
 
-def fetch_repo_file(base_url, dist, path):
+def fetch_repo_file(base_url, dist, path, quiet=False):
     """Fetches and decompresses a repository file (Packages or Sources)."""
     extensions = ["xz", "gz"]
     # Ensure URL ends with /
@@ -30,32 +31,36 @@ def fetch_repo_file(base_url, dist, path):
     for ext in extensions:
         url = f"{base_url}{path}.{ext}"
         try:
-            print(f"[-] Attempting to fetch: {url}")
+            if not quiet:
+                print(f"[-] Attempting to fetch: {url}")
             response = requests.get(url, timeout=10)
             if response.status_code == 200:
-                print(f"[+] Successfully fetched {url}")
+                if not quiet:
+                    print(f"[+] Successfully fetched {url}")
                 if ext == "xz":
                     return lzma.decompress(response.content).decode("utf-8")
                 else:
                     return gzip.decompress(response.content).decode("utf-8")
         except Exception as e:
-            print(f"[!] Connection error: {e}")
+            if not quiet:
+                print(f"[!] Connection error: {e}")
             continue
 
-    print(f"[!] Error: Could not find or download file at {base_url}{path}")
+    # Always print errors even in quiet mode (to stderr)
+    print(f"[!] Error: Could not find or download file at {base_url}{path}", file=sys.stderr)
     sys.exit(1)
 
 
-def fetch_packages_file(base_url, dist, arch):
+def fetch_packages_file(base_url, dist, arch, quiet=False):
     """Fetches and decompresses the Packages file from the PPA."""
     base_path = f"dists/{dist}/main/binary-{arch}/Packages"
-    return fetch_repo_file(base_url, dist, base_path)
+    return fetch_repo_file(base_url, dist, base_path, quiet=quiet)
 
 
-def fetch_sources_file(base_url, dist):
+def fetch_sources_file(base_url, dist, quiet=False):
     """Fetches and decompresses the Sources file from the PPA."""
     base_path = f"dists/{dist}/main/source/Sources"
-    return fetch_repo_file(base_url, dist, base_path)
+    return fetch_repo_file(base_url, dist, base_path, quiet=quiet)
 
 
 def parse_packages(content):
@@ -244,7 +249,7 @@ def find_strongly_connected_components(sources, edges):
     return sccs
 
 
-def compute_dependency_groups(sources, edges):
+def compute_dependency_groups(sources, edges, quiet=False):
     """Computes dependency groups (topological levels) for source packages.
 
     Group 1: Packages with no dependencies within the PPA
@@ -252,6 +257,11 @@ def compute_dependency_groups(sources, edges):
     Group N: Packages that only depend on packages in groups < N
 
     Handles cyclic dependencies by detecting SCCs and marking them appropriately.
+
+    Args:
+        sources: Set of source package names
+        edges: Set of (from, to) tuples representing dependencies
+        quiet: If True, suppress informational messages
 
     Returns:
         tuple: (groups, cycles_info)
@@ -270,8 +280,7 @@ def compute_dependency_groups(sources, edges):
             cycle_packages.add(pkg)
             cycles_info[pkg] = cycle
 
-    if cycles:
-        cycle_names = [', '.join(sorted(c)) for c in cycles]
+    if cycles and not quiet:
         print(f"[!] Warning: Circular dependencies detected:")
         for i, cycle in enumerate(cycles, 1):
             print(f"    Cycle {i}: {', '.join(sorted(cycle))}")
@@ -360,13 +369,14 @@ def compute_dependency_groups(sources, edges):
     return groups, cycles_info
 
 
-def print_dependency_groups(groups, cycles_info, edges):
+def print_dependency_groups(groups, cycles_info, edges, json_output=False):
     """Prints dependency groups in a formatted way.
 
     Args:
         groups: list of dicts with 'packages', 'is_cycle', and 'cycles' keys
         cycles_info: dict mapping cycle packages to their cycle members
         edges: set of (from, to) tuples representing dependencies
+        json_output: if True, output in JSON format
     """
     # Build dependency lookup
     deps_map = {}
@@ -374,6 +384,44 @@ def print_dependency_groups(groups, cycles_info, edges):
         if src_from not in deps_map:
             deps_map[src_from] = set()
         deps_map[src_from].add(src_to)
+
+    if json_output:
+        output = {
+            "build_order": [],
+            "has_cycles": bool(cycles_info),
+            "cycles": [list(cycle) for cycle in set(frozenset(c) for c in cycles_info.values())] if cycles_info else []
+        }
+
+        group_num = 1
+        for group_info in groups:
+            packages = group_info['packages']
+            cycles = group_info.get('cycles', [])
+
+            cyclic_pkgs = set()
+            for cycle in cycles:
+                cyclic_pkgs.update(cycle)
+
+            non_cyclic_pkgs = [p for p in packages if p not in cyclic_pkgs]
+
+            group_data = {
+                "group": group_num,
+                "packages": packages,
+                "has_cycles": bool(cyclic_pkgs),
+            }
+
+            if cyclic_pkgs:
+                group_data["regular_packages"] = non_cyclic_pkgs
+                group_data["cyclic_packages"] = {}
+                for pkg in packages:
+                    if pkg in cyclic_pkgs:
+                        cycle_deps = deps_map.get(pkg, set()) & cyclic_pkgs
+                        group_data["cyclic_packages"][pkg] = list(sorted(cycle_deps))
+
+            output["build_order"].append(group_data)
+            group_num += 1
+
+        print(json.dumps(output, indent=2))
+        return
 
     print("\n" + "=" * 60)
     print("BUILD ORDER (Dependency Groups)")
@@ -429,12 +477,13 @@ def print_dependency_groups(groups, cycles_info, edges):
     print("\n" + "=" * 60)
 
 
-def build_reverse_depends_binary(packages, target_pkg):
+def build_reverse_depends_binary(packages, target_pkg, quiet=False):
     """Finds all binary packages that depend on the target package.
 
     Args:
         packages: List of parsed package paragraphs
         target_pkg: Name of the package to find reverse dependencies for
+        quiet: If True, suppress informational messages
 
     Returns:
         dict: Mapping of package name -> list of dependency types (e.g., 'Depends', 'Recommends')
@@ -442,7 +491,7 @@ def build_reverse_depends_binary(packages, target_pkg):
     # Map of all binaries available in this PPA
     ppa_binaries = {p["Package"] for p in packages}
 
-    if target_pkg not in ppa_binaries:
+    if target_pkg not in ppa_binaries and not quiet:
         print(f"[!] Warning: Package '{target_pkg}' not found in repository")
 
     reverse_deps = {}
@@ -465,12 +514,13 @@ def build_reverse_depends_binary(packages, target_pkg):
     return reverse_deps
 
 
-def build_reverse_depends_source(sources, target_pkg):
+def build_reverse_depends_source(sources, target_pkg, quiet=False):
     """Finds all source packages that build-depend on the target package.
 
     Args:
         sources: List of parsed source paragraphs
         target_pkg: Name of the package (binary or source) to find reverse build-deps for
+        quiet: If True, suppress informational messages
 
     Returns:
         dict: Mapping of source package name -> list of dependency types
@@ -502,7 +552,8 @@ def build_reverse_depends_source(sources, target_pkg):
         target_binaries = source_to_binaries.get(target_pkg, set())
         # Also include the source name itself in case it's used directly
         target_binaries.add(target_pkg)
-        print(f"[*] Source package '{target_pkg}' provides: {', '.join(sorted(target_binaries - {target_pkg})) or '(none)'}")
+        if not quiet:
+            print(f"[*] Source package '{target_pkg}' provides: {', '.join(sorted(target_binaries - {target_pkg})) or '(none)'}")
     elif target_pkg in bin_to_source:
         # Target is a binary package - just search for that binary
         target_source = bin_to_source[target_pkg]
@@ -510,7 +561,8 @@ def build_reverse_depends_source(sources, target_pkg):
     else:
         # Unknown package - still try to search for it
         target_binaries.add(target_pkg)
-        print(f"[!] Warning: Package '{target_pkg}' not found in repository")
+        if not quiet:
+            print(f"[!] Warning: Package '{target_pkg}' not found in repository")
 
     reverse_deps = {}
     dep_fields = ["Build-Depends", "Build-Depends-Indep", "Build-Depends-Arch"]
@@ -534,12 +586,13 @@ def build_reverse_depends_source(sources, target_pkg):
     return reverse_deps
 
 
-def build_reverse_depends_source_recursive(sources, target_pkg):
+def build_reverse_depends_source_recursive(sources, target_pkg, quiet=False):
     """Recursively finds all source packages that depend on the target.
 
     Args:
         sources: List of parsed source paragraphs
         target_pkg: Name of the source package to start from
+        quiet: If True, suppress informational messages
 
     Returns:
         dict: Mapping of source package -> dict with 'via' (dependency path) and 'deps' (direct dep info)
@@ -581,10 +634,12 @@ def build_reverse_depends_source_recursive(sources, target_pkg):
 
     # BFS to find all transitive reverse dependencies
     if target_pkg not in ppa_sources:
-        print(f"[!] Warning: Source package '{target_pkg}' not found in repository")
+        if not quiet:
+            print(f"[!] Warning: Source package '{target_pkg}' not found in repository")
         return {}, []
 
-    print(f"[*] Source package '{target_pkg}' provides: {', '.join(sorted(source_to_binaries.get(target_pkg, set()))) or '(none)'}")
+    if not quiet:
+        print(f"[*] Source package '{target_pkg}' provides: {', '.join(sorted(source_to_binaries.get(target_pkg, set()))) or '(none)'}")
 
     visited = set()
     result = {}  # pkg -> {'level': int, 'via': [path], 'deps': [(field, binary)]}
@@ -612,19 +667,20 @@ def build_reverse_depends_source_recursive(sources, target_pkg):
     return result, traversal_order
 
 
-def build_reverse_depends_binary_recursive(packages, target_pkg):
+def build_reverse_depends_binary_recursive(packages, target_pkg, quiet=False):
     """Recursively finds all binary packages that depend on the target.
 
     Args:
         packages: List of parsed package paragraphs
         target_pkg: Name of the binary package to start from
+        quiet: If True, suppress informational messages
 
     Returns:
         dict: Mapping of package -> dict with 'level', 'via' (path), and 'deps' info
     """
     ppa_binaries = {p["Package"] for p in packages}
 
-    if target_pkg not in ppa_binaries:
+    if target_pkg not in ppa_binaries and not quiet:
         print(f"[!] Warning: Package '{target_pkg}' not found in repository")
 
     # Pre-compute reverse dependencies
@@ -669,8 +725,20 @@ def build_reverse_depends_binary_recursive(packages, target_pkg):
     return result, traversal_order
 
 
-def print_reverse_depends(reverse_deps, target_pkg, mode):
+def print_reverse_depends(reverse_deps, target_pkg, mode, json_output=False):
     """Prints reverse dependencies in a formatted way."""
+    if json_output:
+        output = {
+            "target": target_pkg,
+            "mode": mode,
+            "count": len(reverse_deps),
+            "reverse_dependencies": {
+                pkg: deps for pkg, deps in sorted(reverse_deps.items())
+            }
+        }
+        print(json.dumps(output, indent=2))
+        return
+
     print(f"\n{'=' * 60}")
     print(f"REVERSE DEPENDENCIES FOR: {target_pkg}")
     print(f"Mode: {mode}")
@@ -691,8 +759,53 @@ def print_reverse_depends(reverse_deps, target_pkg, mode):
     print(f"\n{'=' * 60}")
 
 
-def print_reverse_depends_recursive(result, traversal_order, target_pkg, mode):
+def print_reverse_depends_recursive(result, traversal_order, target_pkg, mode, json_output=False):
     """Prints recursive reverse dependencies in a tree-like format."""
+    if json_output:
+        # Group by level for JSON output
+        levels = {}
+        for pkg, info in result.items():
+            level = info['level']
+            if level not in levels:
+                levels[level] = []
+
+            # Format dependencies
+            deps_formatted = []
+            for dep_info in info['deps']:
+                if len(dep_info) == 3:  # source mode: (field, binary, source)
+                    field, binary, source = dep_info
+                    deps_formatted.append({
+                        "field": field,
+                        "binary": binary,
+                        "source": source
+                    })
+                else:  # binary mode: (field, pkg)
+                    field, dep_pkg = dep_info
+                    deps_formatted.append({
+                        "field": field,
+                        "package": dep_pkg
+                    })
+
+            levels[level].append({
+                "package": pkg,
+                "path": info['via'],
+                "dependencies": deps_formatted
+            })
+
+        # Sort packages within each level
+        for level in levels:
+            levels[level] = sorted(levels[level], key=lambda x: x['package'])
+
+        output = {
+            "target": target_pkg,
+            "mode": mode,
+            "recursive": True,
+            "count": len(result),
+            "levels": {str(k): v for k, v in sorted(levels.items())}
+        }
+        print(json.dumps(output, indent=2))
+        return
+
     print(f"\n{'=' * 60}")
     print(f"RECURSIVE REVERSE DEPENDENCIES FOR: {target_pkg}")
     print(f"Mode: {mode}")
@@ -778,6 +891,11 @@ def main():
         action="store_true",
         help="Recursively follow reverse dependencies (only valid with --rdepends)",
     )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output results in JSON format",
+    )
 
     args = parser.parse_args()
 
@@ -786,53 +904,58 @@ def main():
         parser.error("-X/--recursive requires --rdepends")
 
     # Warn if --arch is specified with source mode (it's ignored)
-    if args.mode == "source" and "--arch" in sys.argv:
+    if args.mode == "source" and "--arch" in sys.argv and not args.json:
         print("[!] Note: --arch is ignored in source mode (Sources file is architecture-independent)")
+
+    # Helper to print status messages (suppressed in JSON mode)
+    def log(msg):
+        if not args.json:
+            print(msg)
 
     # 1. Fetch and Parse
     if args.mode == "binary":
-        print(f"[*] Fetching Packages metadata for {args.dist}/{args.arch}...")
-        content = fetch_packages_file(args.ppa, args.dist, args.arch)
+        log(f"[*] Fetching Packages metadata for {args.dist}/{args.arch}...")
+        content = fetch_packages_file(args.ppa, args.dist, args.arch, quiet=args.json)
         packages = parse_packages(content)
-        print(f"[*] Found {len(packages)} binary packages.")
+        log(f"[*] Found {len(packages)} binary packages.")
 
         # Handle reverse depends query
         if args.rdepends:
             mode_str = f"binary ({args.arch})"
             if args.recursive:
-                result, order = build_reverse_depends_binary_recursive(packages, args.rdepends)
-                print_reverse_depends_recursive(result, order, args.rdepends, mode_str)
+                result, order = build_reverse_depends_binary_recursive(packages, args.rdepends, quiet=args.json)
+                print_reverse_depends_recursive(result, order, args.rdepends, mode_str, args.json)
             else:
-                reverse_deps = build_reverse_depends_binary(packages, args.rdepends)
-                print_reverse_depends(reverse_deps, args.rdepends, mode_str)
+                reverse_deps = build_reverse_depends_binary(packages, args.rdepends, quiet=args.json)
+                print_reverse_depends(reverse_deps, args.rdepends, mode_str, args.json)
             return
 
         # 2. Build Graph
-        print("[*] Generating BINARY level dependency graph...")
+        log("[*] Generating BINARY level dependency graph...")
         dot = build_binary_graph(packages)
     else:
-        print(f"[*] Fetching Sources metadata for {args.dist}...")
-        content = fetch_sources_file(args.ppa, args.dist)
+        log(f"[*] Fetching Sources metadata for {args.dist}...")
+        content = fetch_sources_file(args.ppa, args.dist, quiet=args.json)
         sources = parse_sources(content)
-        print(f"[*] Found {len(sources)} source packages.")
+        log(f"[*] Found {len(sources)} source packages.")
 
         # Handle reverse depends query
         if args.rdepends:
             if args.recursive:
-                result, order = build_reverse_depends_source_recursive(sources, args.rdepends)
-                print_reverse_depends_recursive(result, order, args.rdepends, "source (Build-Depends)")
+                result, order = build_reverse_depends_source_recursive(sources, args.rdepends, quiet=args.json)
+                print_reverse_depends_recursive(result, order, args.rdepends, "source (Build-Depends)", args.json)
             else:
-                reverse_deps = build_reverse_depends_source(sources, args.rdepends)
-                print_reverse_depends(reverse_deps, args.rdepends, "source (Build-Depends)")
+                reverse_deps = build_reverse_depends_source(sources, args.rdepends, quiet=args.json)
+                print_reverse_depends(reverse_deps, args.rdepends, "source (Build-Depends)", args.json)
             return
 
         # 2. Build Graph
-        print("[*] Generating SOURCE level dependency graph (using Build-Depends)...")
+        log("[*] Generating SOURCE level dependency graph (using Build-Depends)...")
         dot, edges, ppa_sources = build_source_graph(sources)
 
         # 3. Compute and print dependency groups
-        groups, cycles_info = compute_dependency_groups(ppa_sources, edges)
-        print_dependency_groups(groups, cycles_info, edges)
+        groups, cycles_info = compute_dependency_groups(ppa_sources, edges, quiet=args.json)
+        print_dependency_groups(groups, cycles_info, edges, args.json)
 
     # 4. Render
     try:
