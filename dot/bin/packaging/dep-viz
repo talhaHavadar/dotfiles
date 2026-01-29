@@ -429,6 +429,315 @@ def print_dependency_groups(groups, cycles_info, edges):
     print("\n" + "=" * 60)
 
 
+def build_reverse_depends_binary(packages, target_pkg):
+    """Finds all binary packages that depend on the target package.
+
+    Args:
+        packages: List of parsed package paragraphs
+        target_pkg: Name of the package to find reverse dependencies for
+
+    Returns:
+        dict: Mapping of package name -> list of dependency types (e.g., 'Depends', 'Recommends')
+    """
+    # Map of all binaries available in this PPA
+    ppa_binaries = {p["Package"] for p in packages}
+
+    if target_pkg not in ppa_binaries:
+        print(f"[!] Warning: Package '{target_pkg}' not found in repository")
+
+    reverse_deps = {}
+    dep_fields = ["Depends", "Pre-Depends", "Recommends", "Suggests"]
+
+    for pkg in packages:
+        pkg_name = pkg["Package"]
+        if pkg_name == target_pkg:
+            continue
+
+        for field in dep_fields:
+            dep_raw = pkg.get(field, "")
+            dep_names = parse_dependency_names(dep_raw)
+
+            if target_pkg in dep_names:
+                if pkg_name not in reverse_deps:
+                    reverse_deps[pkg_name] = []
+                reverse_deps[pkg_name].append(field)
+
+    return reverse_deps
+
+
+def build_reverse_depends_source(sources, target_pkg):
+    """Finds all source packages that build-depend on the target package.
+
+    Args:
+        sources: List of parsed source paragraphs
+        target_pkg: Name of the package (binary or source) to find reverse build-deps for
+
+    Returns:
+        dict: Mapping of source package name -> list of dependency types
+    """
+    # Map Binary -> Source and Source -> Binaries
+    bin_to_source = {}
+    source_to_binaries = {}
+    ppa_sources = set()
+
+    for src in sources:
+        src_name = src["Package"]
+        ppa_sources.add(src_name)
+        source_to_binaries[src_name] = set()
+
+        binaries = src.get("Binary", "")
+        for bin_name in binaries.split(","):
+            bin_name = bin_name.strip()
+            if bin_name:
+                bin_to_source[bin_name] = src_name
+                source_to_binaries[src_name].add(bin_name)
+
+    # Determine the target source and all binaries to search for
+    target_source = None
+    target_binaries = set()
+
+    if target_pkg in ppa_sources:
+        # Target is a source package - search for all its binaries
+        target_source = target_pkg
+        target_binaries = source_to_binaries.get(target_pkg, set())
+        # Also include the source name itself in case it's used directly
+        target_binaries.add(target_pkg)
+        print(f"[*] Source package '{target_pkg}' provides: {', '.join(sorted(target_binaries - {target_pkg})) or '(none)'}")
+    elif target_pkg in bin_to_source:
+        # Target is a binary package - just search for that binary
+        target_source = bin_to_source[target_pkg]
+        target_binaries.add(target_pkg)
+    else:
+        # Unknown package - still try to search for it
+        target_binaries.add(target_pkg)
+        print(f"[!] Warning: Package '{target_pkg}' not found in repository")
+
+    reverse_deps = {}
+    dep_fields = ["Build-Depends", "Build-Depends-Indep", "Build-Depends-Arch"]
+
+    for src in sources:
+        src_name = src["Package"]
+        if src_name == target_source:
+            continue
+
+        for field in dep_fields:
+            dep_raw = src.get(field, "")
+            dep_names = set(parse_dependency_names(dep_raw))
+
+            # Check if any of the target binaries appear in dependencies
+            matched_binaries = dep_names & target_binaries
+            for matched_bin in matched_binaries:
+                if src_name not in reverse_deps:
+                    reverse_deps[src_name] = []
+                reverse_deps[src_name].append(f"{field} ({matched_bin})")
+
+    return reverse_deps
+
+
+def build_reverse_depends_source_recursive(sources, target_pkg):
+    """Recursively finds all source packages that depend on the target.
+
+    Args:
+        sources: List of parsed source paragraphs
+        target_pkg: Name of the source package to start from
+
+    Returns:
+        dict: Mapping of source package -> dict with 'via' (dependency path) and 'deps' (direct dep info)
+    """
+    # Build mappings
+    bin_to_source = {}
+    source_to_binaries = {}
+    ppa_sources = set()
+
+    for src in sources:
+        src_name = src["Package"]
+        ppa_sources.add(src_name)
+        source_to_binaries[src_name] = set()
+
+        binaries = src.get("Binary", "")
+        for bin_name in binaries.split(","):
+            bin_name = bin_name.strip()
+            if bin_name:
+                bin_to_source[bin_name] = src_name
+                source_to_binaries[src_name].add(bin_name)
+
+    # Pre-compute all reverse dependencies for each source package
+    dep_fields = ["Build-Depends", "Build-Depends-Indep", "Build-Depends-Arch"]
+    # rdeps_map[source] = list of (dependent_source, field, matched_binary)
+    rdeps_map = {src: [] for src in ppa_sources}
+
+    for src in sources:
+        src_name = src["Package"]
+
+        for field in dep_fields:
+            dep_raw = src.get(field, "")
+            dep_names = set(parse_dependency_names(dep_raw))
+
+            for dep_bin in dep_names:
+                if dep_bin in bin_to_source:
+                    dep_source = bin_to_source[dep_bin]
+                    if dep_source != src_name:
+                        rdeps_map[dep_source].append((src_name, field, dep_bin))
+
+    # BFS to find all transitive reverse dependencies
+    if target_pkg not in ppa_sources:
+        print(f"[!] Warning: Source package '{target_pkg}' not found in repository")
+        return {}, []
+
+    print(f"[*] Source package '{target_pkg}' provides: {', '.join(sorted(source_to_binaries.get(target_pkg, set()))) or '(none)'}")
+
+    visited = set()
+    result = {}  # pkg -> {'level': int, 'via': [path], 'deps': [(field, binary)]}
+    queue = [(target_pkg, 0, [target_pkg])]  # (package, level, path)
+    traversal_order = []
+
+    while queue:
+        current, level, path = queue.pop(0)
+
+        for dependent, field, matched_bin in rdeps_map.get(current, []):
+            if dependent not in visited:
+                visited.add(dependent)
+                new_path = path + [dependent]
+                result[dependent] = {
+                    'level': level + 1,
+                    'via': new_path,
+                    'deps': [(field, matched_bin, current)]
+                }
+                traversal_order.append(dependent)
+                queue.append((dependent, level + 1, new_path))
+            elif dependent in result:
+                # Add additional dependency info
+                result[dependent]['deps'].append((field, matched_bin, current))
+
+    return result, traversal_order
+
+
+def build_reverse_depends_binary_recursive(packages, target_pkg):
+    """Recursively finds all binary packages that depend on the target.
+
+    Args:
+        packages: List of parsed package paragraphs
+        target_pkg: Name of the binary package to start from
+
+    Returns:
+        dict: Mapping of package -> dict with 'level', 'via' (path), and 'deps' info
+    """
+    ppa_binaries = {p["Package"] for p in packages}
+
+    if target_pkg not in ppa_binaries:
+        print(f"[!] Warning: Package '{target_pkg}' not found in repository")
+
+    # Pre-compute reverse dependencies
+    dep_fields = ["Depends", "Pre-Depends", "Recommends", "Suggests"]
+    # rdeps_map[pkg] = list of (dependent_pkg, field)
+    rdeps_map = {p["Package"]: [] for p in packages}
+
+    for pkg in packages:
+        pkg_name = pkg["Package"]
+
+        for field in dep_fields:
+            dep_raw = pkg.get(field, "")
+            dep_names = set(parse_dependency_names(dep_raw))
+
+            for dep_bin in dep_names:
+                if dep_bin in rdeps_map and dep_bin != pkg_name:
+                    rdeps_map[dep_bin].append((pkg_name, field))
+
+    # BFS traversal
+    visited = set()
+    result = {}
+    queue = [(target_pkg, 0, [target_pkg])]
+    traversal_order = []
+
+    while queue:
+        current, level, path = queue.pop(0)
+
+        for dependent, field in rdeps_map.get(current, []):
+            if dependent not in visited:
+                visited.add(dependent)
+                new_path = path + [dependent]
+                result[dependent] = {
+                    'level': level + 1,
+                    'via': new_path,
+                    'deps': [(field, current)]
+                }
+                traversal_order.append(dependent)
+                queue.append((dependent, level + 1, new_path))
+            elif dependent in result:
+                result[dependent]['deps'].append((field, current))
+
+    return result, traversal_order
+
+
+def print_reverse_depends(reverse_deps, target_pkg, mode):
+    """Prints reverse dependencies in a formatted way."""
+    print(f"\n{'=' * 60}")
+    print(f"REVERSE DEPENDENCIES FOR: {target_pkg}")
+    print(f"Mode: {mode}")
+    print(f"{'=' * 60}")
+
+    if not reverse_deps:
+        print(f"\nNo packages in this repository depend on '{target_pkg}'")
+    else:
+        print(f"\n{len(reverse_deps)} package(s) depend on '{target_pkg}':\n")
+
+        # Sort by package name
+        for pkg_name in sorted(reverse_deps.keys()):
+            dep_types = reverse_deps[pkg_name]
+            print(f"  {pkg_name}")
+            for dep_type in dep_types:
+                print(f"    - {dep_type}")
+
+    print(f"\n{'=' * 60}")
+
+
+def print_reverse_depends_recursive(result, traversal_order, target_pkg, mode):
+    """Prints recursive reverse dependencies in a tree-like format."""
+    print(f"\n{'=' * 60}")
+    print(f"RECURSIVE REVERSE DEPENDENCIES FOR: {target_pkg}")
+    print(f"Mode: {mode}")
+    print(f"{'=' * 60}")
+
+    if not result:
+        print(f"\nNo packages in this repository depend on '{target_pkg}'")
+        print(f"\n{'=' * 60}")
+        return
+
+    # Group by level
+    levels = {}
+    for pkg, info in result.items():
+        level = info['level']
+        if level not in levels:
+            levels[level] = []
+        levels[level].append(pkg)
+
+    print(f"\n{len(result)} package(s) depend on '{target_pkg}' (directly or transitively):\n")
+
+    # Print by level
+    for level in sorted(levels.keys()):
+        pkgs = sorted(levels[level])
+        print(f"Level {level} ({len(pkgs)} package{'s' if len(pkgs) > 1 else ''}):")
+
+        for pkg in pkgs:
+            info = result[pkg]
+            # Show the dependency path
+            path_str = " -> ".join(info['via'])
+            print(f"  {pkg}")
+            print(f"    path: {path_str}")
+
+            # Show what it depends on
+            for dep_info in info['deps']:
+                if len(dep_info) == 3:  # source mode: (field, binary, source)
+                    field, binary, source = dep_info
+                    print(f"    - {field} ({binary}) from {source}")
+                else:  # binary mode: (field, pkg)
+                    field, dep_pkg = dep_info
+                    print(f"    - {field} on {dep_pkg}")
+        print()
+
+    print("=" * 60)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Generate PPA Dependency Charts")
 
@@ -443,7 +752,11 @@ def main():
     parser.add_argument(
         "--dist", default="noble", help="Distribution codename (default: noble)"
     )
-    parser.add_argument("--arch", default="arm64", help="Architecture (default: arm64)")
+    parser.add_argument(
+        "--arch", default="amd64",
+        help="Architecture for binary mode (default: amd64). "
+             "Only applies to --mode=binary. Common values: amd64, arm64, i386"
+    )
     parser.add_argument(
         "--output",
         default="dependency_graph",
@@ -455,8 +768,26 @@ def main():
         default="binary",
         help="Graph mode: 'binary' (package-to-package) or 'source' (aggregated by source)",
     )
+    parser.add_argument(
+        "--rdepends",
+        metavar="PACKAGE",
+        help="Show reverse dependencies for the specified package (like reverse-depends)",
+    )
+    parser.add_argument(
+        "-X", "--recursive",
+        action="store_true",
+        help="Recursively follow reverse dependencies (only valid with --rdepends)",
+    )
 
     args = parser.parse_args()
+
+    # Validate -X is only used with --rdepends
+    if args.recursive and not args.rdepends:
+        parser.error("-X/--recursive requires --rdepends")
+
+    # Warn if --arch is specified with source mode (it's ignored)
+    if args.mode == "source" and "--arch" in sys.argv:
+        print("[!] Note: --arch is ignored in source mode (Sources file is architecture-independent)")
 
     # 1. Fetch and Parse
     if args.mode == "binary":
@@ -464,6 +795,17 @@ def main():
         content = fetch_packages_file(args.ppa, args.dist, args.arch)
         packages = parse_packages(content)
         print(f"[*] Found {len(packages)} binary packages.")
+
+        # Handle reverse depends query
+        if args.rdepends:
+            mode_str = f"binary ({args.arch})"
+            if args.recursive:
+                result, order = build_reverse_depends_binary_recursive(packages, args.rdepends)
+                print_reverse_depends_recursive(result, order, args.rdepends, mode_str)
+            else:
+                reverse_deps = build_reverse_depends_binary(packages, args.rdepends)
+                print_reverse_depends(reverse_deps, args.rdepends, mode_str)
+            return
 
         # 2. Build Graph
         print("[*] Generating BINARY level dependency graph...")
@@ -473,6 +815,16 @@ def main():
         content = fetch_sources_file(args.ppa, args.dist)
         sources = parse_sources(content)
         print(f"[*] Found {len(sources)} source packages.")
+
+        # Handle reverse depends query
+        if args.rdepends:
+            if args.recursive:
+                result, order = build_reverse_depends_source_recursive(sources, args.rdepends)
+                print_reverse_depends_recursive(result, order, args.rdepends, "source (Build-Depends)")
+            else:
+                reverse_deps = build_reverse_depends_source(sources, args.rdepends)
+                print_reverse_depends(reverse_deps, args.rdepends, "source (Build-Depends)")
+            return
 
         # 2. Build Graph
         print("[*] Generating SOURCE level dependency graph (using Build-Depends)...")
