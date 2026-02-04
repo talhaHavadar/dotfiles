@@ -150,8 +150,61 @@ def build_binary_graph(packages):
     return dot
 
 
-def build_source_graph(sources):
+def build_binary_transitive_deps(packages, ppa_binaries):
+    """Computes transitive closure of binary dependencies within PPA.
+
+    For each binary package in the PPA, finds all other PPA binaries it
+    transitively depends on (via Depends and Pre-Depends).
+
+    Args:
+        packages: List of parsed package paragraphs
+        ppa_binaries: Set of binary package names in the PPA
+
+    Returns:
+        dict: Mapping of binary name -> set of transitively dependent binaries
+    """
+    # Build direct dependency map (only PPA binaries)
+    direct_deps = {}
+    for pkg in packages:
+        pkg_name = pkg["Package"]
+        deps = set()
+
+        for field in ["Depends", "Pre-Depends"]:
+            dep_raw = pkg.get(field, "")
+            for dep in parse_dependency_names(dep_raw):
+                if dep in ppa_binaries:
+                    deps.add(dep)
+
+        direct_deps[pkg_name] = deps
+
+    # Compute transitive closure via BFS
+    closure = {}
+    for pkg in ppa_binaries:
+        visited = set()
+        queue = list(direct_deps.get(pkg, []))
+
+        while queue:
+            dep = queue.pop(0)
+            if dep in visited:
+                continue
+            visited.add(dep)
+            queue.extend(direct_deps.get(dep, []))
+
+        closure[pkg] = visited
+
+    return closure
+
+
+def build_source_graph(sources, packages=None):
     """Generates a graph based on Source Package Build-Depends.
+
+    If packages (binary package info) is provided, also considers transitive
+    binary dependencies. For example, if source A Build-Depends on binary X,
+    and X Depends on binary Y which is built from source B, then A depends on B.
+
+    Args:
+        sources: List of parsed source paragraphs
+        packages: Optional list of parsed binary package paragraphs
 
     Returns:
         tuple: (Digraph, set of edges, set of source names)
@@ -175,6 +228,12 @@ def build_source_graph(sources):
             if bin_name:
                 bin_to_source_map[bin_name] = src_name
 
+    # Build transitive binary dependency closure if packages provided
+    ppa_binaries = set(bin_to_source_map.keys())
+    bin_transitive = {}
+    if packages:
+        bin_transitive = build_binary_transitive_deps(packages, ppa_binaries)
+
     edges = set()
 
     for src in sources:
@@ -183,13 +242,19 @@ def build_source_graph(sources):
         dep_names = parse_dependency_names(build_depends_raw)
 
         for bin_target in dep_names:
-            # Resolve target binary to target source
-            # If bin_target is not in map, it's external (system) -> Skip
+            # Direct dependency: Build-Depends -> binary -> source
             if bin_target in bin_to_source_map:
                 src_to = bin_to_source_map[bin_target]
-
                 if src_from != src_to:
                     edges.add((src_from, src_to))
+
+            # Transitive dependencies through binary Depends chain
+            if bin_target in bin_transitive:
+                for transitive_bin in bin_transitive[bin_target]:
+                    if transitive_bin in bin_to_source_map:
+                        src_to = bin_to_source_map[transitive_bin]
+                        if src_from != src_to:
+                            edges.add((src_from, src_to))
 
     for src in ppa_sources:
         dot.node(src, src)
@@ -903,9 +968,9 @@ def main():
     if args.recursive and not args.rdepends:
         parser.error("-X/--recursive requires --rdepends")
 
-    # Warn if --arch is specified with source mode (it's ignored)
-    if args.mode == "source" and "--arch" in sys.argv and not args.json:
-        print("[!] Note: --arch is ignored in source mode (Sources file is architecture-independent)")
+    # Note about --arch in source mode (it's used for binary transitive deps)
+    # No longer printing a warning since --arch IS used to fetch Packages for
+    # resolving transitive binary dependencies in source mode
 
     # Helper to print status messages (suppressed in JSON mode)
     def log(msg):
@@ -939,6 +1004,12 @@ def main():
         sources = parse_sources(content)
         log(f"[*] Found {len(sources)} source packages.")
 
+        # Also fetch Packages to resolve transitive binary dependencies
+        log(f"[*] Fetching Packages metadata for {args.dist}/{args.arch} (for transitive deps)...")
+        pkg_content = fetch_packages_file(args.ppa, args.dist, args.arch, quiet=args.json)
+        packages = parse_packages(pkg_content)
+        log(f"[*] Found {len(packages)} binary packages.")
+
         # Handle reverse depends query
         if args.rdepends:
             if args.recursive:
@@ -949,9 +1020,9 @@ def main():
                 print_reverse_depends(reverse_deps, args.rdepends, "source (Build-Depends)", args.json)
             return
 
-        # 2. Build Graph
-        log("[*] Generating SOURCE level dependency graph (using Build-Depends)...")
-        dot, edges, ppa_sources = build_source_graph(sources)
+        # 2. Build Graph (with transitive binary deps)
+        log("[*] Generating SOURCE level dependency graph (using Build-Depends + transitive binary deps)...")
+        dot, edges, ppa_sources = build_source_graph(sources, packages)
 
         # 3. Compute and print dependency groups
         groups, cycles_info = compute_dependency_groups(ppa_sources, edges, quiet=args.json)
