@@ -916,6 +916,639 @@ def print_reverse_depends_recursive(result, traversal_order, target_pkg, mode, j
     print("=" * 60)
 
 
+def generate_html_graph(nodes, edges, title, output_path):
+    """Generates an interactive HTML graph using Cytoscape.js.
+
+    Args:
+        nodes: Set of node names
+        edges: Set of (from, to) tuples representing dependencies
+        title: Title for the graph
+        output_path: Path to write the HTML file
+    """
+    # Build node and edge data for Cytoscape
+    nodes_json = [{"data": {"id": node, "label": node}} for node in sorted(nodes)]
+    edges_json = [{"data": {"source": src, "target": tgt}} for src, tgt in edges]
+
+    html_template = '''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>''' + title + '''</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            overflow: hidden;
+        }
+        #cy {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        #controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(30, 30, 50, 0.95);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            max-width: 320px;
+        }
+        #controls h3 {
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        #search-container {
+            margin-bottom: 12px;
+        }
+        #search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        #search-input:focus {
+            border-color: #4ecdc4;
+        }
+        #search-input::placeholder {
+            color: #666;
+        }
+        #search-input.matched {
+            border-color: #4ecdc4;
+            background: rgba(78, 205, 196, 0.1);
+        }
+        #search-input.no-match {
+            border-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+        #mode-indicator {
+            font-size: 13px;
+            padding: 8px 12px;
+            background: rgba(100, 100, 140, 0.3);
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+        #mode-indicator .mode-label {
+            color: #aaa;
+        }
+        #mode-indicator .mode-value {
+            font-weight: 600;
+            color: #fff;
+        }
+        .legend {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 12px;
+            margin-top: 12px;
+            padding: 12px 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 0;
+        }
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+        }
+        .legend-color.depends {
+            background: #4ecdc4;
+        }
+        .legend-color.rdepends {
+            background: #ff6b6b;
+        }
+        .legend-color.both {
+            background: #ffe66d;
+        }
+        .legend-color.dimmed {
+            background: rgba(100, 100, 100, 0.3);
+        }
+        #help {
+            margin-top: 15px;
+            padding: 12px 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 11px;
+            color: #666;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        #help p {
+            padding: 4px 0;
+        }
+        #help kbd {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        #node-info {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(30, 30, 50, 0.95);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            max-width: 400px;
+            display: none;
+        }
+        #node-info h4 {
+            color: #4ecdc4;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        #node-info .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 12px;
+        }
+        #node-info .stat {
+            padding: 6px 10px;
+            background: rgba(100, 100, 140, 0.2);
+            border-radius: 4px;
+        }
+        #node-info .stat-label {
+            color: #888;
+        }
+        #node-info .stat-value {
+            font-weight: 600;
+        }
+        #node-info .stat-value.depends {
+            color: #4ecdc4;
+        }
+        #node-info .stat-value.rdepends {
+            color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div id="cy"></div>
+    <div id="controls">
+        <h3>Dependency Graph</h3>
+        <div id="search-container">
+            <input type="text" id="search-input" placeholder="Search package..." autocomplete="off" />
+        </div>
+        <div id="mode-indicator">
+            <span class="mode-label">Highlight mode:</span>
+            <span class="mode-value" id="mode-text">Both</span>
+        </div>
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color depends"></div>
+                <span>Dependencies (packages I depend on)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color rdepends"></div>
+                <span>Reverse dependencies (depend on me)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color both"></div>
+                <span>Current node</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color dimmed"></div>
+                <span>Unrelated packages</span>
+            </div>
+        </div>
+        <div id="help">
+            <p><kbd>Space</kbd> Toggle highlight mode</p>
+            <p><kbd>Esc</kbd> Clear search</p>
+            <p><kbd>Scroll</kbd> Zoom in/out</p>
+            <p><kbd>Drag</kbd> Pan the graph</p>
+        </div>
+    </div>
+    <div id="node-info">
+        <h4 id="node-name"></h4>
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-label">Dependencies: </span>
+                <span class="stat-value depends" id="dep-count">0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Reverse deps: </span>
+                <span class="stat-value rdepends" id="rdep-count">0</span>
+            </div>
+        </div>
+    </div>
+    <script>
+        const graphData = {
+            nodes: ''' + json.dumps(nodes_json) + ''',
+            edges: ''' + json.dumps(edges_json) + '''
+        };
+
+        // Pre-compute dependency relationships for fast lookup
+        const dependencies = {};  // node -> set of nodes it depends on (transitively)
+        const reverseDeps = {};   // node -> set of nodes that depend on it (transitively)
+
+        // Initialize
+        graphData.nodes.forEach(n => {
+            dependencies[n.data.id] = new Set();
+            reverseDeps[n.data.id] = new Set();
+        });
+
+        // Build direct dependency map
+        const directDeps = {};
+        const directRdeps = {};
+        graphData.nodes.forEach(n => {
+            directDeps[n.data.id] = new Set();
+            directRdeps[n.data.id] = new Set();
+        });
+        graphData.edges.forEach(e => {
+            directDeps[e.data.source].add(e.data.target);
+            directRdeps[e.data.target].add(e.data.source);
+        });
+
+        // Compute transitive closure for dependencies
+        function computeTransitive(directMap, resultMap) {
+            Object.keys(directMap).forEach(node => {
+                const visited = new Set();
+                const queue = [...directMap[node]];
+                while (queue.length > 0) {
+                    const current = queue.shift();
+                    if (visited.has(current)) continue;
+                    visited.add(current);
+                    resultMap[node].add(current);
+                    directMap[current].forEach(next => {
+                        if (!visited.has(next)) queue.push(next);
+                    });
+                }
+            });
+        }
+
+        computeTransitive(directDeps, dependencies);
+        computeTransitive(directRdeps, reverseDeps);
+
+        // Highlight modes: 0 = both, 1 = dependencies only, 2 = reverse deps only
+        let highlightMode = 0;
+        const modeNames = ['Both', 'Dependencies only', 'Reverse deps only'];
+
+        const cy = cytoscape({
+            container: document.getElementById('cy'),
+            elements: [...graphData.nodes, ...graphData.edges],
+            style: [
+                {
+                    selector: 'node',
+                    style: {
+                        'background-color': '#6c7a89',
+                        'label': 'data(label)',
+                        'color': '#fff',
+                        'text-valign': 'center',
+                        'text-halign': 'center',
+                        'font-size': '10px',
+                        'font-weight': '500',
+                        'width': 'label',
+                        'height': '30px',
+                        'padding': '10px',
+                        'shape': 'round-rectangle',
+                        'text-wrap': 'none',
+                        'border-width': 2,
+                        'border-color': '#4a5568',
+                        'transition-property': 'background-color, border-color, opacity',
+                        'transition-duration': '0.2s'
+                    }
+                },
+                {
+                    selector: 'edge',
+                    style: {
+                        'width': 2,
+                        'line-color': '#4a5568',
+                        'target-arrow-color': '#4a5568',
+                        'target-arrow-shape': 'triangle',
+                        'curve-style': 'bezier',
+                        'arrow-scale': 1.2,
+                        'transition-property': 'line-color, target-arrow-color, opacity',
+                        'transition-duration': '0.2s'
+                    }
+                },
+                {
+                    selector: 'node.dimmed',
+                    style: {
+                        'opacity': 0.15
+                    }
+                },
+                {
+                    selector: 'edge.dimmed',
+                    style: {
+                        'opacity': 0.08
+                    }
+                },
+                {
+                    selector: 'node.highlighted-current',
+                    style: {
+                        'background-color': '#ffe66d',
+                        'border-color': '#f5c842',
+                        'border-width': 3,
+                        'color': '#1a1a2e'
+                    }
+                },
+                {
+                    selector: 'node.highlighted-depends',
+                    style: {
+                        'background-color': '#4ecdc4',
+                        'border-color': '#26a69a',
+                        'border-width': 3,
+                        'color': '#1a1a2e'
+                    }
+                },
+                {
+                    selector: 'node.highlighted-rdepends',
+                    style: {
+                        'background-color': '#ff6b6b',
+                        'border-color': '#e53935',
+                        'border-width': 3,
+                        'color': '#fff'
+                    }
+                },
+                {
+                    selector: 'edge.highlighted-depends',
+                    style: {
+                        'line-color': '#4ecdc4',
+                        'target-arrow-color': '#4ecdc4',
+                        'width': 3
+                    }
+                },
+                {
+                    selector: 'edge.highlighted-rdepends',
+                    style: {
+                        'line-color': '#ff6b6b',
+                        'target-arrow-color': '#ff6b6b',
+                        'width': 3
+                    }
+                }
+            ],
+            layout: {
+                name: 'cose',
+                idealEdgeLength: 120,
+                nodeOverlap: 20,
+                refresh: 20,
+                fit: true,
+                padding: 50,
+                randomize: false,
+                componentSpacing: 100,
+                nodeRepulsion: 8000,
+                edgeElasticity: 100,
+                nestingFactor: 5,
+                gravity: 0.25,
+                numIter: 1000,
+                initialTemp: 200,
+                coolingFactor: 0.95,
+                minTemp: 1.0
+            },
+            minZoom: 0.2,
+            maxZoom: 3,
+            wheelSensitivity: 0.3
+        });
+
+        let hoveredNode = null;
+
+        // Search state
+        const searchInput = document.getElementById('search-input');
+        const allNodeNames = new Set(graphData.nodes.map(n => n.data.id));
+        let searchedNode = null;
+
+        function clearHighlights() {
+            cy.elements().removeClass('dimmed highlighted-current highlighted-depends highlighted-rdepends');
+        }
+
+        function applyHighlights(nodeId) {
+            if (!nodeId) return;
+
+            const deps = dependencies[nodeId] || new Set();
+            const rdeps = reverseDeps[nodeId] || new Set();
+
+            const showDeps = highlightMode === 0 || highlightMode === 1;
+            const showRdeps = highlightMode === 0 || highlightMode === 2;
+
+            // Determine which nodes to highlight
+            const highlightedNodes = new Set([nodeId]);
+            if (showDeps) deps.forEach(d => highlightedNodes.add(d));
+            if (showRdeps) rdeps.forEach(r => highlightedNodes.add(r));
+
+            // Dim all elements first
+            cy.elements().addClass('dimmed');
+
+            // Remove dimmed from highlighted nodes and apply highlight classes
+            cy.nodes().forEach(node => {
+                const id = node.id();
+                if (highlightedNodes.has(id)) {
+                    node.removeClass('dimmed');
+                    if (id === nodeId) {
+                        node.addClass('highlighted-current');
+                    } else if (showDeps && deps.has(id)) {
+                        node.addClass('highlighted-depends');
+                    } else if (showRdeps && rdeps.has(id)) {
+                        node.addClass('highlighted-rdepends');
+                    }
+                }
+            });
+
+            // Highlight edges
+            cy.edges().forEach(edge => {
+                const src = edge.source().id();
+                const tgt = edge.target().id();
+
+                // Edge from current node to a dependency
+                if (showDeps && src === nodeId && deps.has(tgt)) {
+                    edge.removeClass('dimmed');
+                    edge.addClass('highlighted-depends');
+                }
+                // Edge within dependencies (transitive)
+                else if (showDeps && deps.has(src) && deps.has(tgt)) {
+                    edge.removeClass('dimmed');
+                    edge.addClass('highlighted-depends');
+                }
+                // Edge from rdep to current node
+                else if (showRdeps && tgt === nodeId && rdeps.has(src)) {
+                    edge.removeClass('dimmed');
+                    edge.addClass('highlighted-rdepends');
+                }
+                // Edge within reverse dependencies (transitive)
+                else if (showRdeps && rdeps.has(src) && rdeps.has(tgt)) {
+                    edge.removeClass('dimmed');
+                    edge.addClass('highlighted-rdepends');
+                }
+            });
+        }
+
+        function updateModeIndicator() {
+            document.getElementById('mode-text').textContent = modeNames[highlightMode];
+        }
+
+        function updateNodeInfo(nodeId) {
+            const nodeInfo = document.getElementById('node-info');
+            if (!nodeId) {
+                nodeInfo.style.display = 'none';
+                return;
+            }
+            const deps = dependencies[nodeId] || new Set();
+            const rdeps = reverseDeps[nodeId] || new Set();
+
+            document.getElementById('node-name').textContent = nodeId;
+            document.getElementById('dep-count').textContent = deps.size;
+            document.getElementById('rdep-count').textContent = rdeps.size;
+            nodeInfo.style.display = 'block';
+        }
+
+        cy.on('mouseover', 'node', function(e) {
+            hoveredNode = e.target.id();
+            clearHighlights();
+            applyHighlights(hoveredNode);
+            updateNodeInfo(hoveredNode);
+        });
+
+        cy.on('mouseout', 'node', function(e) {
+            hoveredNode = null;
+            // If there's a searched node, keep that highlighted
+            if (searchedNode) {
+                clearHighlights();
+                applyHighlights(searchedNode);
+                updateNodeInfo(searchedNode);
+            } else {
+                clearHighlights();
+                updateNodeInfo(null);
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            // Don't intercept space when typing in search
+            if (e.code === 'Space' && document.activeElement !== searchInput) {
+                e.preventDefault();
+                highlightMode = (highlightMode + 1) % 3;
+                updateModeIndicator();
+                if (hoveredNode || searchedNode) {
+                    clearHighlights();
+                    applyHighlights(hoveredNode || searchedNode);
+                }
+            }
+        });
+
+        // Search functionality
+        searchInput.addEventListener('input', function(e) {
+            const query = e.target.value.trim().toLowerCase();
+            searchInput.classList.remove('matched', 'no-match');
+
+            if (!query) {
+                searchedNode = null;
+                if (!hoveredNode) {
+                    clearHighlights();
+                    updateNodeInfo(null);
+                }
+                return;
+            }
+
+            // Find exact match (case-insensitive)
+            let matchedNode = null;
+            for (const name of allNodeNames) {
+                if (name.toLowerCase() === query) {
+                    matchedNode = name;
+                    break;
+                }
+            }
+
+            if (matchedNode) {
+                searchInput.classList.add('matched');
+                searchedNode = matchedNode;
+                clearHighlights();
+                applyHighlights(matchedNode);
+                updateNodeInfo(matchedNode);
+
+                // Center view on the matched node
+                const node = cy.getElementById(matchedNode);
+                cy.animate({
+                    center: { eles: node },
+                    duration: 300
+                });
+            } else {
+                searchInput.classList.add('no-match');
+                searchedNode = null;
+                if (!hoveredNode) {
+                    clearHighlights();
+                    updateNodeInfo(null);
+                }
+            }
+        });
+
+        // Clear search when hovering a node
+        cy.on('mouseover', 'node', function() {
+            searchInput.value = '';
+            searchInput.classList.remove('matched', 'no-match');
+            searchedNode = null;
+        });
+
+        // Escape key clears search
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.code === 'Escape') {
+                searchInput.value = '';
+                searchInput.classList.remove('matched', 'no-match');
+                searchedNode = null;
+                searchInput.blur();
+                clearHighlights();
+                updateNodeInfo(null);
+            }
+        });
+
+        updateModeIndicator();
+    </script>
+</body>
+</html>'''
+
+    with open(output_path, 'w') as f:
+        f.write(html_template)
+
+    return output_path
+
+
+def build_binary_edges(packages):
+    """Builds edge set for binary package dependencies.
+
+    Args:
+        packages: List of parsed package paragraphs
+
+    Returns:
+        tuple: (set of package names, set of (from, to) edges)
+    """
+    ppa_binaries = {p["Package"] for p in packages}
+    edges = set()
+
+    for pkg in packages:
+        pkg_name = pkg["Package"]
+        depends_raw = pkg.get("Depends", "")
+        dep_names = parse_dependency_names(depends_raw)
+
+        for target_bin in dep_names:
+            if target_bin in ppa_binaries and target_bin != pkg_name:
+                edges.add((pkg_name, target_bin))
+
+    return ppa_binaries, edges
+
+
 def main():
     parser = argparse.ArgumentParser(description="Generate PPA Dependency Charts")
 
@@ -961,6 +1594,12 @@ def main():
         action="store_true",
         help="Output results in JSON format",
     )
+    parser.add_argument(
+        "--format",
+        choices=["png", "html"],
+        default="png",
+        help="Output format: 'png' (static graph) or 'html' (interactive visualization)",
+    )
 
     args = parser.parse_args()
 
@@ -997,7 +1636,10 @@ def main():
 
         # 2. Build Graph
         log("[*] Generating BINARY level dependency graph...")
+        ppa_binaries, edges = build_binary_edges(packages)
         dot = build_binary_graph(packages)
+        graph_nodes = ppa_binaries
+        graph_edges = edges
     else:
         log(f"[*] Fetching Sources metadata for {args.dist}...")
         content = fetch_sources_file(args.ppa, args.dist, quiet=args.json)
@@ -1023,20 +1665,28 @@ def main():
         # 2. Build Graph (with transitive binary deps)
         log("[*] Generating SOURCE level dependency graph (using Build-Depends + transitive binary deps)...")
         dot, edges, ppa_sources = build_source_graph(sources, packages)
+        graph_nodes = ppa_sources
+        graph_edges = edges
 
         # 3. Compute and print dependency groups
         groups, cycles_info = compute_dependency_groups(ppa_sources, edges, quiet=args.json)
         print_dependency_groups(groups, cycles_info, edges, args.json)
 
     # 4. Render
-    try:
-        output_path = dot.render(args.output, format="png", cleanup=True)
-        print(f"[SUCCESS] Chart saved to: {output_path}")
-    except Exception as e:
-        print(f"[!] Error rendering graph: {e}")
-        print(
-            "    Ensure 'graphviz' is installed on your system (e.g., 'sudo apt install graphviz')"
-        )
+    if args.format == "html":
+        title = f"PPA Dependency Graph ({args.mode} mode) - {args.dist}"
+        output_path = f"{args.output}.html"
+        generate_html_graph(graph_nodes, graph_edges, title, output_path)
+        print(f"[SUCCESS] Interactive chart saved to: {output_path}")
+    else:
+        try:
+            output_path = dot.render(args.output, format="png", cleanup=True)
+            print(f"[SUCCESS] Chart saved to: {output_path}")
+        except Exception as e:
+            print(f"[!] Error rendering graph: {e}")
+            print(
+                "    Ensure 'graphviz' is installed on your system (e.g., 'sudo apt install graphviz')"
+            )
 
 
 if __name__ == "__main__":
