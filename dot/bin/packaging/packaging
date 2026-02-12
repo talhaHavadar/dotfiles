@@ -4,6 +4,12 @@
 if [ $# -eq 0 ]; then
     echo "Usage: packaging <command> [arguments...]"
     echo "Example: packaging get-uploads --help"
+    echo "
+Example: packaging get-uploads --help
+See available packaging binaries:
+
+$(basename -a $HOME/.local/bin/packaging-*)
+    "
     exit 1
 fi
 
