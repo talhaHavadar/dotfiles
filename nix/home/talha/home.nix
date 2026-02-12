@@ -47,6 +47,7 @@ in
         ".local/bin/packaging-dep-viz".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/dep-viz;
         ".local/bin/packaging-copy-from-ubuntu".source =
           mkOutOfStoreSymlink ../../../dot/bin/packaging/copy-from-ubuntu;
+        ".local/bin/packaging-ppa-build".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/ppa-build;
       };
 
       # - pkgs.stdenv.isLinux
