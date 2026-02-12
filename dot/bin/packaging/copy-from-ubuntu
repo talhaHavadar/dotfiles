@@ -48,6 +48,13 @@ cli.add_argument(
     help="update the package even if it already exists in the PPA (and the archive's version is more recent)",
     action="store_true",
 )
+cli.add_argument(
+    "-p", "--pocket",
+    help="pocket(s) to look in the Ubuntu archive (can be specified multiple times). Default: Release, Security, Updates",
+    action="append",
+    choices=["Release", "Security", "Updates", "Proposed", "Backports"],
+    dest="pockets",
+)
 
 
 def log(*args):
@@ -69,6 +76,7 @@ def extract_ppa_components(ppa):
 
 if __name__ == "__main__":
     args = cli.parse_args()
+    pockets = args.pockets if args.pockets else ["Release", "Security", "Updates"]
     (ppa_owner, ppa_dist, ppa_name) = extract_ppa_components(args.ppa)
 
     lp = Launchpad.login_with("lpcopy", "production", version="devel")
@@ -89,7 +97,7 @@ if __name__ == "__main__":
         new_pkg = None
         new_version = None
         for srcpkg in ubuntu_archive.getPublishedSources(distro_series=series, source_name=pkg_name, exact_match=True):
-            if srcpkg.pocket not in ['Release', 'Security', 'Updates']: continue
+            if srcpkg.pocket not in pockets: continue
             srcpkg_version = debian_support.Version(srcpkg.source_package_version)
             if new_version is None or srcpkg_version > new_version:
                 new_pkg = srcpkg
