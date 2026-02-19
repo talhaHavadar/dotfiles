@@ -120,8 +120,8 @@ in
           sparse.user.id = "talhaHavadar";
           rebase.autoSquash = true;
           commit.gpgSign = "true";
-          tag.gpgSign = true;
-          log.showSignature = true;
+          # tag.gpgSign = true;
+          # log.showSignature = true;
           includeIf."gitdir:~/workspace/".path = "~/workspace/.gitconfig";
         };
       };
