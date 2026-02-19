@@ -102,6 +102,10 @@ def main():
         builds = source.getBuilds()
         for build in builds:
             targeted_archs.add(build.arch_tag)
+    if not targeted_archs:
+        # Exit 255 signals "no source published yet, retry later"
+        sys.exit(255)
+
     logger.info(f"Targeted architectures: {targeted_archs}")
 
     # Filter by user-specified arch if provided

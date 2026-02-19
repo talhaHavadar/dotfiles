@@ -46,6 +46,7 @@ process_trigger_tests_with_archs() {
     shift
     local archs=("$@")
     local failed_archs=()
+    local needs_full_retry=false
 
     for arch in "${archs[@]}"; do
         local full_cmd="${cmd} --arch ${arch}"
@@ -56,19 +57,26 @@ process_trigger_tests_with_archs() {
 
         log "EXIT | ${full_cmd} | exit=${exit_code}"
 
-        if [[ $exit_code -ne 0 ]]; then
+        if [[ $exit_code -eq 255 ]]; then
+            # No source package published yet - retry everything later
+            needs_full_retry=true
+            break
+        elif [[ $exit_code -ne 0 ]]; then
             failed_archs+=("$arch")
         fi
     done
 
-    if [[ ${#failed_archs[@]} -eq 0 ]]; then
+    if [[ "$needs_full_retry" == true ]]; then
+        log "RETRY | no source published, will retry all archs later"
+        # Don't modify the queue entry - leave it as-is for full retry
+    elif [[ ${#failed_archs[@]} -eq 0 ]]; then
         log "DONE | ${cmd}"
         remove_first
     else
         local archs_json
         archs_json=$(printf '%s\n' "${failed_archs[@]}" | jq -R . | jq -s .)
         local new_entry
-        new_entry=$(jq -n --arg cmd "$cmd" --argjson archs "$archs_json" '{cmd: $cmd, archs: $archs}')
+        new_entry=$(jq -c -n --arg cmd "$cmd" --argjson archs "$archs_json" '{cmd: $cmd, archs: $archs}')
         log "RETRY | archs=${failed_archs[*]}"
         update_queue "$new_entry"
     fi
@@ -96,7 +104,7 @@ process_trigger_tests_initial() {
             local archs_json
             archs_json=$(printf '%s\n' "${archs_arr[@]}" | jq -R . | jq -s .)
             local new_entry
-            new_entry=$(jq -n --arg cmd "$cmd" --argjson archs "$archs_json" '{cmd: $cmd, archs: $archs}')
+            new_entry=$(jq -c -n --arg cmd "$cmd" --argjson archs "$archs_json" '{cmd: $cmd, archs: $archs}')
             log "RETRY | archs=${archs_arr[*]}"
             update_queue "$new_entry"
         fi
