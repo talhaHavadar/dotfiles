@@ -21,24 +21,19 @@ log() {
     fi
 }
 
-update_queue() {
-    local new_first="$1"
+remove_first() {
     local rest
     rest=$(tail -n +2 "${QUEUE_FILE}")
-
-    if [[ -n "$new_first" ]]; then
-        echo "$new_first" > "${QUEUE_FILE}"
+    if [[ -n "$rest" ]]; then
+        echo "$rest" > "${QUEUE_FILE}"
     else
         : > "${QUEUE_FILE}"
     fi
-
-    if [[ -n "$rest" ]]; then
-        echo "$rest" >> "${QUEUE_FILE}"
-    fi
 }
 
-remove_first() {
-    update_queue ""
+append_to_queue() {
+    local entry="$1"
+    echo "$entry" >> "${QUEUE_FILE}"
 }
 
 process_trigger_tests_with_archs() {
@@ -66,19 +61,22 @@ process_trigger_tests_with_archs() {
         fi
     done
 
+    local first_line
+    first_line=$(head -n1 "${QUEUE_FILE}")
+    remove_first
+
     if [[ "$needs_full_retry" == true ]]; then
         log "RETRY | no source published, will retry all archs later"
-        # Don't modify the queue entry - leave it as-is for full retry
+        append_to_queue "$first_line"
     elif [[ ${#failed_archs[@]} -eq 0 ]]; then
         log "DONE | ${cmd}"
-        remove_first
     else
         local archs_json
         archs_json=$(printf '%s\n' "${failed_archs[@]}" | jq -R . | jq -s .)
         local new_entry
         new_entry=$(jq -c -n --arg cmd "$cmd" --argjson archs "$archs_json" '{cmd: $cmd, archs: $archs}')
         log "RETRY | archs=${failed_archs[*]}"
-        update_queue "$new_entry"
+        append_to_queue "$new_entry"
     fi
 }
 
@@ -92,9 +90,12 @@ process_trigger_tests_initial() {
 
     log "EXIT | ${cmd} | exit=${exit_code}"
 
+    local first_line
+    first_line=$(head -n1 "${QUEUE_FILE}")
+    remove_first
+
     if [[ $exit_code -eq 0 ]]; then
         log "DONE | ${cmd}"
-        remove_first
     else
         # Parse archs from output (space-separated)
         local archs_arr
@@ -106,9 +107,11 @@ process_trigger_tests_initial() {
             local new_entry
             new_entry=$(jq -c -n --arg cmd "$cmd" --argjson archs "$archs_json" '{cmd: $cmd, archs: $archs}')
             log "RETRY | archs=${archs_arr[*]}"
-            update_queue "$new_entry"
+            append_to_queue "$new_entry"
+        else
+            # No archs in output, re-append original entry for retry
+            append_to_queue "$first_line"
         fi
-        # If no archs in output, keep entry as-is for retry
     fi
 }
 
@@ -117,16 +120,21 @@ process_simple_command() {
 
     log "EXEC | ${cmd}"
 
+    local first_line
+    first_line=$(head -n1 "${QUEUE_FILE}")
+
     local exit_code=0
     eval "${cmd}" >/dev/null 2>&1 || exit_code=$?
 
     log "EXIT | ${cmd} | exit=${exit_code}"
 
+    remove_first
     if [[ $exit_code -eq 0 ]]; then
         log "DONE | ${cmd}"
-        remove_first
+    else
+        log "RETRY | will retry later"
+        append_to_queue "$first_line"
     fi
-    # On failure, keep entry for retry (no changes to queue)
 }
 
 main() {
