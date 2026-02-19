@@ -181,7 +181,6 @@ install_python_tools() {
     if has_cmd pipx; then
         info "Installing Python tools via pipx..."
         pipx install black 2>/dev/null || true
-        pipx install yamlfmt 2>/dev/null || warn "yamlfmt not available via pipx"
     elif has_cmd pip3; then
         info "Installing Python tools via pip3..."
         pip3 install --user black || warn "Failed to install black"
