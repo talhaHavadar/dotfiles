@@ -19,7 +19,6 @@
     nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
     sparse = {
       url = "github:Orca-The-Company/sparse";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -30,7 +29,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     zen-browser = {
-      url = "github:0xc000022070/zen-browser-flake";
+      url = "github:talhaHavadar/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     walker = {
