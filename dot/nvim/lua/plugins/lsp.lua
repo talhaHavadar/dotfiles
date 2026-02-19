@@ -81,6 +81,9 @@ return {
                 capabilities = capabilities,
                 settings = {
                     yaml = {
+                        format = {
+                            enable = false,
+                        },
                         schemaStore = {
                             enable = false,
                             url = "",
