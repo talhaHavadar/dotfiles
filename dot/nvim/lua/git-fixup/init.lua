@@ -3,6 +3,7 @@ local M = {}
 local defaults = {
 	commit_limit = 20,
 	keymap = "<leader>gf",
+	instant_fixup_keymap = "<leader>gF",
 }
 
 local config = {}
@@ -12,10 +13,13 @@ local function has_staged_changes()
 	return vim.v.shell_error ~= 0
 end
 
-local function show_commit_picker()
+local function show_commit_picker(opts)
+	opts = opts or {}
+	local instant = opts.instant or false
+
 	require("telescope.builtin").git_commits({
 		git_command = { "git", "log", "--oneline", "-n", tostring(config.commit_limit), "--format=%H %s" },
-		attach_mappings = function(_, map)
+		attach_mappings = function(_, _)
 			local actions = require("telescope.actions")
 			local action_state = require("telescope.actions.state")
 			actions.select_default:replace(function(prompt_bufnr)
@@ -23,10 +27,21 @@ local function show_commit_picker()
 				actions.close(prompt_bufnr)
 				local sha = selection.value
 				vim.fn.system("git commit --fixup=" .. sha)
-				if vim.v.shell_error == 0 then
-					vim.notify("Created fixup for " .. sha:sub(1, 7), vim.log.levels.INFO)
-				else
+				if vim.v.shell_error ~= 0 then
 					vim.notify("Fixup failed", vim.log.levels.ERROR)
+					return
+				end
+
+				if instant then
+					vim.notify("Rebasing...", vim.log.levels.INFO)
+					vim.fn.system("GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash " .. sha .. "~1")
+					if vim.v.shell_error == 0 then
+						vim.notify("Fixup applied to " .. sha:sub(1, 7), vim.log.levels.INFO)
+					else
+						vim.notify("Rebase failed - resolve conflicts and continue", vim.log.levels.ERROR)
+					end
+				else
+					vim.notify("Created fixup for " .. sha:sub(1, 7), vim.log.levels.INFO)
 				end
 			end)
 			return true
@@ -34,7 +49,8 @@ local function show_commit_picker()
 	})
 end
 
-local function show_file_picker()
+local function show_file_picker(opts)
+	opts = opts or {}
 	local pickers = require("telescope.pickers")
 	local finders = require("telescope.finders")
 	local conf = require("telescope.config").values
@@ -65,7 +81,7 @@ local function show_file_picker()
 						vim.fn.system("git add " .. vim.fn.shellescape(selection[1]))
 					end
 
-					show_commit_picker()
+					show_commit_picker(opts)
 				end)
 				return true
 			end,
@@ -73,12 +89,17 @@ local function show_file_picker()
 		:find()
 end
 
-function M.fixup()
+function M.fixup(opts)
+	opts = opts or {}
 	if has_staged_changes() then
-		show_commit_picker()
+		show_commit_picker(opts)
 	else
-		show_file_picker()
+		show_file_picker(opts)
 	end
+end
+
+function M.instant_fixup()
+	M.fixup({ instant = true })
 end
 
 function M.setup(opts)
@@ -86,6 +107,14 @@ function M.setup(opts)
 
 	if config.keymap then
 		vim.keymap.set("n", config.keymap, M.fixup, { desc = "Git fixup commit" })
+	end
+	if config.instant_fixup_keymap then
+		vim.keymap.set(
+			"n",
+			config.instant_fixup_keymap,
+			M.instant_fixup,
+			{ desc = "Git instant fixup (fixup + rebase)" }
+		)
 	end
 end
 
