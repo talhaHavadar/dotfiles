@@ -1,0 +1,158 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TQ_DIR="${HOME}/.local/share/taskqueue"
+QUEUE_FILE="${TQ_DIR}/queue"
+LOG_FILE="${TQ_DIR}/tq.log"
+MAX_LOG_SIZE=102400  # 100KB
+
+log() {
+    local msg="$1"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') | ${msg}" >> "${LOG_FILE}"
+
+    # Truncate log if too large
+    if [[ -f "${LOG_FILE}" ]]; then
+        local size
+        size=$(stat -c%s "${LOG_FILE}" 2>/dev/null || echo 0)
+        if [[ $size -gt $MAX_LOG_SIZE ]]; then
+            tail -n 500 "${LOG_FILE}" > "${LOG_FILE}.tmp"
+            mv "${LOG_FILE}.tmp" "${LOG_FILE}"
+        fi
+    fi
+}
+
+update_queue() {
+    local new_first="$1"
+    local rest
+    rest=$(tail -n +2 "${QUEUE_FILE}")
+
+    if [[ -n "$new_first" ]]; then
+        echo "$new_first" > "${QUEUE_FILE}"
+    else
+        : > "${QUEUE_FILE}"
+    fi
+
+    if [[ -n "$rest" ]]; then
+        echo "$rest" >> "${QUEUE_FILE}"
+    fi
+}
+
+remove_first() {
+    update_queue ""
+}
+
+process_trigger_tests_with_archs() {
+    local cmd="$1"
+    shift
+    local archs=("$@")
+    local failed_archs=()
+
+    for arch in "${archs[@]}"; do
+        local full_cmd="${cmd} --arch ${arch}"
+        log "EXEC | ${full_cmd}"
+
+        local exit_code=0
+        eval "${full_cmd}" >/dev/null 2>&1 || exit_code=$?
+
+        log "EXIT | ${full_cmd} | exit=${exit_code}"
+
+        if [[ $exit_code -ne 0 ]]; then
+            failed_archs+=("$arch")
+        fi
+    done
+
+    if [[ ${#failed_archs[@]} -eq 0 ]]; then
+        log "DONE | ${cmd}"
+        remove_first
+    else
+        local archs_json
+        archs_json=$(printf '%s\n' "${failed_archs[@]}" | jq -R . | jq -s .)
+        local new_entry
+        new_entry=$(jq -n --arg cmd "$cmd" --argjson archs "$archs_json" '{cmd: $cmd, archs: $archs}')
+        log "RETRY | archs=${failed_archs[*]}"
+        update_queue "$new_entry"
+    fi
+}
+
+process_trigger_tests_initial() {
+    local cmd="$1"
+
+    log "EXEC | ${cmd}"
+
+    local output exit_code=0
+    output=$(eval "${cmd}" 2>/dev/null) || exit_code=$?
+
+    log "EXIT | ${cmd} | exit=${exit_code}"
+
+    if [[ $exit_code -eq 0 ]]; then
+        log "DONE | ${cmd}"
+        remove_first
+    else
+        # Parse archs from output (space-separated)
+        local archs_arr
+        read -ra archs_arr <<< "$output"
+
+        if [[ ${#archs_arr[@]} -gt 0 ]]; then
+            local archs_json
+            archs_json=$(printf '%s\n' "${archs_arr[@]}" | jq -R . | jq -s .)
+            local new_entry
+            new_entry=$(jq -n --arg cmd "$cmd" --argjson archs "$archs_json" '{cmd: $cmd, archs: $archs}')
+            log "RETRY | archs=${archs_arr[*]}"
+            update_queue "$new_entry"
+        fi
+        # If no archs in output, keep entry as-is for retry
+    fi
+}
+
+process_simple_command() {
+    local cmd="$1"
+
+    log "EXEC | ${cmd}"
+
+    local exit_code=0
+    eval "${cmd}" >/dev/null 2>&1 || exit_code=$?
+
+    log "EXIT | ${cmd} | exit=${exit_code}"
+
+    if [[ $exit_code -eq 0 ]]; then
+        log "DONE | ${cmd}"
+        remove_first
+    fi
+    # On failure, keep entry for retry (no changes to queue)
+}
+
+main() {
+    mkdir -p "${TQ_DIR}"
+
+    if [[ ! -f "${QUEUE_FILE}" ]] || [[ ! -s "${QUEUE_FILE}" ]]; then
+        exit 0
+    fi
+
+    local first_line
+    first_line=$(head -n1 "${QUEUE_FILE}")
+
+    if [[ -z "$first_line" ]]; then
+        exit 0
+    fi
+
+    local cmd archs_json
+    cmd=$(echo "$first_line" | jq -r '.cmd')
+    archs_json=$(echo "$first_line" | jq -r '.archs // empty')
+
+    if [[ "$cmd" == *"trigger-tests"* ]]; then
+        if [[ -n "$archs_json" ]]; then
+            # Has archs - iterate through them
+            local archs_arr
+            mapfile -t archs_arr < <(echo "$archs_json" | jq -r '.[]')
+            process_trigger_tests_with_archs "$cmd" "${archs_arr[@]}"
+        else
+            # Initial run - capture archs from output
+            process_trigger_tests_initial "$cmd"
+        fi
+    else
+        # Simple command
+        process_simple_command "$cmd"
+    fi
+}
+
+main

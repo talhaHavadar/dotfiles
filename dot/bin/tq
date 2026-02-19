@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TQ_DIR="${HOME}/.local/share/taskqueue"
+QUEUE_FILE="${TQ_DIR}/queue"
+LOG_FILE="${TQ_DIR}/tq.log"
+
+ensure_dir() {
+    mkdir -p "${TQ_DIR}"
+}
+
+cmd_add() {
+    if [[ $# -eq 0 ]]; then
+        echo "Usage: tq add <command>" >&2
+        exit 1
+    fi
+    ensure_dir
+    local cmd="$*"
+    echo "{\"cmd\": \"${cmd}\"}" >> "${QUEUE_FILE}"
+    echo "Added: ${cmd}"
+}
+
+cmd_list() {
+    if [[ ! -f "${QUEUE_FILE}" ]]; then
+        echo "Queue is empty"
+        return
+    fi
+    local count=0
+    while IFS= read -r line; do
+        count=$((count + 1))
+        local cmd archs
+        cmd=$(echo "$line" | jq -r '.cmd')
+        archs=$(echo "$line" | jq -r '.archs // empty | join(",")')
+        if [[ -n "$archs" ]]; then
+            echo "${count}. ${cmd} [archs: ${archs}]"
+        else
+            echo "${count}. ${cmd}"
+        fi
+    done < "${QUEUE_FILE}"
+    if [[ $count -eq 0 ]]; then
+        echo "Queue is empty"
+    fi
+}
+
+cmd_pop() {
+    if [[ ! -f "${QUEUE_FILE}" ]]; then
+        echo "Queue is empty"
+        return
+    fi
+    local first
+    first=$(head -n1 "${QUEUE_FILE}")
+    if [[ -z "$first" ]]; then
+        echo "Queue is empty"
+        return
+    fi
+    sed -i '1d' "${QUEUE_FILE}"
+    echo "Removed: $(echo "$first" | jq -r '.cmd')"
+}
+
+cmd_run() {
+    exec tq-worker
+}
+
+cmd_log() {
+    if [[ ! -f "${LOG_FILE}" ]]; then
+        echo "No log file yet"
+        return
+    fi
+    tail -n "${1:-50}" "${LOG_FILE}"
+}
+
+cmd_help() {
+    cat <<EOF
+tq - Task Queue Manager
+
+Usage: tq <command> [args]
+
+Commands:
+  add <command>   Add a command to the queue
+  list            Show current queue
+  pop             Remove first entry from queue
+  run             Manually trigger worker
+  log [n]         Show last n log entries (default: 50)
+  help            Show this help
+EOF
+}
+
+case "${1:-help}" in
+    add)
+        shift
+        cmd_add "$@"
+        ;;
+    list)
+        cmd_list
+        ;;
+    pop)
+        cmd_pop
+        ;;
+    run)
+        cmd_run
+        ;;
+    log)
+        shift || true
+        cmd_log "$@"
+        ;;
+    help|--help|-h)
+        cmd_help
+        ;;
+    *)
+        echo "Unknown command: $1" >&2
+        cmd_help
+        exit 1
+        ;;
+esac
