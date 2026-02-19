@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
-set -ex
+set -e
+
+if [ $# -eq 0 ]; then
+    echo "Usage: packaging ppa-build <ppa>"
+    echo "<ppa> in this format <owner>/<ppa_name>"
+    exit 1
+fi
 
 TMP_DIR="$(mktemp -u -d -p ..)"
 CURRENT_DIR="$(basename $(pwd))"
@@ -8,7 +14,10 @@ cp -R ../${CURRENT_DIR} ${TMP_DIR}
 cd "${TMP_DIR}"
 packaging dch-auto
 debuild --no-conf -S -d -sa
-SOURCE_CHANGES_FILE="$(dpkg-parsechangelog -SSource)_$(dpkg-parsechangelog -SVersion)_source.changes"
+SOURCE_NAME=$(dpkg-parsechangelog -SSource)
+SOURCE_CHANGES_FILE="${SOURCE_NAME}_$(dpkg-parsechangelog -SVersion)_source.changes"
 cd -
 rm -rf "${TMP_DIR}"
 dput -f "ppa:$1" "../${SOURCE_CHANGES_FILE}"
+
+tq add "packaging trigger-tests -r "$(dpkg-parsechangelog -SDistribution)" "${SOURCE_NAME}" "$1""
