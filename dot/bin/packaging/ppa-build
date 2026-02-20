@@ -1,8 +1,22 @@
 #!/usr/bin/env bash
 set -e
 
+TESTING=true
+
+OPTS=$(getopt -o '' --long no-testing -n 'ppa-build' -- "$@")
+eval set -- "$OPTS"
+
+while true; do
+    case "$1" in
+        --no-testing) TESTING=false; shift ;;
+        --) shift; break ;;
+        *) break ;;
+    esac
+done
+
 if [ $# -eq 0 ]; then
-    echo "Usage: packaging ppa-build <ppa>"
+    echo "Usage: packaging ppa-build [--no-testing] <ppa>"
+    echo "  --no-testing    Skip triggering tests"
     echo "<ppa> in this format <owner>/<ppa_name>"
     exit 1
 fi
@@ -20,4 +34,6 @@ cd -
 rm -rf "${TMP_DIR}"
 dput -f "ppa:$1" "../${SOURCE_CHANGES_FILE}"
 
-tq add "packaging trigger-tests -r "$(dpkg-parsechangelog -SDistribution)" "${SOURCE_NAME}" "$1""
+if [ "$TESTING" = true ]; then
+    tq add "packaging trigger-tests -r "$(dpkg-parsechangelog -SDistribution)" "${SOURCE_NAME}" "$1""
+fi
