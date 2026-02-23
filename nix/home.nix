@@ -25,7 +25,7 @@ in
     ".config/starship.toml".source = mkOutOfStoreSymlink ../dot/starship.toml;
     ".complete_alias".source = mkOutOfStoreSymlink ../dot/complete_alias;
     ".tmux-completion".source = mkOutOfStoreSymlink ../dot/tmux-completion;
-    ".config/nvim".source = mkOutOfStoreSymlink ../dot/nvim;
+    ".config/nvim".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/nvim";
   };
 
   home.activation = {

@@ -21,7 +21,7 @@ with lib;
   config = mkIf home_config.enable {
     home.packages = with pkgs; [
       nixfmt
-      neovim
+      # neovim
     ];
     programs.nixvim = {
       enable = false;
