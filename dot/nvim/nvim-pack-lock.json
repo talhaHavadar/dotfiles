@@ -9,6 +9,10 @@
       "src": "https://github.com/saghen/blink.cmp",
       "version": "1.0.0 - 2.0.0"
     },
+    "diffview.nvim": {
+      "rev": "4516612fe98ff56ae0415a259ff6361a89419b0a",
+      "src": "https://github.com/sindrets/diffview.nvim"
+    },
     "efmls-configs-nvim": {
       "rev": "2dd907fe0043b95a901a9aee814f17804aa4426d",
       "src": "https://github.com/creativenull/efmls-configs-nvim"
@@ -37,6 +41,10 @@
       "rev": "ccfc8c35cac348070a9528410c794459c4cc2eeb",
       "src": "https://www.github.com/echasnovski/mini.nvim"
     },
+    "neogit": {
+      "rev": "0ea6b87ae19e8e5a235c682f8db1305774824f9b",
+      "src": "https://github.com/NeogitOrg/neogit"
+    },
     "nvim-lspconfig": {
       "rev": "5a855bcfec7973767a1a472335684bbd71d2fa2b",
       "src": "https://www.github.com/neovim/nvim-lspconfig"
@@ -48,6 +56,10 @@
     "nvim-treesitter": {
       "rev": "dc42c209f3820bdfaae0956f15de29689aa6b451",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter"
+    },
+    "plenary.nvim": {
+      "rev": "b9fd5226c2f76c951fc8ed5923d85e4de065e509",
+      "src": "https://www.github.com/nvim-lua/plenary.nvim"
     }
   }
 }

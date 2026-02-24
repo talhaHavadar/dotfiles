@@ -8,7 +8,7 @@ require("git-fixup").setup({
 })
 
 vim.pack.add({
-    "https://www.github.com/lewis6991/gitsigns.nvim",
+    "https://www.github.com/nvim-lua/plenary.nvim",
     "https://www.github.com/echasnovski/mini.nvim",
     "https://www.github.com/ibhagwan/fzf-lua",
     "https://www.github.com/nvim-tree/nvim-tree.lua",
@@ -28,12 +28,19 @@ vim.pack.add({
         version = vim.version.range("1.*"),
     },
     "https://github.com/L3MON4D3/LuaSnip",
+    "https://github.com/lewis6991/gitsigns.nvim",
+    "https://github.com/NeogitOrg/neogit",
+    "https://github.com/sindrets/diffview.nvim",
 })
 local function packadd(name)
     vim.cmd("packadd " .. name)
 end
-packadd("nvim-treesitter")
+
+packadd("neogit")
 packadd("gitsigns.nvim")
+packadd("diffview.nvim")
+packadd("plenary.nvim")
+packadd("nvim-treesitter")
 packadd("mini.nvim")
 packadd("fzf-lua")
 packadd("nvim-tree.lua")
@@ -142,24 +149,7 @@ require("mini.notify").setup({})
 require("mini.icons").setup({})
 require("mini.tabline").setup({})
 
-require("gitsigns").setup({
-    signs = {
-        add = { text = "\u{2590}" },          -- ▏
-        change = { text = "\u{2590}" },       -- ▐
-        delete = { text = "\u{2590}" },       -- ◦
-        topdelete = { text = "\u{25e6}" },    -- ◦
-        changedelete = { text = "\u{25cf}" }, -- ●
-        untracked = { text = "\u{25cb}" },    -- ○
-    },
-    signcolumn = true,
-    current_line_blame = true,
-})
-
-vim.keymap.set("n", "<leader>gh", "<cmd>Gitsigns preview_hunk_inline<CR>")
-vim.keymap.set("n", "<leader>ga", "<cmd>Gitsigns stage_buffer<CR>")
-vim.keymap.set("n", "<leader>gsh", "<cmd>Gitsigns stage_hunk<cr>")
-vim.keymap.set("n", "<leader>guh", "<cmd>Gitsigns undo_stage_hunk<cr>")
-vim.keymap.set("v", "<leader>gsh", "<cmd>Gitsigns stage_hunk<CR>")
 
 require("settings.terminal")
 require("settings.efm-configs")
+require("settings.git")
