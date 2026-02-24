@@ -16,19 +16,6 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-dotfiles_version=`cat ./.version`
-echo "Dotfiles version $dotfiles_version"
-if [ -d ~/.config/dotfiles ]; then
-    config_dotfiles_version=`cat ~/.config/dotfiles/.version`
-    if [ "$dotfiles_version" != "$config_dotfiles_version" ]; then
-        echo "Make sure you are executing this script from ~/.config/dotfiles"
-        exit 1
-    fi
-else
-    echo "There is no ~/.config/dotfiles make sure you cloned the dotfiles repo in ~/.config directory"
-    exit 1
-fi
-
 cd ~/.config/dotfiles
 DOTFILES_DIR=~/.config/dotfiles
 

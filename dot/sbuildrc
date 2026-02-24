@@ -3,7 +3,7 @@
 $maintainer_name='Talha Can Havadar <talha.can.havadar@canonical.com>';
 
 # Default distribution to build.
-$distribution = "noble";
+$distribution = "resolute";
 # Build arch-all by default.
 $build_arch_all = 1;
 
@@ -32,7 +32,7 @@ $lintian_opts = ['-EvIL', 'pedantic'];
 # $piuparts_opts = ['--schroot', '%r-%a-sbuild', '--no-eatmydata'];
 $run_autopkgtest = 1;
 $autopkgtest_root_args = '';
-$autopkgtest_opts = [ '--', 'schroot', '%r-%a' ];
+$autopkgtest_opts = [ '--', 'lxd' ];
 
 # don't remove this, Perl needs it:
 1;
