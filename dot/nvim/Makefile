@@ -15,7 +15,7 @@ install: .nvim-git/build/bin/nvim
 	git clone https://github.com/neovim/neovim .nvim-git
 
 .PHONY: nvim-deps
-nvim-deps:
+nvim-deps: treesitter gopls bashls ruff fzf-lua
 	sudo apt-get install -y ninja-build gettext cmake curl build-essential git
 
 .PHONY: treesitter

@@ -47,18 +47,10 @@ in
 
   home.packages = with pkgs; [
     inputs.sparse.packages.${system}.default
-    gnupg
-    curl
-    rustup
-    stylua
     tmux
     fzf
-    ripgrep
-    git
     tio
-    dosfstools
     pyp.pipx
     sd-mux-ctrl
-    tree
   ];
 }

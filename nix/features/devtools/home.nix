@@ -29,6 +29,7 @@ in
         wget
         gperf
         viu
+        github-copilot-cli
       ]
       ++ lib.optionals (!isDarwin) [
         rpi-imager

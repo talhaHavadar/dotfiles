@@ -16,15 +16,15 @@ in
         };
       });
     })
-    (final: prev: {
-      claude-code = prev.claude-code.overrideAttrs (oldAttrs: {
-        version = claude-code;
-        src = prev.fetchurl {
-          url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${claude-code}.tgz";
-          sha256 = "sha256-yCRQtK286EOGVs+0SMokATpvwCeZC4irV1bmhU0kgiI=";
-        };
-      });
-    })
+    #(final: prev: {
+    #  claude-code = prev.claude-code.overrideAttrs (oldAttrs: {
+    #    version = claude-code;
+    #    src = prev.fetchurl {
+    #      url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${claude-code}.tgz";
+    #      sha256 = "sha256-yCRQtK286EOGVs+0SMokATpvwCeZC4irV1bmhU0kgiI=";
+    #    };
+    #  });
+    #})
     # TODO: disabled checks for xdg-desktop-portal 19 Dec. 2025
     # > (/build/source/build/src/xdg-desktop-portal:5143): xdg-desktop-portal-WARNING **: 14:35:52.293: Failed connect to PipeWire: Couldn't connect to PipeWire
     # >   ----------------------------- Captured stderr call -----------------------------

@@ -13,7 +13,7 @@ in
 with lib;
 {
 
-  host.home.windowManagers.hyprland.enable = true;
+  host.home.windowManagers.hyprland.enable = false;
   # TODO: Swift build is failing on ubuntu
   host.features.apps.neovim.swift.enable = lib.mkForce false;
 

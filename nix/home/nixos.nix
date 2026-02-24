@@ -20,6 +20,19 @@ with lib;
   ];
 
   home.packages = with pkgs; [
+    gnupg
+    curl
+    rustup
+    stylua
+    tmux
+    fzf
+    ripgrep
+    git
+    tio
+    dosfstools
+    pyp.pipx
+    sd-mux-ctrl
+    tree
     yubioath-flutter
     wl-clipboard
     ubuntu-classic

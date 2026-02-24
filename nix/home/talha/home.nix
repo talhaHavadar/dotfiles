@@ -19,7 +19,7 @@ let
     else if isDarwin then
       "${config.home.homeDirectory}/.gnupg"
     else
-      "/run/user/1607672815/gnupg";
+      "/run/user/1000/gnupg";
 in
 {
   config = {
@@ -73,7 +73,6 @@ in
       packages =
         with pkgs;
         [
-          gnupg
         ]
         ++ lib.optionals (isNixOS) [
           vlc
@@ -83,18 +82,6 @@ in
         ++ lib.optionals (isDarwin) [
         ]
         ++ lib.optionals (isLinuxNonNixOS) [
-          gnome.gvfs
-          mtools
-          godot
-          mattermost-desktop
-          yazi
-          (obsidian.override {
-            commandLineArgs = [
-              "--enable-features=UseOzonePlatform"
-              "--ozone-platform=x11"
-              "--force-device-scale-factor=2"
-            ];
-          })
         ];
 
     }
@@ -120,8 +107,6 @@ in
       git = {
         enable = true;
         settings = {
-          user.name = "Talha Can Havadar";
-          user.email = "havadartalha@gmail.com";
           core.excludesfile = "~/.gitignore_global";
           sparse.user.id = "talhaHavadar";
           rebase.autoSquash = true;
@@ -129,6 +114,7 @@ in
           # tag.gpgSign = true;
           # log.showSignature = true;
           includeIf."gitdir:~/workspace/".path = "~/workspace/.gitconfig";
+          includeIf."gitdir:~/projects/".path = "~/projects/.gitconfig";
         };
       };
       ssh = {
@@ -189,9 +175,6 @@ in
             ProxyJump dev-amd64.lan
             StreamLocalBindUnlink yes
             RemoteForward /run/user/1000/gnupg/S.gpg-agent ${gpgAgentPrefix}/S.gpg-agent
-
-          Host *launchpad.net
-            IdentityFile ~/.ssh/id_ed25519
         '';
       };
     }
