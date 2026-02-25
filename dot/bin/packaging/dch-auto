@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-VERSION="$(dpkg-parsechangelog -S Version)~git$(date +%Y%m%d%H%M).$(git rev-parse --short HEAD)"
-dch -v "$VERSION" -D resolute -b "Auto build."
+BASE_VERSION="$(dpkg-parsechangelog -S Version | sed 's/~git.*//')"
+VERSION="${BASE_VERSION}~git$(date +%Y%m%d%H%M).$(git rev-parse --short HEAD)"
+
+# Directly replace version in first line of changelog
+sed -i "1s/([^)]*)/($VERSION)/" debian/changelog
+
+# Append auto build entry to existing stanza
+dch -a "Auto build."
