@@ -26,6 +26,7 @@ require('mason-tool-installer').setup {
         "fixjson",
         "checkmake",
         "mbake",
+        "yamlfmt",
     },
 }
 
@@ -168,6 +169,15 @@ vim.lsp.config("gopls", {})
 vim.lsp.config("clangd", {})
 vim.lsp.config("zls", {})
 vim.lsp.config("pyright", {})
+vim.lsp.config("yamlls", {
+    settings = {
+        yaml = {
+            format = {
+                enable = false
+            }
+        }
+    }
+})
 
 vim.lsp.enable({
     "lua_ls",

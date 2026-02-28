@@ -8,6 +8,7 @@ local shfmt = require("efmls-configs.formatters.shfmt")
 
 local checkmake = require("efmls-configs.linters.checkmake")
 local mbake = require("settings.efm-configs.formatters.mbake")
+local yamlfmt = require("settings.efm-configs.formatters.yamlfmt")
 
 vim.lsp.config("efm", {
     init_options = { documentFormatting = true },
@@ -28,7 +29,8 @@ vim.lsp.config("efm", {
             make = {
                 checkmake,
                 mbake,
-            }
+            },
+            yaml = { yamlfmt },
         },
     },
 })
