@@ -1,0 +1,153 @@
+#!/usr/bin/env bash
+#
+# lxc-run: Shebang interpreter for running scripts in ephemeral LXD containers
+#
+# Usage in scripts:
+#   #!/usr/bin/env -S lxc-run ubuntu:22.04
+#   #!/usr/bin/env -S lxc-run ubuntu-daily:resolute -p rocm-gpu
+#
+
+set -euo pipefail
+
+# Default image if none specified
+# requires lxc-templates to be installed
+DEFAULT_IMAGE="ubuntu-daily:$(lsb_release -c -s)"
+
+# Parse arguments
+SHEBANG_ARGS=()
+SCRIPT_PATH=""
+SCRIPT_ARGS=()
+
+found_script=false
+for arg in "$@"; do
+	if [[ "$found_script" == "false" ]]; then
+		# Check if this argument is a file that exists
+		if [[ -f "$arg" ]]; then
+			SCRIPT_PATH="$arg"
+			found_script=true
+		else
+			SHEBANG_ARGS+=("$arg")
+		fi
+	else
+		SCRIPT_ARGS+=("$arg")
+	fi
+done
+
+# If no script found, error out
+if [[ -z "$SCRIPT_PATH" ]]; then
+	echo "Error: No script file provided" >&2
+	exit 1
+fi
+
+# Use default image if no shebang args provided
+if [[ ${#SHEBANG_ARGS[@]} -eq 0 ]]; then
+	SHEBANG_ARGS=("$DEFAULT_IMAGE")
+fi
+
+# Generate a unique container name
+CONTAINER_NAME="lxc-run-$$-$(date +%s%N | cut -b1-13)"
+
+# Cleanup function
+cleanup() {
+	local exit_code=$?
+	if lxc info "$CONTAINER_NAME" >/dev/null 2>&1; then
+		lxc delete -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
+	fi
+	exit "$exit_code"
+}
+
+trap cleanup EXIT INT TERM
+
+# Read the script content
+SCRIPT_CONTENT=$(cat "$SCRIPT_PATH")
+
+# Determine the real interpreter from the script
+REAL_INTERPRETER="/bin/bash"
+SECOND_LINE=$(sed -n '2p' "$SCRIPT_PATH")
+if [[ "$SECOND_LINE" =~ ^#!([^[:space:]]+) ]]; then
+	REAL_INTERPRETER="${BASH_REMATCH[1]}"
+fi
+
+INTERPRETER_NAME=$(basename "$REAL_INTERPRETER")
+
+# Create and start the container
+echo "Creating ephemeral LXD container with image '${SHEBANG_ARGS[0]}'..." >&2
+if ! lxc launch "${SHEBANG_ARGS[@]}" "$CONTAINER_NAME" 2>&1 | grep -v "^$"; then
+	echo "Error: Failed to create container, please make sure to have lxc-templates installed if using ubuntu-daily" >&2
+	exit 1
+fi
+
+# Wait for container to be ready
+echo "Waiting for container to be ready..." >&2
+for i in {1..30}; do
+	if lxc exec "$CONTAINER_NAME" -- /bin/true 2>/dev/null; then
+		break
+	fi
+	if [[ $i -eq 30 ]]; then
+		echo "Error: Container failed to start properly" >&2
+		exit 1
+	fi
+	sleep 0.5
+done
+
+# Ensure the interpreter is installed
+if ! lxc exec "$CONTAINER_NAME" -- sh -c "command -v $INTERPRETER_NAME" >/dev/null 2>&1; then
+	echo "Installing $INTERPRETER_NAME in container..." >&2
+
+	# Detect package manager and install
+	if lxc exec "$CONTAINER_NAME" -- sh -c "command -v apt-get" >/dev/null 2>&1; then
+		lxc exec "$CONTAINER_NAME" -- sh -c "apt-get update -qq && apt-get install -y -qq $INTERPRETER_NAME" >/dev/null 2>&1 || true
+	elif lxc exec "$CONTAINER_NAME" -- sh -c "command -v apk" >/dev/null 2>&1; then
+		lxc exec "$CONTAINER_NAME" -- apk add --quiet "$INTERPRETER_NAME" >/dev/null 2>&1 || true
+	elif lxc exec "$CONTAINER_NAME" -- sh -c "command -v yum" >/dev/null 2>&1; then
+		lxc exec "$CONTAINER_NAME" -- yum install -y -q "$INTERPRETER_NAME" >/dev/null 2>&1 || true
+	elif lxc exec "$CONTAINER_NAME" -- sh -c "command -v dnf" >/dev/null 2>&1; then
+		lxc exec "$CONTAINER_NAME" -- dnf install -y -q "$INTERPRETER_NAME" >/dev/null 2>&1 || true
+	elif lxc exec "$CONTAINER_NAME" -- sh -c "command -v pacman" >/dev/null 2>&1; then
+		lxc exec "$CONTAINER_NAME" -- pacman -Sy --noconfirm "$INTERPRETER_NAME" >/dev/null 2>&1 || true
+	else
+		echo "Warning: Could not install $INTERPRETER_NAME automatically" >&2
+	fi
+fi
+
+# Copy script to container
+CONTAINER_SCRIPT_PATH="/tmp/script-$$"
+echo "$SCRIPT_CONTENT" | lxc exec "$CONTAINER_NAME" -- tee "$CONTAINER_SCRIPT_PATH" >/dev/null
+lxc exec "$CONTAINER_NAME" -- chmod +x "$CONTAINER_SCRIPT_PATH"
+
+# Build environment variable passthrough
+ENV_VARS=()
+while IFS='=' read -r -d '' key value; do
+	# Skip some problematic variables
+	if [[ "$key" != "HOSTNAME" && "$key" != "PWD" && "$key" != "OLDPWD" && "$key" != "SHLVL" && "$key" != "HOME" ]]; then
+		ENV_VARS+=("$key=$value")
+	fi
+done < <(env -0)
+
+# Execute the script with arguments and environment
+echo "Executing script..." >&2
+
+# Build the exec command properly
+EXEC_CMD=(lxc exec "$CONTAINER_NAME")
+
+# Add environment variables
+for env_var in "${ENV_VARS[@]}"; do
+	EXEC_CMD+=(--env "$env_var")
+done
+
+# Add separator and command
+EXEC_CMD+=(-- "$REAL_INTERPRETER" "$CONTAINER_SCRIPT_PATH")
+
+# Add script arguments
+for arg in "${SCRIPT_ARGS[@]}"; do
+	EXEC_CMD+=("$arg")
+done
+
+# Execute
+"${EXEC_CMD[@]}"
+
+# Capture exit code
+SCRIPT_EXIT=$?
+
+# Cleanup happens automatically via trap
+exit $SCRIPT_EXIT
