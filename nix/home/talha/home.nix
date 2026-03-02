@@ -50,6 +50,7 @@ in
         ".local/bin/packaging-ppa-build".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/ppa-build;
         ".local/bin/packaging-trigger-tests".source =
           mkOutOfStoreSymlink ../../../dot/bin/packaging/trigger-tests.py;
+        ".local/bin/lxc-run".source = mkOutOfStoreSymlink ../../../dot/bin/lxc-run;
         ".local/bin/tq".source = mkOutOfStoreSymlink ../../../dot/bin/tq;
         ".local/bin/tq-worker".source = mkOutOfStoreSymlink ../../../dot/bin/tq-worker;
         ".config/systemd/user/tq.service".source = mkOutOfStoreSymlink ../../../dot/systemd/tq.service;
