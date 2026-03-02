@@ -2,14 +2,19 @@
 set -e
 
 TESTING=true
+NO_CLEAN=""
 
-OPTS=$(getopt -o '' --long no-testing -n 'ppa-build' -- "$@")
+OPTS=$(getopt -o '' --long no-testing,no-clean -n 'ppa-build' -- "$@")
 eval set -- "$OPTS"
 
 while true; do
     case "$1" in
     --no-testing)
         TESTING=false
+        shift
+        ;;
+    --no-clean)
+        NO_CLEAN="-nc"
         shift
         ;;
     --)
@@ -28,18 +33,21 @@ if [ $# -eq 0 ]; then
 fi
 
 TMP_DIR="$(mktemp -u -d -p ..)"
+TMP_DIR="$(realpath ..)/$(basename "${TMP_DIR}")"
+# Set up trap to cleanup on exit
+trap 'rm -rf "${TMP_DIR}"' EXIT
+
 CURRENT_DIR="$(basename "$(pwd)")"
 
 cp -R ../"${CURRENT_DIR}" "${TMP_DIR}"
 cd "${TMP_DIR}"
 packaging dch-auto
-debuild --no-conf -S -d -sa
+debuild --no-conf -S -d -sa $NO_CLEAN
 SOURCE_NAME=$(dpkg-parsechangelog -SSource)
 SOURCE_CHANGES_FILE="${SOURCE_NAME}_$(dpkg-parsechangelog -SVersion)_source.changes"
 cd -
-rm -rf "${TMP_DIR}"
 dput -f "ppa:$1" "../${SOURCE_CHANGES_FILE}"
 
 if [ "$TESTING" = true ]; then
-    tq add "packaging trigger-tests -r \"$(dpkg-parsechangelog -SDistribution)\" \"${SOURCE_NAME}\" \"$1\""
+    tq add "packaging trigger-tests -r "$(dpkg-parsechangelog -SDistribution)" "${SOURCE_NAME}" "$1""
 fi
