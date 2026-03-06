@@ -8,29 +8,32 @@ OPTS=$(getopt -o '' --long no-testing,no-clean -n 'ppa-build' -- "$@")
 eval set -- "$OPTS"
 
 while true; do
-    case "$1" in
-    --no-testing)
-        TESTING=false
-        shift
-        ;;
-    --no-clean)
-        NO_CLEAN="-nc"
-        shift
-        ;;
-    --)
-        shift
-        break
-        ;;
-    *) break ;;
-    esac
+	case "$1" in
+	--no-testing)
+		TESTING=false
+		shift
+		;;
+	--no-clean)
+		NO_CLEAN="-nc"
+		shift
+		;;
+	--)
+		shift
+		break
+		;;
+	*) break ;;
+	esac
 done
 
 if [ $# -eq 0 ]; then
-    echo "Usage: packaging ppa-build [--no-testing] <ppa>"
-    echo "  --no-testing    Skip triggering tests"
-    echo "<ppa> in this format <owner>/<ppa_name>"
-    exit 1
+	echo "Usage: packaging ppa-build [--no-testing] <ppa>"
+	echo "  --no-testing    Skip triggering tests"
+	echo "<ppa> in this format <owner>/<ppa_name>"
+	exit 1
 fi
+
+PPA_OWNER="${1%/*}"
+PPA_NAME="${1#*/}"
 
 TMP_DIR="$(mktemp -u -d -p ..)"
 TMP_DIR="$(realpath ..)/$(basename "${TMP_DIR}")"
@@ -41,13 +44,27 @@ CURRENT_DIR="$(basename "$(pwd)")"
 
 cp -R ../"${CURRENT_DIR}" "${TMP_DIR}"
 cd "${TMP_DIR}"
+
+LP_BUGS=$(dpkg-parsechangelog -SLaunchpad-Bugs-Fixed)
+
+PPA_DESC=""
+[ "$TESTING" = true ] && AUTOPKGTEST_LINE=$'\nAutopkgtest: https://autopkgtest.ubuntu.com/user/'"${PPA_OWNER}"'/ppa/'"${PPA_NAME}"
+if [ -n "$LP_BUGS" ]; then
+	BUG_LINES=""
+	for bug in $LP_BUGS; do
+		BUG_LINES="${BUG_LINES} - LP: #${bug}"
+	done
+	PPA_DESC="Testing fix for:${BUG_LINES}${AUTOPKGTEST_LINE:+${AUTOPKGTEST_LINE}}"
+fi
+ppa create "$PPA_NAME" --owner-name "$PPA_OWNER" --all-arches --pocket proposed ${PPA_DESC:+--description "$PPA_DESC"} || true
+
 packaging dch-auto
 debuild --no-conf -S -d -sa -I.jj --source-option='--extend-diff-ignore=(^|/)\.jj/' $NO_CLEAN
 SOURCE_NAME=$(dpkg-parsechangelog -SSource)
 SOURCE_CHANGES_FILE="${SOURCE_NAME}_$(dpkg-parsechangelog -SVersion)_source.changes"
 cd -
-dput -f "ppa:$1" "../${SOURCE_CHANGES_FILE}"
+dput -f "ppa:$PPA_OWNER/$PPA_NAME" "../${SOURCE_CHANGES_FILE}"
 
 if [ "$TESTING" = true ]; then
-    tq add "packaging trigger-tests -r "$(dpkg-parsechangelog -SDistribution)" "${SOURCE_NAME}" "$1""
+	tq add "packaging trigger-tests -r "$(dpkg-parsechangelog -SDistribution)" "${SOURCE_NAME}" "$PPA_OWNER/$PPA_NAME""
 fi
