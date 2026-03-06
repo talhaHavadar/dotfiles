@@ -1,9 +1,8 @@
-{
-  inputs,
-  config,
-  lib,
-  pkgs,
-  ...
+{ inputs
+, config
+, lib
+, pkgs
+, ...
 }:
 let
   isDarwin = pkgs.stdenv.isDarwin;
@@ -19,7 +18,6 @@ in
         git
         uv
         go
-        zig
         nodejs_24
         qemu
         dtc

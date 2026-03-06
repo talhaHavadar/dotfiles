@@ -1,42 +1,43 @@
 set -ex
 
 packages=(
-	sbuild
-	ubuntu-dev-tools
-	apt-cacher-ng
-	autopkgtest
-	lintian
-	git-buildpackage
-	config-package-dev
-	lxc-templates
-	dh-sequence-gir
-	pcscd
-	sssd
-	libpam-sss
-	scdaemon
-	yubikey-manager
-	libpam-u2f
-	# https://raw.githubusercontent.com/Yubico/libfido2/refs/heads/main/udev/70-u2f.rules
-	libfido2-dev
-	python3-venv
-	btop
-	tree
-	ripgrep
-	flatpak
+    sbuild
+    ubuntu-dev-tools
+    apt-cacher-ng
+    autopkgtest
+    lintian
+    git-buildpackage
+    config-package-dev
+    lxc-templates
+    dh-sequence-gir
+    pcscd
+    sssd
+    libpam-sss
+    scdaemon
+    yubikey-manager
+    libpam-u2f
+    # https://raw.githubusercontent.com/Yubico/libfido2/refs/heads/main/udev/70-u2f.rules
+    libfido2-dev
+    python3-venv
+    btop
+    tree
+    ripgrep
+    flatpak
+    zig0.15
 )
 
 snaps=(
-	"ghostty --classic"
-	glow
-	"git-ubuntu --classic"
-	lxd
-	"snapcraft --classic"
-	"rustup --classic"
-	ppa-dev-tools
+    "ghostty --classic"
+    glow
+    "git-ubuntu --classic"
+    lxd
+    "snapcraft --classic"
+    "rustup --classic"
+    ppa-dev-tools
 )
 
 for snap in "${snaps[@]}"; do
-	sudo snap install ${snap}
+    sudo snap install ${snap}
 done
 
 sudo apt update -y
