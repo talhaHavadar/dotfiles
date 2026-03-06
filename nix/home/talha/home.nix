@@ -61,7 +61,7 @@ in
           mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/lp-tools/lp-tools-create-bug.py";
         ".local/bin/lp-tools-propose-merge".source =
           mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/lp-tools/lp-tools-propose-merge.py";
-        ".lp-tools-completion".source = mkOutOfStoreSymlink ../dot/lp-tools-completion;
+        ".lp-tools-completion".source = mkOutOfStoreSymlink ../../../dot/lp-tools-completion;
       };
 
       # - pkgs.stdenv.isLinux
