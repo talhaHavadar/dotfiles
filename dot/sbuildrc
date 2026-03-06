@@ -18,6 +18,16 @@ $purge_build_deps = 'successful';
 # $purge_build_directory = 'never';
 # $purge_session = 'never';
 # $purge_build_deps = 'never';
+$chroot_mode="unshare";
+
+# Use 90% of available CPUs for parallel builds
+$build_environment = {
+    'DEB_BUILD_OPTIONS' => 'parallel=' . (int(`nproc` * 0.9) || 1),
+};
+
+$dpkg_source_opts = [
+    '--extend-diff-ignore=(^|/)\.jj/',
+];
 
 # Directory for writing build logs to
 $log_dir=$ENV{HOME}."/sbuild/logs";
