@@ -111,10 +111,20 @@ def run_git(*args: str) -> str:
 def get_current_branch() -> str:
     """Get the current git branch name."""
     branch = run_git("rev-parse", "--abbrev-ref", "HEAD")
-    if not branch or branch == "HEAD":
-        print("Error: Could not determine current branch", file=sys.stderr)
-        sys.exit(1)
-    return branch
+    if branch and branch != "HEAD":
+        return branch
+
+    # Detached HEAD - try to find a branch pointing to the same commit
+    branches = run_git("branch", "--points-at", "HEAD", "--format=%(refname:short)")
+    if branches:
+        # Filter out detached HEAD indicator lines (start with "(")
+        for line in branches.split("\n"):
+            if line and not line.startswith("("):
+                return line
+
+    print("Error: Could not determine current branch", file=sys.stderr)
+    print("  (detached HEAD and no branch points to this commit)", file=sys.stderr)
+    sys.exit(1)
 
 
 def get_default_target_branch(remote: str) -> str:
@@ -202,16 +212,18 @@ def get_input_from_editor(
         line.rstrip("\n") for line in lines if not line.startswith("#")
     ]
 
-    # First non-empty line is commit message
-    commit_msg = ""
-    desc_start = 0
-    for i, line in enumerate(non_comment_lines):
-        if line.strip():
-            commit_msg = line.strip()
+    # Template format: line 1 = commit message, blank line, then description
+    # Line 0 is commit message (may be empty)
+    commit_msg = non_comment_lines[0].strip() if non_comment_lines else ""
+
+    # Find the blank separator line, description starts after it
+    desc_start = 1
+    for i in range(1, len(non_comment_lines)):
+        if not non_comment_lines[i].strip():
             desc_start = i + 1
             break
 
-    # Description is everything after commit message
+    # Description is everything after the blank separator
     desc_lines = non_comment_lines[desc_start:]
     if desc_lines and not desc_lines[0].strip():
         desc_lines = desc_lines[1:]

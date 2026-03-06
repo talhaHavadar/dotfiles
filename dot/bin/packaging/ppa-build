@@ -4,7 +4,7 @@ set -e
 TESTING=true
 NO_CLEAN=""
 
-OPTS=$(getopt -o '' --long no-testing,no-clean -n 'ppa-build' -- "$@")
+OPTS=$(getopt -o '' --long no-testing,no-clean,with-mp-to: -n 'ppa-build' -- "$@")
 eval set -- "$OPTS"
 
 while true; do
@@ -17,6 +17,10 @@ while true; do
 		NO_CLEAN="-nc"
 		shift
 		;;
+	--with-mp-to)
+		WITH_MP_TO="$2"
+		shift 2
+		;;
 	--)
 		shift
 		break
@@ -26,8 +30,10 @@ while true; do
 done
 
 if [ $# -eq 0 ]; then
-	echo "Usage: packaging ppa-build [--no-testing] <ppa>"
-	echo "  --no-testing    Skip triggering tests"
+	echo "Usage: packaging ppa-build [--no-testing] [--no-clean] [--with-mp-to <remote>/<branch>] <ppa>"
+	echo "  --no-testing                   Skip triggering tests"
+	echo "  --no-clean                     Don't clean the build tree"
+	echo "  --with-mp-to <remote>/<branch> Create merge proposal to target (e.g., origin/ubuntu/devel)"
 	echo "<ppa> in this format <owner>/<ppa_name>"
 	exit 1
 fi
@@ -47,15 +53,34 @@ cd "${TMP_DIR}"
 
 LP_BUGS=$(dpkg-parsechangelog -SLaunchpad-Bugs-Fixed)
 
-PPA_DESC=""
-[ "$TESTING" = true ] && AUTOPKGTEST_LINE=$'\nAutopkgtest: https://autopkgtest.ubuntu.com/user/'"${PPA_OWNER}"'/ppa/'"${PPA_NAME}"
+# Build base description (shared between PPA and MP)
+PPA_LINK="https://launchpad.net/~${PPA_OWNER}/+archive/ubuntu/${PPA_NAME}"
+BASE_DESC="PPA: ${PPA_LINK}"
+[ "$TESTING" = true ] && BASE_DESC="${BASE_DESC}"$'\nAutopkgtest: https://autopkgtest.ubuntu.com/user/'"${PPA_OWNER}"'/ppa/'"${PPA_NAME}"
 if [ -n "$LP_BUGS" ]; then
 	BUG_LINES=""
 	for bug in $LP_BUGS; do
-		BUG_LINES="${BUG_LINES} - LP: #${bug}"
+		BUG_LINES="${BUG_LINES} LP: #${bug}"
 	done
-	PPA_DESC="Testing fix for:${BUG_LINES}${AUTOPKGTEST_LINE:+${AUTOPKGTEST_LINE}}"
+	BASE_DESC="${BASE_DESC}"$'\nBugs:'"${BUG_LINES}"
 fi
+
+# Create merge proposal first (if requested) to get the link
+MP_LINK=""
+if [ -n "$WITH_MP_TO" ]; then
+	MP_TARGET_REMOTE="${WITH_MP_TO%%/*}"
+	MP_TARGET_BRANCH="${WITH_MP_TO#*/}"
+	MP_LINK=$(lp-tools propose-merge --wip --source-remote "${PPA_OWNER}" --target-remote "$MP_TARGET_REMOTE" --target "$MP_TARGET_BRANCH" \
+		${BASE_DESC:+-d "$BASE_DESC"})
+	echo "Created merge proposal: $MP_LINK"
+fi
+
+# Build final PPA description (base + MP link if available)
+PPA_DESC="$BASE_DESC"
+if [ -n "$MP_LINK" ]; then
+	PPA_DESC="${PPA_DESC:+${PPA_DESC}$'\n'}MP: ${MP_LINK}"
+fi
+
 ppa create "$PPA_NAME" --owner-name "$PPA_OWNER" --all-arches --pocket proposed ${PPA_DESC:+--description "$PPA_DESC"} || true
 
 packaging dch-auto
