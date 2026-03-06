@@ -103,7 +103,9 @@ def get_input_from_editor(
         temp_path = f.name
 
     try:
-        result = subprocess.run([editor, temp_path])
+        # Use /dev/tty explicitly to ensure editor works even when stdout is captured
+        with open("/dev/tty", "r") as tty_in, open("/dev/tty", "w") as tty_out:
+            result = subprocess.run([editor, temp_path], stdin=tty_in, stdout=tty_out)
         if result.returncode != 0:
             print("Editor exited with non-zero status", file=sys.stderr)
             sys.exit(1)
