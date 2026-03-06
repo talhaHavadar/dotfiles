@@ -60,6 +60,8 @@ in
             mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/lp-tools/lp-tools.sh";
         ".local/bin/lp-tools-create-bug".source =
             mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/lp-tools/lp-tools-create-bug.py";
+        ".local/bin/lp-tools-propose-merge".source =
+            mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/lp-tools/lp-tools-propose-merge.py";
       };
 
       # - pkgs.stdenv.isLinux
