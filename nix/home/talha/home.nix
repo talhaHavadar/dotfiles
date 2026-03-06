@@ -1,8 +1,7 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 let
   isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
@@ -57,11 +56,11 @@ in
         ".config/systemd/user/tq.timer".source = mkOutOfStoreSymlink ../../../dot/systemd/tq.timer;
         ".config/jj".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/jj";
         ".local/bin/lp-tools".source =
-            mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/lp-tools/lp-tools.sh";
+          mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/lp-tools/lp-tools.sh";
         ".local/bin/lp-tools-create-bug".source =
-            mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/lp-tools/lp-tools-create-bug.py";
+          mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/lp-tools/lp-tools-create-bug.py";
         ".local/bin/lp-tools-propose-merge".source =
-            mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/lp-tools/lp-tools-propose-merge.py";
+          mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/lp-tools/lp-tools-propose-merge.py";
       };
 
       # - pkgs.stdenv.isLinux
@@ -74,9 +73,7 @@ in
       // lib.optionalAttrs (isDarwin) {
         PATH = "/opt/homebrew/opt/python/libexec/bin:$PATH";
       }
-      // lib.optionalAttrs (isLinux) {
-        GIO_EXTRA_MODULES = "${pkgs.gvfs}/lib/gio/modules";
-      };
+      // lib.optionalAttrs (isLinux) { };
 
       packages =
         with pkgs;
