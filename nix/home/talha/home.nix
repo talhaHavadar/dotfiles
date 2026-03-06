@@ -28,6 +28,12 @@ in
       file = {
         "workspace/.gitconfig".source = mkOutOfStoreSymlink ../../../dot/gitconfig.workspace;
         "projects/.gitconfig".source = mkOutOfStoreSymlink ../../../dot/gitconfig.projects;
+        ".local/bin/lxc-run".source = mkOutOfStoreSymlink ../../../dot/bin/lxc-run;
+        ".local/bin/tq".source = mkOutOfStoreSymlink ../../../dot/bin/tq;
+        ".local/bin/tq-worker".source = mkOutOfStoreSymlink ../../../dot/bin/tq-worker;
+        ".config/systemd/user/tq.service".source = mkOutOfStoreSymlink ../../../dot/systemd/tq.service;
+        ".config/systemd/user/tq.timer".source = mkOutOfStoreSymlink ../../../dot/systemd/tq.timer;
+        ".config/jj".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/jj";
       }
       // lib.optionalAttrs isPackagingEnabled {
         ".devscripts".source = mkOutOfStoreSymlink ../../../dot/devscripts;
@@ -49,12 +55,6 @@ in
         ".local/bin/packaging-ppa-build".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/ppa-build;
         ".local/bin/packaging-trigger-tests".source =
           mkOutOfStoreSymlink ../../../dot/bin/packaging/trigger-tests.py;
-        ".local/bin/lxc-run".source = mkOutOfStoreSymlink ../../../dot/bin/lxc-run;
-        ".local/bin/tq".source = mkOutOfStoreSymlink ../../../dot/bin/tq;
-        ".local/bin/tq-worker".source = mkOutOfStoreSymlink ../../../dot/bin/tq-worker;
-        ".config/systemd/user/tq.service".source = mkOutOfStoreSymlink ../../../dot/systemd/tq.service;
-        ".config/systemd/user/tq.timer".source = mkOutOfStoreSymlink ../../../dot/systemd/tq.timer;
-        ".config/jj".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/jj";
         ".local/bin/lp-tools".source =
           mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/lp-tools/lp-tools.sh";
         ".local/bin/lp-tools-create-bug".source =
