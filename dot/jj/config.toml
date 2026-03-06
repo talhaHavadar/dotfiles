@@ -3,8 +3,11 @@ name = "Talha Can Havadar"
 email = "havadartalha@gmail.com"
 
 [signing]
-sign-all = true
+behavior = "drop"
 backend = "gpg"
+
+[git]
+sign-on-push = true
 
 # override user.email if the repository is located under ~/oss
 [[--scope]]
