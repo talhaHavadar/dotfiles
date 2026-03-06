@@ -27,6 +27,7 @@ $build_environment = {
 
 $dpkg_source_opts = [
     '--extend-diff-ignore=(^|/)\.jj/',
+    '-I.jj',
 ];
 
 # Directory for writing build logs to
