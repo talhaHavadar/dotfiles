@@ -13,6 +13,7 @@ require("mason-lspconfig").setup({
         "bashls",
         "efm",
         "pyright",
+        "rnix",
     },
     automatic_installation = true,
 })
