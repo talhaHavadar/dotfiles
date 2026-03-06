@@ -56,6 +56,10 @@ in
         ".config/systemd/user/tq.service".source = mkOutOfStoreSymlink ../../../dot/systemd/tq.service;
         ".config/systemd/user/tq.timer".source = mkOutOfStoreSymlink ../../../dot/systemd/tq.timer;
         ".config/jj".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/jj";
+        ".local/bin/lp-tools".source =
+            mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/lp-tools/lp-tools.sh";
+        ".local/bin/lp-tools-create-bug".source =
+            mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/lp-tools/lp-tools-create-bug.py";
       };
 
       # - pkgs.stdenv.isLinux
