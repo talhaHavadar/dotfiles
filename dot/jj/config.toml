@@ -1,0 +1,15 @@
+[user]
+name = "Talha Can Havadar"
+email = "havadartalha@gmail.com"
+
+# override user.email if the repository is located under ~/oss
+[[--scope]]
+--when.repositories = ["~/workspace/"]
+[--scope.user]
+email = "talha.can.havadar@canonical.com"
+
+# disable pagination for `jj status`, use `delta` for `jj diff` and `jj show`
+[[--scope]]
+--when.commands = ["status"]
+[--scope.ui]
+paginate = "never"

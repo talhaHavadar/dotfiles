@@ -55,6 +55,7 @@ in
         ".local/bin/tq-worker".source = mkOutOfStoreSymlink ../../../dot/bin/tq-worker;
         ".config/systemd/user/tq.service".source = mkOutOfStoreSymlink ../../../dot/systemd/tq.service;
         ".config/systemd/user/tq.timer".source = mkOutOfStoreSymlink ../../../dot/systemd/tq.timer;
+        ".config/jj".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/jj";
       };
 
       # - pkgs.stdenv.isLinux
