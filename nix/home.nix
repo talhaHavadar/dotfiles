@@ -22,6 +22,7 @@ in
     ".local/bin/git-fpush".source = mkOutOfStoreSymlink ../dot/bin/git-fpush;
     ".local/bin/git-fixup".source = mkOutOfStoreSymlink ../dot/bin/git-fixup;
     ".local/bin/git-wapply".source = mkOutOfStoreSymlink ../dot/bin/git-wapply;
+    ".local/bin/git-lp-clone".source = mkOutOfStoreSymlink ../dot/bin/git-lp-clone.sh;
     ".config/starship.toml".source = mkOutOfStoreSymlink ../dot/starship.toml;
     ".complete_alias".source = mkOutOfStoreSymlink ../dot/complete_alias;
     ".tmux-completion".source = mkOutOfStoreSymlink ../dot/tmux-completion;
