@@ -34,6 +34,10 @@ in
         ".config/systemd/user/tq.service".source = mkOutOfStoreSymlink ../../../dot/systemd/tq.service;
         ".config/systemd/user/tq.timer".source = mkOutOfStoreSymlink ../../../dot/systemd/tq.timer;
         ".config/jj".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/jj";
+        ".config/river".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/river";
+        ".config/systemd/user/river-session.target".source = mkOutOfStoreSymlink ../../../dot/systemd/user/river-session.target;
+        ".config/kwm".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/kwm";
+        ".config/kanshi".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/kanshi";
       }
       // lib.optionalAttrs isPackagingEnabled {
         ".devscripts".source = mkOutOfStoreSymlink ../../../dot/devscripts;
@@ -215,24 +219,6 @@ in
     wayland =
       { }
       // lib.optionalAttrs (isLinuxNonNixOS) {
-        windowManager.river = {
-          enable = true;
-          settings = {
-            border-width = 2;
-            map = {
-              normal = {
-                "Mod1 Q" = "close";
-                "Mod1 Return" = "ghostty";
-              };
-            };
-            set-cursor-warp = "on-output-change";
-            set-repeat = "50 300";
-            spawn = [
-              "ghostty"
-            ];
-            xcursor-theme = "Bibata-Modern-Classic 12";
-          };
-        };
         windowManager.hyprland.settings = {
           "$screenlocker" = lib.mkForce "swaylock";
         };

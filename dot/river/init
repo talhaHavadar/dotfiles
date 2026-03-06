@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -x
+
+# Cleanup function
+cleanup() {
+	pkill kanshi
+	systemctl --user stop river-session.target
+	systemctl --user stop waybar.service
+}
+
+trap cleanup EXIT INT TERM
+
+export XDG_CURRENT_DESKTOP=river
+
+kanshi &
+dbus-update-activation-environment --systemd --all &&
+	systemctl --user restart river-session.target
+kwm
