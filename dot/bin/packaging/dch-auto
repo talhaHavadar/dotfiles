@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-BASE_VERSION="$(dpkg-parsechangelog -S Version | sed 's/~git.*//')"
+BASE_VERSION="$(dpkg-parsechangelog -S Version)"
 VERSION="${BASE_VERSION}~git$(date +%Y%m%d%H%M).$(git rev-parse --short HEAD)"
 
 # Directly replace version in first line of changelog
