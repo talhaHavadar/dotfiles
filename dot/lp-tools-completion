@@ -1,0 +1,139 @@
+#!/usr/bin/env bash
+
+# Bash completion for lp-tools and lp-tools-* commands
+# Dynamically completes subcommands by looking at ~/.local/bin/lp-tools-*
+
+# Extract options from argparse-style --help output
+_lp_tools_get_options() {
+    local cmd="$1"
+    "$cmd" --help 2>/dev/null | grep -oE '^\s*(-[a-zA-Z],\s*)?--[a-zA-Z0-9_-]+' | \
+        sed 's/.*\(--[a-zA-Z0-9_-]*\)/\1/' | sort -u
+}
+
+# Get git remotes
+_lp_tools_git_remotes() {
+    git remote 2>/dev/null
+}
+
+# Get local git branches
+_lp_tools_git_local_branches() {
+    git for-each-ref --format='%(refname:short)' refs/heads 2>/dev/null
+}
+
+# Get remote branch names (stripped of remote prefix, e.g., origin/main -> main)
+_lp_tools_git_remote_branches() {
+    git for-each-ref --format='%(refname:short)' refs/remotes 2>/dev/null | \
+        grep '/' | sed 's|^[^/]*/||' | sort -u
+}
+
+# Completion for individual lp-tools-* commands
+_lp_tools_subcommand() {
+    local cur prev words cword
+    if declare -F _init_completion >/dev/null 2>&1; then
+        _init_completion
+    else
+        COMPREPLY=()
+        cur="${COMP_WORDS[COMP_CWORD]}"
+        prev="${COMP_WORDS[COMP_CWORD-1]}"
+    fi
+
+    local cmd="${COMP_WORDS[0]}"
+
+    # Context-aware completion based on previous argument
+    case "$prev" in
+        --source-remote|--target-remote)
+            COMPREPLY=($(compgen -W "$(_lp_tools_git_remotes)" -- "${cur}"))
+            return 0
+            ;;
+        --source|--prerequisite)
+            COMPREPLY=($(compgen -W "$(_lp_tools_git_local_branches)" -- "${cur}"))
+            return 0
+            ;;
+        --target)
+            COMPREPLY=($(compgen -W "$(_lp_tools_git_remote_branches)" -- "${cur}"))
+            return 0
+            ;;
+        --reviewer)
+            # Could add LP user completion here in future
+            return 0
+            ;;
+    esac
+
+    # Complete options
+    if [[ "$cur" == -* ]]; then
+        local options
+        options=$(_lp_tools_get_options "$cmd")
+        COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+        return 0
+    fi
+
+    # Default to file completion
+    _filedir
+    return 0
+}
+
+# Completion for the lp-tools wrapper
+_lp_tools() {
+    local cur prev words cword
+    if declare -F _init_completion >/dev/null 2>&1; then
+        _init_completion
+    else
+        COMPREPLY=()
+        cur="${COMP_WORDS[COMP_CWORD]}"
+        prev="${COMP_WORDS[COMP_CWORD-1]}"
+        words=("${COMP_WORDS[@]}")
+        cword=$COMP_CWORD
+    fi
+
+    # If we're completing the first argument (the subcommand)
+    if [[ $cword -eq 1 ]]; then
+        local subcommands
+        subcommands=$(basename -a "$HOME"/.local/bin/lp-tools-* 2>/dev/null | sed 's/^lp-tools-//')
+        COMPREPLY=($(compgen -W "${subcommands}" -- "${cur}"))
+        return 0
+    fi
+
+    # For subsequent arguments, use subcommand completion logic
+    local subcommand="${words[1]}"
+    local full_command="$HOME/.local/bin/lp-tools-${subcommand}"
+
+    # Context-aware completion based on previous argument
+    case "$prev" in
+        --source-remote|--target-remote)
+            COMPREPLY=($(compgen -W "$(_lp_tools_git_remotes)" -- "${cur}"))
+            return 0
+            ;;
+        --source|--prerequisite)
+            COMPREPLY=($(compgen -W "$(_lp_tools_git_local_branches)" -- "${cur}"))
+            return 0
+            ;;
+        --target)
+            COMPREPLY=($(compgen -W "$(_lp_tools_git_remote_branches)" -- "${cur}"))
+            return 0
+            ;;
+        --reviewer)
+            return 0
+            ;;
+    esac
+
+    if [[ -x "$full_command" && "$cur" == -* ]]; then
+        local options
+        options=$(_lp_tools_get_options "$full_command")
+        COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+        return 0
+    fi
+
+    # Default to file completion
+    _filedir
+    return 0
+}
+
+# Register completion for lp-tools wrapper
+complete -F _lp_tools lp-tools
+
+# Register completion for each lp-tools-* command
+for cmd in "$HOME"/.local/bin/lp-tools-*; do
+    if [[ -x "$cmd" ]]; then
+        complete -F _lp_tools_subcommand "$(basename "$cmd")"
+    fi
+done

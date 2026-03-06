@@ -100,6 +100,7 @@ in
           + ''
             source ~/.tmux-completion
             source ~/.complete_alias
+            source ~/.lp-tools-completion
 
             complete -F _complete_alias t
             export GPG_TTY="$(tty)"
