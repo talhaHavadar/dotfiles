@@ -1,18 +1,46 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash -l
+
+# Source system and user profiles to get proper environment
+# This is needed because river doesn't start from a login shell
+# Sources: nix, home-manager, input methods, debuginfod, etc.
+if [ -f /etc/profile ]; then
+    . /etc/profile
+fi
+if [ -f "$HOME/.profile" ]; then
+    . "$HOME/.profile"
+fi
+
 set -x
+
+# Debug: dump environment to log file
+exec >/tmp/river-init.log 2>&1
+echo "=== River init started at $(date) ==="
+echo "=== Environment ==="
+env | sort
+echo "=== End Environment ==="
 
 # Cleanup function
 cleanup() {
-	pkill kanshi
-	systemctl --user stop river-session.target
-	systemctl --user stop waybar.service
+    pkill kanshi
+    systemctl --user stop river-session.target
+    systemctl --user stop waybar.service
 }
 
 trap cleanup EXIT INT TERM
 
+# Set critical environment variables
 export XDG_CURRENT_DESKTOP=river
+export XDG_SESSION_TYPE=wayland
+export XDG_SESSION_DESKTOP=river
 
 kanshi &
-dbus-update-activation-environment --systemd --all &&
-	systemctl --user restart river-session.target
-kwm
+wlsunset &
+
+# Import critical environment variables to systemd and dbus
+# Using explicit variables instead of --all for reliability on fresh boot
+# WAYLAND_DISPLAY is set by river before running this script
+systemctl --user import-environment
+dbus-update-activation-environment --systemd --all
+
+systemctl --user restart river-session.target
+$HOME/.local/bin/kwm

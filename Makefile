@@ -113,7 +113,7 @@ ifdef IS_UBUNTU
 	sudo add-apt-repository -y ppa:tchavadar/river-unstable || true
 	sudo apt update
 	@echo "Installing river and dependencies..."
-	sudo apt install -y river waylock wlr-randr grim slurp wl-clipboard kanshi wlogout
+	sudo apt install -y river waylock wlr-randr grim slurp wl-clipboard kanshi wlogout wlsunset
 else
 	@echo "WARNING: River is only available on Ubuntu via PPA."
 	@echo "On NixOS/macOS, configure in your nix config instead."
