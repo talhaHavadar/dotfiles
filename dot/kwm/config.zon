@@ -907,6 +907,7 @@
     .window_rules = .{
         .{ .app_id = .{ .str = "", .match_null = true }, .floating = true },
         .{ .app_id = .{ .str = "zenity" }, .floating = true },
+        .{ .app_id = .{ .str = "gcr-prompter" }, .floating = true },
         .{ .app_id = .{ .str = "DesktopEditors" }, .floating = true },
         .{ .app_id = .{ .str = "xdg-desktop-portal-gtk" }, .floating = true },
         .{ .app_id = .{ .str = "chromium" }, .tag = 0b10, .scroller_mfact = 0.9 },
