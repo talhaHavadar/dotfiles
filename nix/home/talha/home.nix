@@ -38,6 +38,7 @@ in
         ".config/systemd/user/river-session.target".source = mkOutOfStoreSymlink ../../../dot/systemd/user/river-session.target;
         ".config/kwm".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/kwm";
         ".config/kanshi".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/kanshi";
+        ".config/wlogout".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/wlogout";
       }
       // lib.optionalAttrs isPackagingEnabled {
         ".devscripts".source = mkOutOfStoreSymlink ../../../dot/devscripts;

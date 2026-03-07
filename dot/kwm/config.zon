@@ -865,6 +865,13 @@
                 .event = .{ .click = .{ .pressed = .{ .spawn_shell = .{ .cmd = "pidof waylock || waylock -fork-on-lock" } } } },
             },
 
+            // Logout menu (Super+Alt+L)
+            .{
+                .keysym = "l",
+                .modifiers = .{ .mod4 = true, .ctrl = true, .shift = true },
+                .event = .{ .click = .{ .pressed = .{ .spawn = .{ .argv = .{"wlogout"} } } } },
+            },
+
             // Screenshot
             .{
                 .keysym = "Print",
