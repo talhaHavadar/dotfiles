@@ -107,17 +107,45 @@ river: river-deps symlinks-river
 	@echo "River setup complete. Run 'river' to start."
 
 .PHONY: river-deps
-river-deps:
+river-deps: pwvucontrol overskride
 ifdef IS_UBUNTU
 	@echo "Adding river PPA..."
 	sudo add-apt-repository -y ppa:tchavadar/river-unstable || true
 	sudo apt update
 	@echo "Installing river and dependencies..."
-	sudo apt install -y river waylock wlr-randr grim slurp wl-clipboard kanshi wlogout wlsunset
+	sudo apt install -y river waylock wlr-randr grim slurp wl-clipboard kanshi wlogout wlsunset network-manager-applet
 else
 	@echo "WARNING: River is only available on Ubuntu via PPA."
 	@echo "On NixOS/macOS, configure in your nix config instead."
 	@false
+endif
+
+.PHONY: pwvucontrol
+pwvucontrol: flatpak
+ifdef IS_UBUNTU
+	flatpak install flathub com.saivert.pwvucontrol
+else ifdef IS_MACOS
+	@echo "No pwvucontrol for you macos"
+endif
+
+.PHONY: overskride
+overskride: flatpak
+ifdef IS_UBUNTU
+	@if flatpak list --app | grep -q io.github.kaii_lb.Overskride; then \
+		echo "Overskride already installed. Run 'make overskride-update' to update."; \
+	else \
+		$(MAKE) overskride-install; \
+	fi
+endif
+
+.PHONY: overskride-update overskride-install
+overskride-update overskride-install: flatpak
+ifdef IS_UBUNTU
+	@echo "Downloading Overskride (Bluetooth client)..."
+	curl -sSL -o /tmp/overskride.flatpak https://github.com/kaii-lb/overskride/releases/latest/download/overskride.flatpak
+	sudo flatpak install -y /tmp/overskride.flatpak || sudo flatpak update -y io.github.kaii_lb.Overskride
+	rm -f /tmp/overskride.flatpak
+	@echo "Overskride installed/updated successfully."
 endif
 
 # ============================================================

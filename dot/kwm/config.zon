@@ -55,7 +55,7 @@
     .auto_swallow = true,
     .default_window_decoration = .ssd,
     .border = .{
-        .width = 5,
+        .width = 2,
         .color = .{
             .focus = 0xffc777ff,
             .unfocus = 0x828bb8ff,
@@ -799,12 +799,12 @@
 
             // Volume control
             .{
-                .keysym = "XF86AudioRaiseVolume",
+                .keysym = "xf86AudioRaiseVolume",
                 .modifiers = .{},
                 .event = .{ .repeat = .{ .spawn_shell = .{ .cmd = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+" } } },
             },
             .{
-                .keysym = "XF86AudioLowerVolume",
+                .keysym = "xf86AudioLowerVolume",
                 .modifiers = .{},
                 .event = .{ .repeat = .{ .spawn_shell = .{ .cmd = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-" } } },
             },
@@ -908,6 +908,9 @@
         .{ .app_id = .{ .str = "", .match_null = true }, .floating = true },
         .{ .app_id = .{ .str = "zenity" }, .floating = true },
         .{ .app_id = .{ .str = "gcr-prompter" }, .floating = true },
+        .{ .app_id = .{ .str = "com.saivert.pwvucontrol" }, .floating = true },
+        .{ .app_id = .{ .str = "io.github.kaii_lb.Overskride" }, .floating = true },
+        .{ .app_id = .{ .str = "nm-connection-editor" }, .floating = true },
         .{ .app_id = .{ .str = "DesktopEditors" }, .floating = true },
         .{ .app_id = .{ .str = "xdg-desktop-portal-gtk" }, .floating = true },
         .{ .app_id = .{ .str = "chromium" }, .tag = 0b10, .scroller_mfact = 0.9 },

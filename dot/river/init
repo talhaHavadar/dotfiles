@@ -4,10 +4,10 @@
 # This is needed because river doesn't start from a login shell
 # Sources: nix, home-manager, input methods, debuginfod, etc.
 if [ -f /etc/profile ]; then
-    . /etc/profile
+	. /etc/profile
 fi
 if [ -f "$HOME/.profile" ]; then
-    . "$HOME/.profile"
+	. "$HOME/.profile"
 fi
 
 set -x
@@ -21,9 +21,9 @@ echo "=== End Environment ==="
 
 # Cleanup function
 cleanup() {
-    pkill kanshi
-    systemctl --user stop river-session.target
-    systemctl --user stop waybar.service
+	pkill kanshi
+	systemctl --user stop river-session.target
+	systemctl --user stop waybar.service
 }
 
 trap cleanup EXIT INT TERM
@@ -35,6 +35,7 @@ export XDG_SESSION_DESKTOP=river
 
 kanshi &
 wlsunset &
+nm-applet --indicator &
 
 # Import critical environment variables to systemd and dbus
 # Using explicit variables instead of --all for reliability on fresh boot
