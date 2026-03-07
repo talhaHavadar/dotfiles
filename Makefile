@@ -375,6 +375,7 @@ _symlinks-river:
 	$(call create_symlink,$(DOT_DIR)/kanshi,$(HOME)/.config/kanshi)
 	$(call create_symlink,$(DOT_DIR)/kwm,$(HOME)/.config/kwm)
 	$(call create_symlink,$(DOT_DIR)/wlogout,$(HOME)/.config/wlogout)
+	$(call create_symlink,$(DOT_DIR)/waybar,$(HOME)/.config/waybar)
 
 .PHONY: _symlinks-shell
 _symlinks-shell:

@@ -1,0 +1,163 @@
+* {
+    font-family: "Inter", "SF Pro Display", "Cantarell", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    min-height: 0;
+}
+
+window#waybar {
+    background: rgba(30, 30, 46, 0.92);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: #cdd6f4;
+}
+
+window#waybar.hidden {
+    opacity: 0.2;
+}
+
+/* Base module styling */
+#cpu,
+#memory,
+#clock,
+#network,
+#pulseaudio,
+#battery,
+#tray {
+    padding: 0 14px;
+    margin: 4px 2px;
+    border-radius: 8px;
+    background: transparent;
+    transition: all 0.2s ease;
+}
+
+/* River tags */
+#tags button {
+    padding: 0 8px;
+    margin: 4px 2px;
+    border-radius: 6px;
+    color: #6c7086;
+    background: transparent;
+    border: none;
+    transition: all 0.15s ease;
+}
+
+#tags button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #cdd6f4;
+}
+
+#tags button.focused {
+    background: #89b4fa;
+    color: #1e1e2e;
+}
+
+#tags button.occupied {
+    color: #cdd6f4;
+}
+
+#tags button.urgent {
+    background: #f38ba8;
+    color: #1e1e2e;
+}
+
+/* Left modules */
+#cpu,
+#memory {
+    color: #bac2de;
+}
+
+#cpu:hover,
+#memory:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #cdd6f4;
+}
+
+/* Center clock */
+#clock {
+    color: #cdd6f4;
+    font-weight: 600;
+}
+
+/* Right modules hover effect */
+#bluetooth,
+#network,
+#pulseaudio,
+#battery {
+    color: #bac2de;
+}
+
+#bluetooth:hover,
+#network:hover,
+#pulseaudio:hover,
+#battery:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #cdd6f4;
+}
+
+/* Bluetooth states */
+#bluetooth.disabled,
+#bluetooth.off {
+    color: #6c7086;
+}
+
+#bluetooth.connected {
+    color: #89b4fa;
+}
+
+/* Network states */
+#network.disconnected {
+    color: #6c7086;
+}
+
+#network.wifi {
+    color: #89b4fa;
+}
+
+/* Audio states */
+#pulseaudio.muted {
+    color: #6c7086;
+}
+
+/* Battery states */
+#battery.charging {
+    color: #a6e3a1;
+}
+
+#battery.warning:not(.charging) {
+    color: #fab387;
+}
+
+#battery.critical:not(.charging) {
+    color: #f38ba8;
+    animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+    to { opacity: 0.7; }
+}
+
+/* System tray */
+#tray {
+    padding: 0 10px;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+}
+
+/* Tooltip styling */
+tooltip {
+    background: rgba(30, 30, 46, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+tooltip label {
+    color: #cdd6f4;
+    padding: 6px 10px;
+}
