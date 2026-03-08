@@ -33,8 +33,9 @@ export XDG_CURRENT_DESKTOP=river
 export XDG_SESSION_TYPE=wayland
 export XDG_SESSION_DESKTOP=river
 
+# Amsterdam lat,lon
+wlsunset -l 52 -L 4 &
 kanshi &
-wlsunset &
 nm-applet --indicator &
 
 # Import critical environment variables to systemd and dbus
