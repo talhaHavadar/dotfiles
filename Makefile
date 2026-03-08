@@ -220,7 +220,7 @@ cli: cli-deps
 	@echo "CLI tools installed."
 
 .PHONY: cli-deps
-cli-deps: flatpak
+cli-deps: flatpak jj rustup
 ifdef IS_UBUNTU
 	@echo "Installing CLI tools via apt..."
 	sudo apt update
@@ -229,7 +229,6 @@ ifdef IS_UBUNTU
 	sudo snap install ghostty --classic || true
 	sudo snap install git-ubuntu --classic || true
 	sudo snap install snapcraft --classic || true
-	sudo snap install rustup --classic || true
 	sudo snap install glow || true
 	sudo snap install lxd || true
 	sudo snap install ppa-dev-tools || true
@@ -260,6 +259,26 @@ ifdef IS_UBUNTU
 else
 	@echo "flatpak is not available on this platform"
 endif
+
+.PHONY: jj
+jj: cargo
+	cargo install --locked --bin jj jj-cli
+
+.PHONY: rustup
+rustup:
+ifdef IS_UBUNTU
+	sudo snap install rustup --classic && \
+	rustup default stable
+else ifdef HAS_NIX
+	@echo "CLI tools are managed via home-manager."
+	@echo "Run 'make home-manager' to apply nix config."
+else
+	@echo "ERROR: Install nix first with 'make nix', then 'make home-manager'"
+	@false
+endif
+
+.PHONY: cargo
+cargo: rustup
 
 # ============================================================
 # NIX TARGETS
