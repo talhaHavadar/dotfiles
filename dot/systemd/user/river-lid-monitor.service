@@ -1,0 +1,23 @@
+[Unit]
+Description=River Lid Monitor - Handles laptop lid events for display switching
+Documentation=man:wlr-randr(1)
+
+# Only run when River session is active
+PartOf=river-session.target
+After=river-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.config/river/lid-handler.sh
+
+# Restart on failure with backoff
+Restart=on-failure
+RestartSec=5
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=river-lid-monitor
+
+[Install]
+WantedBy=river-session.target

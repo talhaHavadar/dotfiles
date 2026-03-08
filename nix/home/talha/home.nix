@@ -36,6 +36,7 @@ in
         ".config/jj".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/jj";
         ".config/river".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/river";
         ".config/systemd/user/river-session.target".source = mkOutOfStoreSymlink ../../../dot/systemd/user/river-session.target;
+        ".config/systemd/user/river-lid-monitor.service".source = mkOutOfStoreSymlink ../../../dot/systemd/user/river-lid-monitor.service;
         ".config/kwm".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/kwm";
         ".config/kanshi".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/kanshi";
         ".config/wlogout".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/wlogout";
