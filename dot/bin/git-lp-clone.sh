@@ -5,6 +5,7 @@ set -eu
 # Team short code map
 declare -A TEAM_MAP=(
 	["bwk"]="bullwinkle-team"
+	["limerick"]="limerick-team"
 )
 
 # Resolve team short code to full name
