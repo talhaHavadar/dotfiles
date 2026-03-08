@@ -2,6 +2,7 @@
 Description=Task Queue Timer
 
 [Timer]
+OnBootSec=5min
 OnActiveSec=0
 OnUnitInactiveSec=5min
 Persistent=true
