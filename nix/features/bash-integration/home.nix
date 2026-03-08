@@ -1,17 +1,16 @@
-{
-  config,
-  lib,
-  pkgs,
-  username,
-  platform,
-  flakeOutput,
-  ...
+{ config
+, lib
+, pkgs
+, username
+, platform
+, flakeOutput
+, ...
 }:
 let
   bash-integration_config = config.host.features.bash-integration;
   homeDirectory = config.home.homeDirectory;
   username = config.home.username;
-  isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
+  isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "1";
   isDarwin = pkgs.stdenv.isDarwin;
   isNixOS = pkgs.stdenv.isLinux && builtins.pathExists /etc/NIXOS;
   isLinuxNonNixOS = pkgs.stdenv.isLinux && !builtins.pathExists /etc/NIXOS;

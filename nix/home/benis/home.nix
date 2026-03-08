@@ -1,11 +1,10 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 let
-  isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
+  isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "1";
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
   isDarwin = pkgs.stdenv.isDarwin;
   isNixOS = pkgs.stdenv.isLinux && builtins.pathExists /etc/NIXOS;

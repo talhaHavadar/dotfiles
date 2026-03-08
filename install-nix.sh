@@ -3,15 +3,15 @@
 
 while [ $# -gt 0 ]; do
     case $1 in
-        -p|--with-packaging)
-            INCLUDE_PACKAGING="true"
-            ;;
-        -c|--headless)
-            HEADLESS_INSTANCE="true"
-            ;;
-        *)
-            echo "Unknown argument $1"
-            ;;
+    -p | --with-packaging)
+        INCLUDE_PACKAGING="1"
+        ;;
+    -c | --headless)
+        HEADLESS_INSTANCE="true"
+        ;;
+    *)
+        echo "Unknown argument $1"
+        ;;
     esac
     shift
 done
@@ -19,21 +19,19 @@ done
 cd ~/.config/dotfiles
 DOTFILES_DIR=~/.config/dotfiles
 
-nix_version=`which nix`
-is_macos=`uname -a | grep Darwin`
-is_linux=`uname -a | grep Linux`
+nix_version=$(which nix)
+is_macos=$(uname -a | grep Darwin)
+is_linux=$(uname -a | grep Linux)
 if [ -z "$nix_version" ]; then
     echo "is_macos=$is_macos is_linux=$is_linux"
     if [ -n "$is_macos" ]; then
         echo "Detected a macos system..."
-        if ! command -v nix &>/dev/null
-        then
+        if ! command -v nix &>/dev/null; then
             curl -L https://nixos.org/nix/install | sh
         fi
     elif [ -n "$is_linux" ]; then
         echo "Detected a linux system..."
-        if ! command -v nix &>/dev/null
-        then
+        if ! command -v nix &>/dev/null; then
             curl -L https://nixos.org/nix/install | sh -s -- --daemon
         fi
     fi
@@ -46,8 +44,7 @@ fi
 
 if [ -n "$is_linux" ]; then
     # export NIX_SYSTEM="$(uname -i)-$(uname -s | awk '{print tolower($0)}')"
-    if ! command -v home-manager &>/dev/null
-    then
+    if ! command -v home-manager &>/dev/null; then
         if [ "$HEADLESS_INSTANCE" = "true" ]; then
             INCLUDE_PACKAGING="$INCLUDE_PACKAGING" nix run home-manager -- init --switch "$HOME"/.config/dotfiles/nix#ubuntu-headless --impure -b backup
         else
@@ -62,7 +59,7 @@ if [ -n "$is_linux" ]; then
         fi
     fi
 
-    if [ "$INCLUDE_PACKAGING" = "true" ]; then
+    if [ "$INCLUDE_PACKAGING" = "1" ]; then
         echo "Packaging tools installation is enabled. Installing packaging tools..."
 
         packaging_related_apt_tools=(
@@ -74,17 +71,16 @@ if [ -n "$is_linux" ]; then
             git-buildpackage
             config-package-dev
             lxc-templates
-	    dh-sequence-gir
+            dh-sequence-gir
         )
 
         sudo apt update
         # https://raw.githubusercontent.com/Yubico/libfido2/refs/heads/main/udev/70-u2f.rules
-        sudo apt install swaylock  "${packaging_related_apt_tools[@]}" \
-                pcscd sssd libpam-sss scdaemon yubikey-manager libpam-u2f libfido2-dev \
-                python3-venv
+        sudo apt install swaylock "${packaging_related_apt_tools[@]}" \
+            pcscd sssd libpam-sss scdaemon yubikey-manager libpam-u2f libfido2-dev \
+            python3-venv
         # use pamu2fcfg > ~/.config/Yubico/u2f_keys to setup keys
         # update /etc/pam.d/{sudo,gdm-password,swaylock} with "auth required pam_u2f.so"
-
 
         sudo adduser $USER sbuild
 
@@ -108,4 +104,3 @@ EOF
     source ~/.profile
     source ~/.bashrc
 fi
-

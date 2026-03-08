@@ -63,19 +63,18 @@
   };
 
   outputs =
-    {
-      self,
-      nixpkgs,
-      home-manager,
-      darwin,
-      nixvim,
-      # mac-app-util,
-      nixos-hardware,
-      system-manager,
-      nix-system-graphics,
-      nix-snapd,
-      nixos-raspberrypi,
-      ...
+    { self
+    , nixpkgs
+    , home-manager
+    , darwin
+    , nixvim
+    , # mac-app-util,
+      nixos-hardware
+    , system-manager
+    , nix-system-graphics
+    , nix-snapd
+    , nixos-raspberrypi
+    , ...
     }@inputs:
     let
       mkHomeConfiguration =
@@ -91,8 +90,7 @@
                 allowUnfree = true;
               };
             };
-            extraSpecialArgs = {
-            };
+            extraSpecialArgs = { };
 
           }
           // {
@@ -334,7 +332,7 @@
           inherit username;
           inherit inputs;
           platform = "non-nixos";
-          packagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
+          packagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "1";
           currentConfigSystem = "home";
           flakeOutput = "linux";
         };
@@ -347,7 +345,7 @@
           username = "ubuntu";
           inherit inputs;
           platform = "ubuntu-headless";
-          packagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
+          packagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "1";
           currentConfigSystem = "home";
           flakeOutput = "ubuntu-headless";
         };

@@ -4,7 +4,7 @@
 , ...
 }:
 let
-  isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "true";
+  isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "1";
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
   # Use builtins.currentSystem to determine platform without evaluating pkgs
   system = builtins.currentSystem;
