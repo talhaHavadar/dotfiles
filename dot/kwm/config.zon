@@ -921,6 +921,7 @@
     },
     .libinput_device_rules = .{
         .{ .name = .{ .str = ".*[tT]ouchpad", .regex = true }, .tap = .enabled, .drag = .enabled, .natural_scroll = .enabled },
+        .{ .name = .{ .str = ".*[mM]ouse", .regex = true }, .tap = .enabled, .drag = .enabled, .natural_scroll = .enabled },
         .{ .tap = .enabled, .drag = .enabled },
     },
     .xkb_keyboard_rules = .{
