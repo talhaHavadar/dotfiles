@@ -19,6 +19,7 @@ $purge_build_deps = 'successful';
 # $purge_session = 'never';
 # $purge_build_deps = 'never';
 $chroot_mode="unshare";
+$unshare_mmdebstrap_keep_tarball = 1;
 
 # Use 90% of available CPUs for parallel builds
 $build_environment = {
@@ -43,7 +44,7 @@ $lintian_opts = ['-EvIL', 'pedantic'];
 # $piuparts_opts = ['--schroot', '%r-%a-sbuild', '--no-eatmydata'];
 $run_autopkgtest = 1;
 $autopkgtest_root_args = '';
-$autopkgtest_opts = [ '--', 'lxd' ];
+$autopkgtest_opts = [ '--', 'lxd', "ubuntu:$distribution" ];
 
 # don't remove this, Perl needs it:
 1;
