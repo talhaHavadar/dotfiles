@@ -434,7 +434,7 @@ _symlinks-shell:
 .PHONY: _symlinks-packaging
 _symlinks-packaging:
 	@echo "Creating packaging symlinks..."
-	$(call create_symlink,$(DOT_DIR)/sbuildrc,$(HOME)/.sbuildrc)
+	$(call create_symlink,$(DOT_DIR)/sbuild/config.pl,$(HOME)/.config/sbuild/config.pl)
 	$(call create_symlink,$(DOT_DIR)/mk-sbuild.rc,$(HOME)/.mk-sbuild.rc)
 	$(call create_symlink,$(DOT_DIR)/quiltrc-dpkg,$(HOME)/.quiltrc-dpkg)
 	$(call create_symlink,$(DOT_DIR)/devscripts,$(HOME)/.devscripts)

@@ -47,7 +47,7 @@ in
         ".gbp.conf".source = mkOutOfStoreSymlink ../../../dot/gbp.conf;
         ".mk-sbuild.rc".source = mkOutOfStoreSymlink ../../../dot/mk-sbuild.rc;
         ".quiltrc-dpkg".source = mkOutOfStoreSymlink ../../../dot/quiltrc-dpkg;
-        ".sbuildrc".source = mkOutOfStoreSymlink ../../../dot/sbuildrc;
+        ".config/sbuild/config.pl".source = mkOutOfStoreSymlink ../../../dot/sbuild/config.pl;
         ".packaging.bashrc".source = mkOutOfStoreSymlink ../../../dot/packaging.bashrc;
         ".local/bin/packaging".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/packaging;
         ".local/bin/packaging-get-uploads".source =

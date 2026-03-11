@@ -1,11 +1,10 @@
-{
-  config,
-  lib,
-  pkgs,
-  platform,
-  packagingEnabled,
-  currentConfigSystem,
-  ...
+{ config
+, lib
+, pkgs
+, platform
+, packagingEnabled
+, currentConfigSystem
+, ...
 }:
 let
   pyp = pkgs.python312Packages;
@@ -35,7 +34,7 @@ with lib;
         ".gbp.conf".source = mkOutOfStoreSymlink ../../../dot/gbp.conf;
         ".mk-sbuild.rc".source = mkOutOfStoreSymlink ../../../dot/mk-sbuild.rc;
         ".quiltrc-dpkg".source = mkOutOfStoreSymlink ../../../dot/quiltrc-dpkg;
-        ".sbuildrc".source = mkOutOfStoreSymlink ../../../dot/sbuildrc;
+        ".config/sbuild/config.pl".source = mkOutOfStoreSymlink ../../../dot/sbuild/config.pl;
         ".packaging.bashrc".source = mkOutOfStoreSymlink ../../../dot/packaging.bashrc;
         ".local/bin/packaging".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/packaging;
         ".local/bin/packaging-get-uploads".source =
@@ -55,9 +54,7 @@ with lib;
         gcc-arm-embedded-13
       ];
     }
-    // lib.optionalAttrs (currentConfigSystem == "darwin") {
-    }
-    // lib.optionalAttrs (currentConfigSystem == "nixos") {
-    };
+    // lib.optionalAttrs (currentConfigSystem == "darwin") { }
+    // lib.optionalAttrs (currentConfigSystem == "nixos") { };
 
 }
