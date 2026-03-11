@@ -542,17 +542,6 @@
                 },
             },
             .{
-                .keysym = "s",
-                .modifiers = .{ .mod4 = true },
-                .event = .{
-                    .click = .{
-                        .pressed = .{
-                            .switch_layout = .{ .layout = .scroller },
-                        },
-                    },
-                },
-            },
-            .{
                 .keysym = "Tab",
                 .modifiers = .{ .mod4 = true },
                 .event = .{
@@ -876,6 +865,11 @@
             .{
                 .keysym = "Print",
                 .modifiers = .{},
+                .event = .{ .click = .{ .pressed = .{ .spawn_shell = .{ .cmd = "grim -g \"$(slurp)\" - | wl-copy -t image/png" } } } },
+            },
+            .{
+                .keysym = "s",
+                .modifiers = .{ .mod4 = true, .shift = true },
                 .event = .{ .click = .{ .pressed = .{ .spawn_shell = .{ .cmd = "grim -g \"$(slurp)\" - | wl-copy -t image/png" } } } },
             },
             .{
