@@ -31,6 +31,7 @@ vim.pack.add({
     "https://github.com/lewis6991/gitsigns.nvim",
     "https://github.com/NeogitOrg/neogit",
     "https://github.com/sindrets/diffview.nvim",
+    "https://github.com/godlygeek/tabular",
 })
 local function packadd(name)
     vim.cmd("packadd " .. name)
