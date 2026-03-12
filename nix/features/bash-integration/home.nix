@@ -26,6 +26,7 @@ in
       NIX_STORE = "/nix/store";
       NIX_MYUSER = "${username}";
       NIX_PLATFORM = "${platform}";
+      _ZO_EXCLUDE_DIRS = "/run/user/*/gvfs/*";
     };
 
     programs = {
