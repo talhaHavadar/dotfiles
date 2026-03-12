@@ -70,5 +70,56 @@ git:
 
 .PHONY: clean
 clean:
+	rm -rf .nvim-git nvim-offline-*.tar.gz
+
 .PHONY: test
 test:
+
+# ============================================================================
+# OFFLINE EXPORT / INSTALL
+# ============================================================================
+
+NVIM_DATA := $(HOME)/.local/share/nvim
+NVIM_CONFIG := $(HOME)/.config/nvim
+EXPORT_DIR := nvim-offline-export
+EXPORT_TARBALL := nvim-offline-$$(date +%Y%m%d).tar.gz
+
+.PHONY: export
+export:
+	@echo "==> Creating offline nvim export..."
+	rm -rf $(EXPORT_DIR)
+	mkdir -p $(EXPORT_DIR)/bin
+	mkdir -p $(EXPORT_DIR)/share
+	mkdir -p $(EXPORT_DIR)/config
+	mkdir -p $(EXPORT_DIR)/data/site
+	mkdir -p $(EXPORT_DIR)/data/mason
+	@echo "==> Copying nvim binary..."
+	cp $$(which nvim) $(EXPORT_DIR)/bin/
+	@echo "==> Copying nvim runtime..."
+	cp -r /usr/local/share/nvim $(EXPORT_DIR)/share/ 2>/dev/null || \
+		cp -r /usr/share/nvim $(EXPORT_DIR)/share/ 2>/dev/null || \
+		echo "Warning: Could not find nvim runtime, will use built-in"
+	@echo "==> Copying nvim config..."
+	cp -r $(NVIM_CONFIG)/* $(EXPORT_DIR)/config/ 2>/dev/null || true
+	@echo "==> Copying plugins (vim.pack)..."
+	cp -r $(NVIM_DATA)/site/pack $(EXPORT_DIR)/data/site/ 2>/dev/null || true
+	@echo "==> Copying treesitter parsers..."
+	cp -r $(NVIM_DATA)/site/parser $(EXPORT_DIR)/data/site/ 2>/dev/null || true
+	cp -r $(NVIM_DATA)/site/parser-info $(EXPORT_DIR)/data/site/ 2>/dev/null || true
+	@echo "==> Copying treesitter queries (dereferencing symlinks)..."
+	cp -rL $(NVIM_DATA)/site/queries $(EXPORT_DIR)/data/site/ 2>/dev/null || true
+	@echo "==> Copying mason packages (LSPs, formatters, linters)..."
+	cp -r $(NVIM_DATA)/mason $(EXPORT_DIR)/data/ 2>/dev/null || true
+	@echo "==> Copying lock file..."
+	cp $(NVIM_DATA)/nvim-pack-lock.json $(EXPORT_DIR)/data/ 2>/dev/null || true
+	@echo "==> Copying install script..."
+	cp $(CURDIR)/offline-install.sh $(EXPORT_DIR)/install.sh
+	chmod +x $(EXPORT_DIR)/install.sh
+	@echo "==> Creating tarball..."
+	tar -czvf $(EXPORT_TARBALL) $(EXPORT_DIR)
+	rm -rf $(EXPORT_DIR)
+	@echo ""
+	@echo "==> Export complete: $(EXPORT_TARBALL)"
+	@echo "    Transfer this file to your offline machine and run:"
+	@echo "      tar -xzvf $(EXPORT_TARBALL)"
+	@echo "      cd nvim-offline-export && ./install.sh"
