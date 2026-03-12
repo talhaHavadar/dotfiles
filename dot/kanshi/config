@@ -5,12 +5,12 @@ profile laptop-only {
 
 # Laptop + LG Ultrawide (dual monitor, lid open)
 profile laptop-lg-ultrawide {
-    output eDP-1 enable mode 2560x1600 position 0,0 scale 2
-    output "LG Electronics LG ULTRAWIDE 207NTUW4Q462" enable mode 5120x2160@72 position 1280,0 scale 1.5
+    output eDP-1 enable mode 2880x1920@120 scale 1.5
+    output "LG Electronics LG ULTRAWIDE 207NTUW4Q462" enable mode 5120x2160@72 scale 1.5
 }
 
 # LG Ultrawide only (lid closed)
 profile lg-ultrawide-only {
     output eDP-1 disable
-    output "LG Electronics LG ULTRAWIDE 207NTUW4Q462" enable mode 5120x2160@72 position 1280,0 scale 1.5
+    output "LG Electronics LG ULTRAWIDE 207NTUW4Q462" enable mode 5120x2160@72 scale 1.5
 }
