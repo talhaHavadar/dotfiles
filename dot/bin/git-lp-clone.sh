@@ -59,6 +59,7 @@ REPO="$1"
 git ubuntu clone $REPO
 # # Clone the repository
 cd "$REPO"
+git ubuntu export-orig
 
 git remote add "$TEAM_SHORT" "git+ssh://$LP_USER@git.launchpad.net/~$LP_TEAM/ubuntu/+source/$REPO"
 
