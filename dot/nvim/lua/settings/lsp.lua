@@ -80,9 +80,6 @@ local function lsp_on_attach(ev)
         return
     end
 
-
-
-
     local bufnr = ev.buf
     local opts = { noremap = true, silent = true, buffer = bufnr }
 
@@ -147,6 +144,11 @@ local function lsp_on_attach(ev)
             end, 50)
         end, opts)
     end
+
+    if client.name == 'ruff' then
+        -- Disable hover in favor of Pyright
+        client.server_capabilities.hoverProvider = false
+    end
 end
 
 vim.api.nvim_create_autocmd("LspAttach", { group = augroup, callback = lsp_on_attach })
@@ -169,7 +171,20 @@ vim.lsp.config("bashls", {})
 vim.lsp.config("gopls", {})
 vim.lsp.config("clangd", {})
 vim.lsp.config("zls", {})
-vim.lsp.config("pyright", {})
+vim.lsp.config("pyright", {
+    settings = {
+        pyright = {
+            -- Using Ruff's import organizer
+            disableOrganizeImports = true,
+        },
+        python = {
+            analysis = {
+                -- Ignore all files for analysis to exclusively use Ruff for linting
+                ignore = { '*' },
+            },
+        },
+    },
+})
 vim.lsp.config("yamlls", {
     settings = {
         yaml = {
