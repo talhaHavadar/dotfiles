@@ -1,6 +1,6 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.8"
+# requires-python = ">=3.9"
 # dependencies = [
 #     "launchpadlib",
 #     "keyring",
@@ -164,7 +164,7 @@ def parse_lp_remote(remote: str) -> Tuple[Optional[str], Optional[str]]:
     for pattern in patterns:
         match = re.match(pattern, remote_url)
         if match:
-            path = match.group(1).rstrip("/").rstrip(".git")
+            path = match.group(1).rstrip("/").removesuffix(".git")
             return path, None
 
     return None, None
