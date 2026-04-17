@@ -86,7 +86,7 @@ ALL_ARCHES="amd64,amd64v3,arm64,armhf,i386,powerpc,ppc64el,s390x,riscv64"
 ppa create "$PPA_NAME" --owner-name "$PPA_OWNER" --arches $ALL_ARCHES --pocket proposed ${PPA_DESC:+--description "$PPA_DESC"} || true
 
 packaging dch-auto
-debuild --no-conf --no-lintian -S -d -sa -I.jj --source-option='--extend-diff-ignore=(^|/)\.jj/' $NO_CLEAN
+debuild --no-conf --no-lintian -S -d -sa -I.jj -ktalha.can.havadar@canonical.com --source-option='--extend-diff-ignore=(^|/)\.jj/' $NO_CLEAN
 SOURCE_NAME=$(dpkg-parsechangelog -SSource)
 SOURCE_CHANGES_FILE="${SOURCE_NAME}_$(dpkg-parsechangelog -SVersion)_source.changes"
 cd -
