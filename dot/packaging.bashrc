@@ -8,7 +8,7 @@ alias dquilt="quilt --quiltrc=${HOME}/.quiltrc-dpkg"
 complete -F _quilt_completion $_quilt_complete_opt dquilt
 
 export DEBFULLNAME="Talha Can Havadar"
-export DEBEMAIL="talha.can.havadar@canonical.com"
+export DEBEMAIL="havadartalha@gmail.com"
 export UBUMAIL="Talha Can Havadar <talha.can.havadar@canonical.com>"
 
 sbuild-cross() {
