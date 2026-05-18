@@ -1,10 +1,9 @@
-{
-  config,
-  lib,
-  pkgs,
-  platform,
-  currentConfigSystem,
-  ...
+{ config
+, lib
+, pkgs
+, platform
+, currentConfigSystem
+, ...
 }:
 {
   config = {
@@ -28,6 +27,8 @@
       brews = [
         "python3"
         "python-tk"
+        "zig"
+        "jj"
         # Swift package manager
         # https://github.com/cameroncooke/XcodeBuildMCP/tree/v26.0.0?tab=readme-ov-file
       ];
@@ -46,8 +47,7 @@
         "discord"
       ];
 
-      masApps = {
-      };
+      masApps = { };
 
       onActivation = {
         autoUpdate = false;
