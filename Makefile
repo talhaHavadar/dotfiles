@@ -61,6 +61,7 @@ help:
 	@echo "  make yubikey      Security/Yubikey tools"
 	@echo "  make cli          CLI utilities (ripgrep, btop, etc.)"
 	@echo "  make zen-browser  Install Zen Browser"
+	@echo "  make zed          Install Zed IDE"
 	@echo "  make flatpak      Install Flatpak"
 	@echo "  make desktop      Install desktop environment that I like"
 	@echo ""
@@ -71,7 +72,7 @@ help:
 	@echo ""
 	@echo "Symlinks (home-manager aware):"
 	@echo "  make symlinks     All config symlinks"
-	@echo "  make symlinks-X   Specific: nvim, river, shell, packaging, git, ghostty, systemd"
+	@echo "  make symlinks-X   Specific: nvim, river, shell, packaging, git, jj, ghostty, systemd"
 	@echo ""
 	@echo "Utilities:"
 	@echo "  make clean        Clean build artifacts"
@@ -232,6 +233,13 @@ ifdef IS_UBUNTU
 	sudo snap install glow || true
 	sudo snap install lxd || true
 	sudo snap install ppa-dev-tools || true
+	sudo apt install tmux || true
+else ifdef IS_MACOS
+	@echo "Installing CLI tools via brew..."
+	brew install glow || true
+	brew install tmux || true
+	brew install starship || true
+	brew install zoxide || true
 else ifdef HAS_NIX
 	@echo "CLI tools are managed via home-manager."
 	@echo "Run 'make home-manager' to apply nix config."
@@ -246,6 +254,14 @@ ifdef IS_UBUNTU
 	flatpak install flathub app.zen_browser.zen
 else ifdef IS_MACOS
 	brew install --cask zen-browser
+endif
+
+.PHONY: zen-browser
+zed:
+ifdef IS_UBUNTU
+	@echo "Zed installation is not implemented for ubuntu yet"
+else ifdef IS_MACOS
+	brew install --cask zed
 endif
 
 .PHONY: flatpak
@@ -268,6 +284,9 @@ jj: cargo
 rustup:
 ifdef IS_UBUNTU
 	sudo snap install rustup --classic && \
+	rustup default stable
+else ifdef IS_MACOS
+	brew install rustup && \
 	rustup default stable
 else ifdef HAS_NIX
 	@echo "CLI tools are managed via home-manager."
@@ -390,6 +409,14 @@ else
 	$(MAKE) _symlinks-git
 endif
 
+.PHONY: symlinks-jj
+symlinks-jj:
+ifdef HAS_HOME_MANAGER
+	@echo "git symlinks managed by home-manager. Run 'make home-manager'."
+else
+	$(MAKE) _symlinks-jj
+endif
+
 .PHONY: symlinks-ghostty
 symlinks-ghostty:
 ifdef HAS_HOME_MANAGER
@@ -446,6 +473,11 @@ _symlinks-git:
 	@echo "Creating git symlinks..."
 	$(call create_symlink,$(DOT_DIR)/gitconfig.projects,$(HOME)/.gitconfig.projects)
 	$(call create_symlink,$(DOT_DIR)/gitconfig.workspace,$(HOME)/.gitconfig.workspace)
+
+.PHONY: _symlinks-jj
+_symlinks-jj:
+	@echo "Creating git symlinks..."
+	$(call create_symlink,$(DOT_DIR)/jj.$(USER),$(HOME)/.config/jj)
 
 .PHONY: _symlinks-ghostty
 _symlinks-ghostty:

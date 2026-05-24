@@ -1,3 +1,11 @@
+# ============================================================
+# PLATFORM DETECTION
+# ============================================================
+UNAME_S := $(shell uname -s)
+IS_MACOS := $(filter Darwin,$(UNAME_S))
+IS_LINUX := $(filter Linux,$(UNAME_S))
+IS_NIXOS := $(if $(wildcard /etc/NIXOS),1,)
+IS_UBUNTU := $(if $(shell grep -qi ubuntu /etc/os-release 2>/dev/null && echo 1),1,)
 
 .PHONY: all
 all: nvim install
@@ -16,7 +24,13 @@ install: .nvim-git/build/bin/nvim
 
 .PHONY: nvim-deps
 nvim-deps: treesitter gopls bashls ruff fzf-lua
+ifdef IS_UBUNTU
 	sudo apt-get install -y ninja-build gettext cmake curl build-essential git
+endif
+ifdef IS_MACOS
+	brew install ninja gettext cmake curl gcc git
+endif
+
 
 .PHONY: treesitter
 treesitter: cargo libclang
@@ -33,40 +47,65 @@ ruff: unzip venv
 
 .PHONY: fzf-lua
 fzf-lua: cargo
+ifdef IS_UBUNTU
 	sudo apt install fzf -y
+endif
+ifdef IS_MACOS
+	brew install fzf
+endif
 	cargo install --locked viu
 
 .PHONY: unzip
 unzip:
+ifdef IS_UBUNTU
 	sudo apt install unzip -y
+endif
 
 .PHONY: libclang
 libclang:
+ifdef IS_UBUNTU
 	sudo apt install libclang-dev -y
+endif
 
 .PHONY:npm
 npm:
+ifdef IS_UBUNTU
 	sudo apt install npm -y
+endif
 
 .PHONY: go
 go:
+ifdef IS_UBUNTU
 	sudo snap install go --classic
+endif
+ifdef IS_MACOS
+	brew install go
+endif
 
 .PHONY: rustup
 rustup:
-	sudo snap install rustup --classic && \
-	rustup default stable
+ifdef IS_UBUNTU
+	sudo snap install rustup --classic && rustup default stable
+endif
+ifdef IS_MACOS
+	brew install rustup && rustup default stable
+endif
+	
 
 .PHONY: cargo
 cargo: rustup
 
 .PHONY: venv
 venv:
+ifdef IS_UBUNTU
 	sudo apt install python3-venv -y
+endif
 
 .PHONY: git
 git:
+ifdef IS_UBUNTU
 	sudo apt install git -y
+endif
 
 .PHONY: clean
 clean:
