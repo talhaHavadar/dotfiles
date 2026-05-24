@@ -1,0 +1,16 @@
+[user]
+name = "Bahanur Enis"
+email = "bahanurenis@gmail.com"
+
+[signing]
+behavior = "drop"
+backend = "gpg"
+
+[git]
+sign-on-push = true
+
+# disable pagination for `jj status`, use `delta` for `jj diff` and `jj show`
+[[--scope]]
+--when.commands = ["status"]
+[--scope.ui]
+paginate = "never"
