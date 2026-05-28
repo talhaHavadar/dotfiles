@@ -14,10 +14,12 @@
 # Environment overrides:
 #   CONTAINED_CONTAINER_RUNTIME   docker (default) | podman
 #   CONTAINED_CONTAINER_NAME      ghcr.io/talhahavadar/contained-debdev:ubuntu-devel
-#   CONTAINED_RUN_ARGS            "--privileged --security-opt seccomp=unconfined"
-#                                 -- needed by sbuild's unshare backend on
-#                                 macOS runtimes; override to replace, set
-#                                 empty to disable
+#   CONTAINED_RUN_ARGS            per-runtime defaults that wire sbuild's
+#                                 unshare backend through the container layer:
+#                                   macOS:         --privileged --security-opt seccomp=unconfined
+#                                   Linux+podman:  --userns=auto:size=65536
+#                                   Linux+docker:  (none)
+#                                 Override to replace, set empty to disable.
 #   CONTAINED_HOST_GATEWAY_ALIAS  host.docker.internal (default) -- hostname
 #                                 the in-container side of the GPG bridge
 #                                 connects to (macOS only)
@@ -105,10 +107,22 @@ CONTAINER_WORK_DIR="/work/$(basename "$PWD")"
 INTERACTIVE=0
 VOLUMES=("$PWD/..:/work")
 
-# --privileged (CAP_SYS_ADMIN for the chroot's /proc mount inside sbuild) and
-# --security-opt seccomp=unconfined (lets unshare(CLONE_NEWUSER) through) are
-# needed on macOS container runtimes. Override via CONTAINED_RUN_ARGS.
-_default_run_args="--privileged --security-opt seccomp=unconfined"
+# Per-runtime defaults for sbuild's unshare backend inside the container:
+#   macOS: --privileged grants CAP_SYS_ADMIN for the chroot's /proc mount,
+#     and --security-opt seccomp=unconfined lets unshare(CLONE_NEWUSER)
+#     through Docker Desktop / OrbStack / Colima / Apple `container`.
+#   Linux + podman: rootless podman maps a single host UID to container root,
+#     so sbuild's `unshare --map-users 100000,1,1 ...` hits EPERM writing
+#     /proc/<pid>/uid_map -- the parent namespace has no UID 100000 to map
+#     in. --userns=auto:size=65536 carves a real subuid range into the
+#     container so the nested namespace satisfies the kernel.
+#   Linux + docker: rootful by default, no extra flags needed.
+# Override via CONTAINED_RUN_ARGS (set empty to disable).
+case "${HOST_OS}:${CONTAINER_RUNTIME}" in
+Darwin:*) _default_run_args="--privileged --security-opt seccomp=unconfined" ;;
+Linux:podman) _default_run_args="--userns=auto:size=65536" ;;
+*) _default_run_args="" ;;
+esac
 # shellcheck disable=SC2206  # intentional word-split into array
 DEFAULT_RUN_ARGS=(${CONTAINED_RUN_ARGS:-$_default_run_args})
 
@@ -144,7 +158,7 @@ trap cleanup EXIT
 stage_file() {
     local tmp
     tmp=$(mktemp -t contained-stage.XXXXXX)
-    cat "$1" > "$tmp"
+    cat "$1" >"$tmp"
     STAGED_FILES+=("$tmp")
     printf '%s' "$tmp"
 }
@@ -163,7 +177,7 @@ stage_git_config() {
         /^[[:space:]]*\[/ { in_gpg=0 }
         in_gpg && /^[[:space:]]*program[[:space:]]*=/ { next }
         { print }
-    ' "$1" > "$tmp"
+    ' "$1" >"$tmp"
     STAGED_FILES+=("$tmp")
     printf '%s' "$tmp"
 }
@@ -248,9 +262,9 @@ setup_gpg_linux() {
     GPG_MOUNTS+=(-v "${sock}:/root/.gnupg/S.gpg-agent")
     conf=$(mktemp -t contained-gpgconf.XXXXXX)
     if [ -f "${HOME}/.gnupg/gpg.conf" ]; then
-        cat "${HOME}/.gnupg/gpg.conf" > "$conf"
+        cat "${HOME}/.gnupg/gpg.conf" >"$conf"
     fi
-    printf '\nno-autostart\n' >> "$conf"
+    printf '\nno-autostart\n' >>"$conf"
     STAGED_FILES+=("$conf")
     GPG_MOUNTS+=(-v "${conf}:/root/.gnupg/gpg.conf:ro")
 }
@@ -279,7 +293,7 @@ setup_gpg_macos() {
 
     gpgconf --launch keyboxd >/dev/null 2>&1 || true
     pubkeys=$(mktemp -t contained-pubkeys.XXXXXX)
-    if gpg --batch --no-tty --export > "$pubkeys" 2>/dev/null && [ -s "$pubkeys" ]; then
+    if gpg --batch --no-tty --export >"$pubkeys" 2>/dev/null && [ -s "$pubkeys" ]; then
         STAGED_FILES+=("$pubkeys")
         GPG_MOUNTS+=(-v "${pubkeys}:/run/host-pubkeys.gpg:ro")
     else
@@ -392,9 +406,13 @@ Environment overrides:
   CONTAINED_CONTAINER_RUNTIME   docker (default) | podman
   CONTAINED_CONTAINER_NAME      default container image
                                 (default: ghcr.io/talhahavadar/contained-debdev:ubuntu-devel)
-  CONTAINED_RUN_ARGS            extra flags for `docker run`
-                                (default: --privileged --security-opt seccomp=unconfined;
-                                 needed by sbuild's unshare backend on macOS runtimes)
+  CONTAINED_RUN_ARGS            extra flags for `docker run` / `podman run`.
+                                Per-runtime defaults wire sbuild's unshare
+                                backend through the container layer:
+                                  macOS:         --privileged --security-opt seccomp=unconfined
+                                  Linux+podman:  --userns=auto:size=65536
+                                  Linux+docker:  (none)
+                                Override to replace, set empty to disable.
   CONTAINED_HOST_GATEWAY_ALIAS  host.docker.internal (default) -- alias the
                                 in-container side of the GPG bridge connects
                                 to (macOS only)
@@ -435,7 +453,10 @@ EOF
 # at the first `--` so it doesn't pick up a `--help` aimed at the inner cmd.
 for _arg in "$@"; do
     case $_arg in
-    --help) usage; exit 0 ;;
+    --help)
+        usage
+        exit 0
+        ;;
     --) break ;;
     esac
 done
@@ -446,7 +467,10 @@ while getopts ":c:v:ih" opt; do
     c) CONTAINER="$OPTARG" ;;
     v) VOLUMES+=("$OPTARG") ;;
     i) INTERACTIVE=1 ;;
-    h) usage; exit 0 ;;
+    h)
+        usage
+        exit 0
+        ;;
     :)
         echo "Option -$OPTARG requires an argument" >&2
         exit 2

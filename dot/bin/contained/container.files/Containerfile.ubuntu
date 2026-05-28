@@ -25,9 +25,10 @@
 # in-development release) but mmdebstrap does not accept 'devel' as a suite
 # name -- it needs the actual codename. We resolve it from /etc/os-release's
 # UBUNTU_CODENAME field, which the official ubuntu:devel image sets correctly.
-# The resulting chroot tarball is still named after RELEASE (devel-<arch>.tar.zst)
-# so `sbuild -d devel` works inside the container regardless of which codename
-# devel currently points at.
+# The chroot tarball is named after the resolved SUITE (e.g.
+# stonking-<arch>.tar.zst), so use `sbuild -d <codename>` inside the container.
+# `sbuild -d devel` is intentionally not supported -- always pass the real
+# codename so the chroot lookup matches the tarball.
 
 ARG RELEASE=resolute
 
