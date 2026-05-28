@@ -371,16 +371,93 @@ exec "$@"'
 # Argument parsing
 # ---------------------------------------------------------------------------
 
-while getopts ":c:v:i" opt; do
+usage() {
+    cat <<'EOF'
+Usage: contained [opts] -- [docker-opts...] -- [container-cmd...]
+
+Run a tool inside a Debian-packaging container. cwd is bind-mounted so
+`../foo.changes`, `../foo.dsc`, etc. resolve the same way as on the host.
+
+Options:
+  -c <image>       override the container image
+  -v <mount>       extra bind mount (passed straight to docker -v)
+  -i               interactive (docker -it)
+  -h, -?, --help   show this help and exit
+
+Args between the first '--' and second '--' go to `docker run`.
+Args after the second '--' (or after the first, if there's no second)
+are the command to run inside the container.
+
+Environment overrides:
+  CONTAINED_CONTAINER_RUNTIME   docker (default) | podman
+  CONTAINED_CONTAINER_NAME      default container image
+                                (default: ghcr.io/talhahavadar/contained-debdev:ubuntu-devel)
+  CONTAINED_RUN_ARGS            extra flags for `docker run`
+                                (default: --privileged --security-opt seccomp=unconfined;
+                                 needed by sbuild's unshare backend on macOS runtimes)
+  CONTAINED_HOST_GATEWAY_ALIAS  host.docker.internal (default) -- alias the
+                                in-container side of the GPG bridge connects
+                                to (macOS only)
+
+Auto-passthrough (forwarded only when set on the host):
+  DEBFULLNAME, DEBEMAIL, DEBSIGN_KEYID
+  SSH_AUTH_SOCK -> /run/host-ssh-agent.sock
+
+Auto-mount (read-only when host file exists):
+  ~/.config/sbuild/config.pl -> /root/.config/sbuild/config.pl
+  ~/.sbuildrc                -> /root/.sbuildrc          (legacy fallback)
+  ~/.config/git/config       -> /root/.config/git/config (XDG)
+  ~/.gitconfig               -> /root/.gitconfig         (legacy fallback)
+  ~/.gnupg                   bridged for gpg-agent / YubiKey signing
+
+Examples:
+  # uscan a watch file using the default image
+  contained uscan -v --no-download
+
+  # interactive shell inside a specific image
+  contained -i -c ghcr.io/talhahavadar/contained-debdev:debian-unstable -- bash
+
+  # full sbuild run
+  contained -c ghcr.io/talhahavadar/contained-debdev:debian-unstable \
+      -- sbuild -d unstable --no-clean-source
+
+  # extra bind mount for a local apt cache
+  contained -c ghcr.io/talhahavadar/contained-debdev:debian-unstable \
+      -v "$HOME/.cache/apt:/var/cache/apt" \
+      -- sbuild -d unstable
+
+  # add an extra docker flag on top of the defaults
+  contained -- --cap-add SYS_PTRACE -- bash
+EOF
+}
+
+# --help is a long option getopts can't parse; catch it before getopts. Stop
+# at the first `--` so it doesn't pick up a `--help` aimed at the inner cmd.
+for _arg in "$@"; do
+    case $_arg in
+    --help) usage; exit 0 ;;
+    --) break ;;
+    esac
+done
+unset _arg
+
+while getopts ":c:v:ih" opt; do
     case $opt in
     c) CONTAINER="$OPTARG" ;;
     v) VOLUMES+=("$OPTARG") ;;
     i) INTERACTIVE=1 ;;
+    h) usage; exit 0 ;;
     :)
         echo "Option -$OPTARG requires an argument" >&2
         exit 2
         ;;
     \?)
+        # `-?` lands here because getopts treats `?` as the unknown-option
+        # sentinel; detect it via OPTARG and treat it as help.
+        if [ "$OPTARG" = "?" ]; then
+            usage
+            exit 0
+        fi
         echo "Unknown option: -$OPTARG" >&2
         exit 2
         ;;
