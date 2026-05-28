@@ -102,9 +102,9 @@ in
     // lib.optionalAttrs (isDarwin) {
       homeDirectory = "/Users/${config.home.username}";
       activation = {
-        mint-swift-bundler = lib.hm.dag.entryAfter [ "installPackages" ] ''
-          PATH="/opt/homebrew/bin:${pkgs.git}/bin:/usr/bin:$PATH" $DRY_RUN_CMD mint install stackotter/swift-bundler@main
-        '';
+       # mint-swift-bundler = lib.hm.dag.entryAfter [ "installPackages" ] ''
+       #   PATH="/opt/homebrew/bin:${pkgs.git}/bin:/usr/bin:$PATH" $DRY_RUN_CMD mint install stackotter/swift-bundler@main
+       # '';
       };
     }
     // lib.optionalAttrs (isLinux) {
@@ -135,7 +135,6 @@ in
         enable = true;
         extraConfig = ''
           Include ~/.ssh/extra_config
-          IdentityFile ~/.ssh/id_ed25519_sk_mobil
 
           Host dev-amd64-unlock
             User root

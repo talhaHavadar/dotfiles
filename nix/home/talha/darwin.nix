@@ -25,33 +25,22 @@
       ];
 
       brews = [
+        "jj"
         "python3"
         "python-tk"
-        "zig"
-        "jj"
         # Swift package manager
         # https://github.com/cameroncooke/XcodeBuildMCP/tree/v26.0.0?tab=readme-ov-file
       ];
 
       casks = [
-        "MonitorControl"
-        "karabiner-elements"
-        {
-          name = "middleclick";
-          args = {
-            no_quarantine = true;
-          };
-        }
-        "obsidian"
         "jordanbaird-ice"
-        "discord"
       ];
 
       masApps = { };
 
       onActivation = {
         autoUpdate = false;
-        cleanup = "zap";
+        cleanup = "none";
         upgrade = false;
       };
 
