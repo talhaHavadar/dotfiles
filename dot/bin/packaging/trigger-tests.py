@@ -57,6 +57,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+SUCCESSFUL_BUILD_STATE = "Successfully built"
+
+
 def main():
     args = parse_args()
 
@@ -83,7 +86,6 @@ def main():
 
     release = args.release
     package = args.package
-    package_version = None
     owner = args.owner
     ppa = args.ppa_name
 
@@ -93,17 +95,51 @@ def main():
     lp_ppa = lp_owner.getPPAByName(name=ppa)
     logger.info(f"Found PPA: {lp_ppa.web_link}")
 
-    # Get the source package and its targeted architectures from builds
-    logger.info(f"Fetching source package builds for: {package}")
-    sources = lp_ppa.getPublishedSources(source_name=package, status="Published")
-    targeted_archs = set()
-    for source in sources:
-        package_version = source.source_package_version
-        builds = source.getBuilds()
-        for build in builds:
-            targeted_archs.add(build.arch_tag)
-    if not targeted_archs:
+    distro_series = lp.distributions["ubuntu"].getSeries(name_or_version=release)
+
+    # A newer source sitting in Pending means the currently-Published source
+    # is about to be superseded. Triggering anything in that window would
+    # test the soon-to-be-stale binaries against a soon-to-be-stale trigger
+    # string, so defer the whole task for a later tq-worker retry.
+    pending_sources = list(
+        lp_ppa.getPublishedSources(
+            source_name=package,
+            status="Pending",
+            distro_series=distro_series,
+        )
+    )
+    if pending_sources:
+        logger.info(
+            "Pending source(s) for %s in %s: %s — full retry",
+            package,
+            release,
+            [s.source_package_version for s in pending_sources],
+        )
+        sys.exit(255)
+
+    # The single Published source row is the target version.
+    published_sources = list(
+        lp_ppa.getPublishedSources(
+            source_name=package,
+            status="Published",
+            distro_series=distro_series,
+        )
+    )
+    if not published_sources:
         # Exit 255 signals "no source published yet, retry later"
+        sys.exit(255)
+    target_source = published_sources[0]
+    target_version = target_source.source_package_version
+    logger.info(f"Target source: {package}/{target_version}")
+
+    targeted_archs = set()
+    unbuilt_archs = {}
+    for build in target_source.getBuilds():
+        targeted_archs.add(build.arch_tag)
+        if build.buildstate != SUCCESSFUL_BUILD_STATE:
+            unbuilt_archs[build.arch_tag] = build.buildstate
+
+    if not targeted_archs:
         sys.exit(255)
 
     logger.info(f"Targeted architectures: {targeted_archs}")
@@ -116,42 +152,61 @@ def main():
                 f"Specified arch {args.arch} is not a build target for this package"
             )
 
-    # Get published binaries for your package
+    # Per-arch binary counts restricted to the target source version.
+    # Publisher can leave binaries in Pending for hours after a build
+    # finishes; until every binary on an arch is Published, the autopkgtest
+    # runner would install the previous version's still-Published binaries.
     logger.info(f"Fetching published binaries for package: {package}")
-    binaries = lp_ppa.getPublishedBinaries()
-    # map of arch => [binary_name]
-    published_binaries = {}
-    for b in binaries:
-        if b.status == "Published" and b.source_package_name == package:
-            arch = b.distro_arch_series_link.split("/")[-1]
-            bins = published_binaries.get(arch, [])
-            bins.append(b.binary_package_name)
-            published_binaries[arch] = bins
+    binaries_at_target = {
+        arch: {"published": 0, "pending": 0} for arch in targeted_archs
+    }
+    for b in lp_ppa.getPublishedBinaries():
+        if b.source_package_name != package:
+            continue
+        if b.binary_package_version != target_version:
+            continue
+        arch = b.distro_arch_series_link.rsplit("/", 1)[-1]
+        if arch not in binaries_at_target:
+            continue
+        if b.status == "Published":
+            binaries_at_target[arch]["published"] += 1
+        elif b.status == "Pending":
+            binaries_at_target[arch]["pending"] += 1
 
-    logger.info(f"Published binaries by arch: {published_binaries}")
+    logger.info(f"Binaries at {target_version} by arch: {binaries_at_target}")
 
     # Track remaining archs that haven't been triggered
-    remaining_archs = targeted_archs.copy()
+    remaining_archs = set(targeted_archs)
 
-    for arch in targeted_archs:
-        if arch in published_binaries and len(published_binaries[arch]) > 0:
-            params = {
-                "release": release,
-                "package": package,
-                "arch": arch,
-                "trigger": f"{package}/{package_version}",
-                "ppa": f"{owner}/{ppa}",
-                "all-proposed": "1",
-            }
-            url = "https://autopkgtest.ubuntu.com/request.cgi"
-            logger.info(f"Requesting autopkgtest for {package} on {arch}")
-            logger.debug(f"Request params: {params}")
-            session.get(url, params=params)
-            remaining_archs.discard(arch)
+    for arch in sorted(targeted_archs):
+        if arch in unbuilt_archs:
+            logger.info(f"Skipping {arch}: build state is {unbuilt_archs[arch]!r}")
+            continue
+        counts = binaries_at_target[arch]
+        if counts["pending"] > 0 or counts["published"] == 0:
+            logger.info(
+                f"Skipping {arch}: binaries at {target_version} not fully "
+                f"published (pending={counts['pending']} "
+                f"published={counts['published']})"
+            )
+            continue
+        params = {
+            "release": release,
+            "package": package,
+            "arch": arch,
+            "trigger": f"{package}/{target_version}",
+            "ppa": f"{owner}/{ppa}",
+            "all-proposed": "1",
+        }
+        url = "https://autopkgtest.ubuntu.com/request.cgi"
+        logger.info(f"Requesting autopkgtest for {package} on {arch}")
+        logger.debug(f"Request params: {params}")
+        session.get(url, params=params)
+        remaining_archs.discard(arch)
 
     if remaining_archs:
         logger.warning(
-            f"Remaining architectures not yet published: {sorted(remaining_archs)}"
+            f"Remaining architectures not yet ready: {sorted(remaining_archs)}"
         )
         print(*sorted(remaining_archs))
 
