@@ -20,6 +20,30 @@ $purge_build_deps = 'successful';
 # $purge_build_deps = 'never';
 $chroot_mode="unshare";
 $unshare_mmdebstrap_keep_tarball = 1;
+push @$unshare_mmdebstrap_extra_args,
+    qr/^(experimental|rc-buggy)$/ => [
+        '--keyring=/usr/share/keyrings/debian-archive-keyring.gpg',
+    ];
+
+# Detect target distribution from the command line so we can apply
+# per-distribution overrides for scalars that sbuild doesn't expose
+# a native per-dist mechanism for (e.g. $build_dep_resolver).
+use Getopt::Long qw(GetOptionsFromArray);
+my $cli_dist;
+{
+    my @argv_copy = @ARGV;
+    Getopt::Long::Configure(qw(pass_through no_auto_abbrev));
+    GetOptionsFromArray(\@argv_copy, 'd|dist|distribution=s' => \$cli_dist);
+}
+my $target_dist = $cli_dist // $distribution;
+
+# Debian experimental: apt's default resolver won't pull priority-1
+# packages even when they satisfy a versioned build-dep. Aptitude does.
+# Keep the apt resolver everywhere else so local Ubuntu builds match
+# what Launchpad's buildds do.
+if ($target_dist eq 'experimental') {
+    $build_dep_resolver = 'aptitude';
+}
 
 # Use 90% of available CPUs for parallel builds
 $build_environment = {
