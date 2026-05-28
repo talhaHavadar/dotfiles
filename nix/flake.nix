@@ -274,6 +274,7 @@
             home-manager.users.talha.imports = [
               ./home.nix
             ];
+            home-manager.backupFileExtension = "backup";
           }
         ];
       };
@@ -321,6 +322,7 @@
             home-manager.users.benis.imports = [
               ./home.nix
             ];
+            home-manager.backupFileExtension = "backup";
           }
         ];
       };
