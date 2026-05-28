@@ -96,7 +96,6 @@ in
         ++ lib.optionals (isDarwin) [
         ]
         ++ lib.optionals (isLinuxNonNixOS) [
-          zig
         ];
 
     }
