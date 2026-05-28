@@ -25,11 +25,10 @@
       ];
 
       brews = [
-        "jj"
-        "python3"
-        "python-tk"
         # Swift package manager
         # https://github.com/cameroncooke/XcodeBuildMCP/tree/v26.0.0?tab=readme-ov-file
+        "zig"
+        "jj"
       ];
 
       casks = [
