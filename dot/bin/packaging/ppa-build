@@ -88,7 +88,8 @@ ppa create "$PPA_NAME" --owner-name "$PPA_OWNER" --arches $ALL_ARCHES --pocket p
 packaging dch-auto
 debuild --no-conf --no-lintian -S -d -sa -I.jj -ktalha.can.havadar@canonical.com --source-option='--extend-diff-ignore=(^|/)\.jj/' $NO_CLEAN
 SOURCE_NAME=$(dpkg-parsechangelog -SSource)
-SOURCE_CHANGES_FILE="${SOURCE_NAME}_$(dpkg-parsechangelog -SVersion)_source.changes"
+SOURCE_VERSION=$(dpkg-parsechangelog -SVersion)
+SOURCE_CHANGES_FILE="${SOURCE_NAME}_${SOURCE_VERSION#*:}_source.changes"
 cd -
 dput -f "ppa:$PPA_OWNER/$PPA_NAME" "../${SOURCE_CHANGES_FILE}"
 
