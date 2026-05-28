@@ -58,5 +58,5 @@ RUN ARCH="$(dpkg --print-architecture)" \
     && mmdebstrap --variant=buildd \
          --components="main universe" \
          "${SUITE}" \
-         "/root/.cache/sbuild/${RELEASE}-${ARCH}.tar.zst" \
+         "/root/.cache/sbuild/${SUITE}-${ARCH}.tar.zst" \
          "${MIRROR}"
