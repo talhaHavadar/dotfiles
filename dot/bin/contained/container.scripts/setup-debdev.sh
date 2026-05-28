@@ -36,6 +36,7 @@ apt-get install -y --no-install-recommends \
     dput-ng \
     reportbug \
     licenserecon \
+    autopkgtest \
     ${EXTRA_PACKAGES:-}
 rm -rf /var/lib/apt/lists/*
 
