@@ -41,6 +41,7 @@ in
         ".config/kanshi".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/kanshi";
         ".config/wlogout".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/wlogout";
         ".config/waybar".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/waybar";
+        ".local/bin/contained".source = mkOutOfStoreSymlink ../../../dot/bin/contained/contained.sh;
       }
       // lib.optionalAttrs isPackagingEnabled {
         ".devscripts".source = mkOutOfStoreSymlink ../../../dot/devscripts;
