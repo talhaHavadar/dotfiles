@@ -24,7 +24,6 @@ in
 
       casks = [
         "container"
-        "multipass"
         "raspberry-pi-imager"
         "openvpn-connect"
         "nordic-nrf-command-line-tools"
