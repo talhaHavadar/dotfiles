@@ -1,0 +1,52 @@
+# Debian packaging dev environment (sbuild + devscripts + git-buildpackage +
+# pristine-tar + lintian + ...). Loosely mirrors the salsa-ci build image but
+# trimmed to a single local target that works on macOS container runtimes.
+#
+# Build (run from dot/bin/contained/, default = unstable):
+#   docker build -t contained-debdev:debian-unstable \
+#                -f container.files/Containerfile.debian .
+# Or override release/mirror:
+#   docker build --build-arg RELEASE=trixie --build-arg MIRROR=http://ftp.de.debian.org/debian \
+#                -t contained-debdev:debian-trixie \
+#                -f container.files/Containerfile.debian .
+#
+# Use (the docker flags after the first -- are required on macOS):
+#   contained -c contained-debdev:debian-unstable \
+#     -- --privileged --security-opt seccomp=unconfined \
+#     -- sbuild -d unstable
+#
+# Why those flags are required on macOS:
+#   * seccomp=unconfined  -> lets the unshare(CLONE_NEWUSER) syscall through;
+#                            Docker's default seccomp profile blocks it.
+#   * --privileged        -> grants CAP_SYS_ADMIN so sbuild-usernsexec can
+#                            mount /proc inside the build chroot.
+#
+# Why sbuild runs as root inside the container (not as a non-root "builder"
+# user like salsa-ci's image): when unshare(1) is invoked by uid 0 it writes
+# /proc/<pid>/uid_map directly instead of going through the setuid newuidmap
+# helper. macOS container runtimes (Docker Desktop, Apple `container`, OrbStack
+# Docker, Colima) do not reliably grant CAP_SYS_ADMIN in the container's
+# bounding set, which the kernel's map_write() requires when uid_map is
+# written via the setuid bridge. So salsa-ci's "run as builder" pattern fails
+# on macOS with "newuidmap: write to uid_map failed: EPERM". Running as root
+# sidesteps the bridge entirely. On Linux hosts this image still works fine.
+
+ARG RELEASE=unstable
+ARG MIRROR=http://deb.debian.org/debian
+
+FROM debian:${RELEASE}-slim
+ARG RELEASE
+ARG MIRROR
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    LC_ALL=C.UTF-8 \
+    LANG=C.UTF-8
+
+COPY container.scripts/setup-debdev.sh /tmp/setup-debdev.sh
+RUN /tmp/setup-debdev.sh && rm /tmp/setup-debdev.sh
+
+RUN ARCH="$(dpkg --print-architecture)" \
+    && mkdir -p /root/.cache/sbuild \
+    && mmdebstrap --variant=buildd "${RELEASE}" \
+         "/root/.cache/sbuild/${RELEASE}-${ARCH}.tar.zst" \
+         "${MIRROR}"

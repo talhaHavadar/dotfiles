@@ -1,0 +1,46 @@
+# Ubuntu packaging dev environment. Sibling of Containerfile.debian; see that
+# file's header for the full discussion of why sbuild runs as root and what
+# runtime flags are required on macOS container runtimes. This file only
+# documents Ubuntu-specific bits.
+#
+# Build (run from dot/bin/contained/, default = resolute):
+#   docker build -t contained-debdev:ubuntu-resolute \
+#                -f container.files/Containerfile.ubuntu .
+# Or override release:
+#   docker build --build-arg RELEASE=noble \
+#                -t contained-debdev:ubuntu-noble \
+#                -f container.files/Containerfile.ubuntu .
+#
+# Use:
+#   contained -c contained-debdev:ubuntu-resolute \
+#     -- --privileged --security-opt seccomp=unconfined \
+#     -- sbuild -d resolute
+#
+# Ubuntu mirror layout: archive.ubuntu.com hosts amd64/i386 only; arm64 and
+# the other ports archives live at ports.ubuntu.com/ubuntu-ports. The bootstrap
+# step below picks the right one based on dpkg --print-architecture so this
+# Containerfile builds correctly on any host arch.
+
+ARG RELEASE=resolute
+
+FROM ubuntu:${RELEASE}
+ARG RELEASE
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    LC_ALL=C.UTF-8 \
+    LANG=C.UTF-8
+
+COPY container.scripts/setup-debdev.sh /tmp/setup-debdev.sh
+RUN EXTRA_PACKAGES=ubuntu-keyring /tmp/setup-debdev.sh && rm /tmp/setup-debdev.sh
+
+RUN ARCH="$(dpkg --print-architecture)" \
+    && case "${ARCH}" in \
+         amd64|i386) MIRROR=http://archive.ubuntu.com/ubuntu ;; \
+         *)          MIRROR=http://ports.ubuntu.com/ubuntu-ports ;; \
+       esac \
+    && mkdir -p /root/.cache/sbuild \
+    && mmdebstrap --variant=buildd \
+         --components="main universe" \
+         "${RELEASE}" \
+         "/root/.cache/sbuild/${RELEASE}-${ARCH}.tar.zst" \
+         "${MIRROR}"
