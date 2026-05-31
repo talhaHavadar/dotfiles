@@ -20,6 +20,14 @@
 # the other ports archives live at ports.ubuntu.com/ubuntu-ports. The bootstrap
 # step below picks the right one based on dpkg --print-architecture so this
 # Containerfile builds correctly on any host arch.
+#
+# RELEASE=devel: ubuntu publishes a 'devel' Docker tag (always the current
+# in-development release) but mmdebstrap does not accept 'devel' as a suite
+# name -- it needs the actual codename. We resolve it from /etc/os-release's
+# UBUNTU_CODENAME field, which the official ubuntu:devel image sets correctly.
+# The resulting chroot tarball is still named after RELEASE (devel-<arch>.tar.zst)
+# so `sbuild -d devel` works inside the container regardless of which codename
+# devel currently points at.
 
 ARG RELEASE=resolute
 
@@ -38,9 +46,16 @@ RUN ARCH="$(dpkg --print-architecture)" \
          amd64|i386) MIRROR=http://archive.ubuntu.com/ubuntu ;; \
          *)          MIRROR=http://ports.ubuntu.com/ubuntu-ports ;; \
        esac \
+    && if [ "${RELEASE}" = "devel" ]; then \
+         SUITE="$(. /etc/os-release && printf '%s' "${UBUNTU_CODENAME}")"; \
+         [ -n "${SUITE}" ] && [ "${SUITE}" != "devel" ] \
+           || { echo "Failed to resolve 'devel' codename from /etc/os-release" >&2; exit 1; }; \
+       else \
+         SUITE="${RELEASE}"; \
+       fi \
     && mkdir -p /root/.cache/sbuild \
     && mmdebstrap --variant=buildd \
          --components="main universe" \
-         "${RELEASE}" \
+         "${SUITE}" \
          "/root/.cache/sbuild/${RELEASE}-${ARCH}.tar.zst" \
          "${MIRROR}"
