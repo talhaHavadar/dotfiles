@@ -14,7 +14,7 @@
 #
 # Environment overrides:
 #   CONTAINED_CONTAINER_RUNTIME   default: docker          (e.g. podman)
-#   CONTAINED_CONTAINER_NAME      default: ghcr.io/talhahavadar/contained-debdev:ubuntu-resolute
+#   CONTAINED_CONTAINER_NAME      default: ghcr.io/talhahavadar/contained-debdev:ubuntu-devel
 #   CONTAINED_RUN_ARGS            default: --privileged --security-opt seccomp=unconfined
 #                                 (these are needed by the contained-debdev
 #                                 image on macOS runtimes; set to empty string
