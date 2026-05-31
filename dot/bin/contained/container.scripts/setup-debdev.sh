@@ -29,7 +29,7 @@ apt-get install -y --no-install-recommends \
 	socat \
 	uidmap \
 	zstd \
-	dput \
+	dput-ng \
 	${EXTRA_PACKAGES:-}
 rm -rf /var/lib/apt/lists/*
 
