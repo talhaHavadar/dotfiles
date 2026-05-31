@@ -22,10 +22,27 @@
 #
 # Auto-passthrough (forwarded to the container only when set on the host):
 #   DEBFULLNAME, DEBEMAIL, DEBSIGN_KEYID
+#   SSH_AUTH_SOCK -- mounted to /run/host-ssh-agent.sock and re-exported, so
+#     git-over-ssh and ssh-format commit signing both route to the host agent
+#     (incl. YubiKey via gpg-agent's enable-ssh-support socket).
 #
 # Auto-mount (only when the host file exists, mounted read-only):
 #   ~/.config/sbuild/config.pl  -> /root/.config/sbuild/config.pl
 #   ~/.sbuildrc                 -> /root/.sbuildrc          (legacy fallback)
+#   ~/.config/git/config        -> /root/.config/git/config (XDG)
+#   ~/.gitconfig                -> /root/.gitconfig         (legacy fallback)
+#   ~/.gnupg                    -> /root/.gnupg             (pubring, key stubs
+#                                                            -- gives the
+#                                                            container's gpg
+#                                                            read access to
+#                                                            your keys; signing
+#                                                            inside the
+#                                                            container does NOT
+#                                                            work on macOS
+#                                                            Docker Desktop --
+#                                                            do `git commit -S`
+#                                                            and `debsign` on
+#                                                            the host)
 #
 # Examples:
 #
@@ -79,14 +96,78 @@ for v in DEBFULLNAME DEBEMAIL DEBSIGN_KEYID; do
     fi
 done
 
+# Helper: stage a host file into /tmp before bind-mounting it. On Nix-managed
+# setups, host dotfiles are symlinks into /nix/store, and Docker Desktop /
+# Apple `container` don't share /nix with the VM by default -- the symlink
+# follow then fails with "mkdir source: file exists". Copying the file content
+# into a tmp under /tmp (which is always in the runtime's shared paths)
+# sidesteps this without requiring per-runtime sharing configuration. Files
+# are cleaned up on script exit via the EXIT trap below.
+STAGED_FILES=()
+trap '[ ${#STAGED_FILES[@]} -gt 0 ] && rm -f "${STAGED_FILES[@]}"' EXIT
+stage_for_mount() {
+    local src="$1"
+    local tmp
+    tmp=$(mktemp -t contained-stage.XXXXXX)
+    cat "$src" > "$tmp"
+    STAGED_FILES+=("$tmp")
+    printf '%s' "$tmp"
+}
+
 # Auto-mount the host's sbuild config (XDG path first, then legacy ~/.sbuildrc)
 # so it overrides /etc/sbuild/sbuild.conf inside the image. Read-only because
 # sbuild never writes back to its config.
 SBUILD_CONFIG_MOUNTS=()
 if [ -f "${HOME}/.config/sbuild/config.pl" ]; then
-    SBUILD_CONFIG_MOUNTS+=(-v "${HOME}/.config/sbuild/config.pl:/root/.config/sbuild/config.pl:ro")
+    SBUILD_CONFIG_MOUNTS+=(-v "$(stage_for_mount "${HOME}/.config/sbuild/config.pl"):/root/.config/sbuild/config.pl:ro")
 elif [ -f "${HOME}/.sbuildrc" ]; then
-    SBUILD_CONFIG_MOUNTS+=(-v "${HOME}/.sbuildrc:/root/.sbuildrc:ro")
+    SBUILD_CONFIG_MOUNTS+=(-v "$(stage_for_mount "${HOME}/.sbuildrc"):/root/.sbuildrc:ro")
+fi
+
+# Forward host git config (XDG path first, then legacy ~/.gitconfig) so
+# commits made inside the container pick up user.name, user.email, signing
+# settings, URL rewrites, etc. Read-only -- a stray `git config --global` in
+# the container should not corrupt host config.
+GIT_CONFIG_MOUNTS=()
+if [ -f "${HOME}/.config/git/config" ]; then
+    GIT_CONFIG_MOUNTS+=(-v "$(stage_for_mount "${HOME}/.config/git/config"):/root/.config/git/config:ro")
+elif [ -f "${HOME}/.gitconfig" ]; then
+    GIT_CONFIG_MOUNTS+=(-v "$(stage_for_mount "${HOME}/.gitconfig"):/root/.gitconfig:ro")
+fi
+
+# YubiKey / GPG signing: bind-mount the host's ~/.gnupg into the container so
+# its gpg can see pubring, key stubs, and gpg.conf. RW (not :ro) because gpg
+# writes lockfiles into the homedir even for pure read operations and rejects
+# the homedir otherwise. The YubiKey is the source of truth for any actual
+# key material, so the worst a container-side gpg can do is scribble on the
+# host's trustdb / pubring -- annoying but no cryptographic loss.
+#
+# Signing inside the container: does NOT work on macOS Docker Desktop today.
+# The gpg-agent socket would need to be reachable through the bind-mount, but
+# (a) sockets carried inside a directory bind-mount lose their socket type
+# through virtiofs ("ls" reports "Operation not supported"), and (b) overlaying
+# a single-file socket bind-mount on top of the dir mount fails at runc with
+# "openat2 ... operation not supported" because virtiofs doesn't support
+# mountpoint creation. Workflow: do `git commit -S` / `debsign foo.changes`
+# on the host before/after the container session. Inside the container, run
+# sbuild with --no-arch-any-sign-changes / --no-arch-all-sign-changes (or set
+# $sign_changes = 0 in your sbuild config) and sign post-build on the host.
+#
+# This limitation does NOT apply on a Linux host -- gpg-agent socket
+# forwarding works fine there, and the .gnupg mount alone is enough.
+GPG_MOUNTS=()
+if [ -d "${HOME}/.gnupg" ]; then
+    GPG_MOUNTS+=(-v "${HOME}/.gnupg:/root/.gnupg")
+fi
+
+# Forward the SSH agent socket if one is set on the host. Mounted as a
+# standalone single-file bind so it retains socket type (which a passenger
+# of a virtiofs dir mount would not). On a YubiKey-via-gpg-agent host setup
+# this socket is gpg-agent's ssh wrapper, so it routes ssh auth through the
+# YubiKey too. Useful for git-over-ssh and ssh-format commit signing.
+if [ -n "${SSH_AUTH_SOCK-}" ] && [ -S "${SSH_AUTH_SOCK}" ]; then
+    GPG_MOUNTS+=(-v "${SSH_AUTH_SOCK}:/run/host-ssh-agent.sock")
+    ENV_ARGS+=(-e "SSH_AUTH_SOCK=/run/host-ssh-agent.sock")
 fi
 
 while getopts ":c:v:i" opt; do
@@ -138,4 +219,4 @@ if [ "$separator_seen" -eq 0 ]; then
     DOCKER_EXTRA_ARGS=()
 fi
 
-${CONTAINER_RUNTIME} run "${INTERACTIVE_ARGS[@]}" --rm "${VOLUME_ARGS[@]}" "${SBUILD_CONFIG_MOUNTS[@]}" "${ENV_ARGS[@]}" "${DEFAULT_RUN_ARGS[@]}" "${DOCKER_EXTRA_ARGS[@]}" -w "${CONTAINER_WORK_DIR}" "$CONTAINER" "${CONTAINER_CMD[@]}"
+${CONTAINER_RUNTIME} run "${INTERACTIVE_ARGS[@]}" --rm "${VOLUME_ARGS[@]}" "${SBUILD_CONFIG_MOUNTS[@]}" "${GIT_CONFIG_MOUNTS[@]}" "${GPG_MOUNTS[@]}" "${ENV_ARGS[@]}" "${DEFAULT_RUN_ARGS[@]}" "${DOCKER_EXTRA_ARGS[@]}" -w "${CONTAINER_WORK_DIR}" "$CONTAINER" "${CONTAINER_CMD[@]}"
