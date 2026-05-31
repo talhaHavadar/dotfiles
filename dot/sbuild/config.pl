@@ -57,7 +57,7 @@ $dpkg_source_opts = [
 
 # Directory for writing build logs to
 $log_dir=$ENV{HOME}."/sbuild/logs";
-$build_dir=$ENV{HOME}."/sbuild/build";
+$build_dir="../build-area";
 
 ##############################################################################
 # POST-BUILD RELATED (turn off functionality by setting variables to 0)
