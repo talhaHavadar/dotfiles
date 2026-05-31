@@ -12,29 +12,30 @@ set -eu
 apt-get update
 # shellcheck disable=SC2086  # intentional word-split of EXTRA_PACKAGES
 apt-get install -y --no-install-recommends \
-    bash-completion \
-    ca-certificates \
-    devscripts \
-    eatmydata \
-    equivs \
-    fakeroot \
-    git \
-    git-buildpackage \
-    lintian \
-    mmdebstrap \
-    pristine-tar \
-    quilt \
-    sbuild \
-    socat \
-    uidmap \
-    zstd \
-    ${EXTRA_PACKAGES:-}
+	bash-completion \
+	ca-certificates \
+	devscripts \
+	eatmydata \
+	equivs \
+	fakeroot \
+	git \
+	git-buildpackage \
+	lintian \
+	mmdebstrap \
+	pristine-tar \
+	quilt \
+	sbuild \
+	socat \
+	uidmap \
+	zstd \
+	dput \
+	${EXTRA_PACKAGES:-}
 rm -rf /var/lib/apt/lists/*
 
 # Default sbuild config. Loaded as /etc/sbuild/sbuild.conf -- gets overridden
 # by ~/.config/sbuild/config.pl when the host mounts one in via contained.sh.
 install -d /etc/sbuild
-cat > /etc/sbuild/sbuild.conf <<'PERL'
+cat >/etc/sbuild/sbuild.conf <<'PERL'
 # Chroot backend: unshare is what we set the image up for; see Containerfile
 # headers for the deep dive on why this is the right choice on macOS runtimes.
 $chroot_mode = 'unshare';
@@ -89,11 +90,11 @@ PERL
 # Subid range for root: unshare(1) reads /etc/sub{u,g}id for the invoking user
 # to decide what range to map into the new namespace. Without this entry root
 # would get "uid range not allowed" from the kernel.
-echo 'root:100000:65536' >> /etc/subuid
-echo 'root:100000:65536' >> /etc/subgid
+echo 'root:100000:65536' >>/etc/subuid
+echo 'root:100000:65536' >>/etc/subgid
 
 # Standard Debian-recommended quiltrc for working with debian/patches.
-cat > /root/.quiltrc-dpkg <<'EOF'
+cat >/root/.quiltrc-dpkg <<'EOF'
 QUILT_PATCHES=debian/patches
 QUILT_NO_DIFF_INDEX=1
 QUILT_NO_DIFF_TIMESTAMPS=1
@@ -103,7 +104,7 @@ QUILT_COLORS="diff_hdr=1;32:diff_add=1;34:diff_rem=1;31:diff_hunk=1;33:diff_ctx=
 EOF
 
 # dquilt alias + completion wiring for interactive shells.
-cat >> /root/.bashrc <<'EOF'
+cat >>/root/.bashrc <<'EOF'
 
 # Debian quilt helper: use the .quiltrc-dpkg above and wire the same bash
 # completion as the upstream quilt command.
