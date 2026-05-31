@@ -58,6 +58,7 @@ help:
 	@echo "  make nvim         Build neovim from source"
 	@echo "  make river        River compositor + kwm (Ubuntu only)"
 	@echo "  make packaging    Packaging tools + sbuild (Ubuntu only)"
+	@echo "  make contained    Install the contained wrapper (~/.local/bin/contained)"
 	@echo "  make yubikey      Security/Yubikey tools"
 	@echo "  make cli          CLI utilities (ripgrep, btop, etc.)"
 	@echo "  make zen-browser  Install Zen Browser"
@@ -72,7 +73,7 @@ help:
 	@echo ""
 	@echo "Symlinks (home-manager aware):"
 	@echo "  make symlinks     All config symlinks"
-	@echo "  make symlinks-X   Specific: nvim, river, shell, packaging, git, jj, ghostty, systemd"
+	@echo "  make symlinks-X   Specific: nvim, river, shell, packaging, git, jj, ghostty, systemd, contained"
 	@echo ""
 	@echo "Utilities:"
 	@echo "  make clean        Clean build artifacts"
@@ -193,6 +194,30 @@ ifdef IS_UBUNTU
 	sudo adduser $(USER) lxd || true
 	@echo "Make sure to run 'setup-packaging-environment' to complete the setup"
 endif
+
+# ============================================================
+# CONTAINED FEATURE (Debian packaging in a container)
+# ============================================================
+# Installs the contained wrapper from dot/bin/contained/contained.sh onto
+# the user's PATH. Does NOT install a container runtime -- the user supplies
+# their own (Docker Desktop, OrbStack, Colima, podman, Apple container, ...).
+# Default image is published at ghcr.io/talhahavadar/contained-debdev:*
+# so no local build is required.
+.PHONY: contained
+contained: symlinks-contained
+	@echo ""
+	@echo "contained installed at $(HOME)/.local/bin/contained"
+	@echo "Make sure $(HOME)/.local/bin is on your PATH."
+	@if ! command -v docker >/dev/null 2>&1 && ! command -v podman >/dev/null 2>&1; then \
+		echo ""; \
+		echo "WARNING: no container runtime (docker/podman) found on PATH."; \
+		echo "Install one of:"; \
+		echo "  macOS:  Docker Desktop, OrbStack, Colima, or Apple 'container'"; \
+		echo "  Ubuntu: sudo apt install docker.io   (and add yourself to the docker group)"; \
+	fi
+	@echo ""
+	@echo "First run will pull the default image:"
+	@echo "  ghcr.io/talhahavadar/contained-debdev:ubuntu-devel"
 
 # ============================================================
 # YUBIKEY FEATURE
@@ -365,7 +390,7 @@ else
 endif
 
 .PHONY: _symlinks-manual
-_symlinks-manual: _symlinks-nvim _symlinks-river _symlinks-shell _symlinks-packaging _symlinks-git _symlinks-ghostty _symlinks-systemd
+_symlinks-manual: _symlinks-nvim _symlinks-river _symlinks-shell _symlinks-packaging _symlinks-git _symlinks-ghostty _symlinks-systemd _symlinks-contained
 	@echo "All symlinks created."
 
 # Individual symlink targets (check for home-manager)
@@ -433,6 +458,14 @@ else
 	$(MAKE) _symlinks-systemd
 endif
 
+.PHONY: symlinks-contained
+symlinks-contained:
+ifdef HAS_HOME_MANAGER
+	@echo "contained symlink managed by home-manager. Run 'make home-manager'."
+else
+	$(MAKE) _symlinks-contained
+endif
+
 # Internal manual symlink targets (prefixed with _)
 # NOTE: Most configs symlink whole directories (like home-manager does)
 # Exception: systemd symlinks individual service files (not the whole dir)
@@ -491,3 +524,8 @@ _symlinks-systemd:
 	$(call create_symlink,$(DOT_DIR)/systemd/user/river-session.target,$(HOME)/.config/systemd/user/river-session.target)
 	$(call create_symlink,$(DOT_DIR)/systemd/tq.service,$(HOME)/.config/systemd/user/tq.service)
 	$(call create_symlink,$(DOT_DIR)/systemd/tq.timer,$(HOME)/.config/systemd/user/tq.timer)
+
+.PHONY: _symlinks-contained
+_symlinks-contained:
+	@echo "Creating contained symlink..."
+	$(call create_symlink,$(DOT_DIR)/bin/contained/contained.sh,$(HOME)/.local/bin/contained)
