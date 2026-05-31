@@ -33,7 +33,7 @@ in
         ".local/bin/tq-worker".source = mkOutOfStoreSymlink ../../../dot/bin/tq-worker;
         ".config/systemd/user/tq.service".source = mkOutOfStoreSymlink ../../../dot/systemd/tq.service;
         ".config/systemd/user/tq.timer".source = mkOutOfStoreSymlink ../../../dot/systemd/tq.timer;
-        ".config/jj".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/jj";
+        ".config/jj".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/jj.talha";
         ".config/river".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/river";
         ".config/systemd/user/river-session.target".source = mkOutOfStoreSymlink ../../../dot/systemd/user/river-session.target;
         ".config/systemd/user/river-lid-monitor.service".source = mkOutOfStoreSymlink ../../../dot/systemd/user/river-lid-monitor.service;
