@@ -54,7 +54,7 @@
 set -eo pipefail
 
 CONTAINER_RUNTIME=${CONTAINED_CONTAINER_RUNTIME:-docker}
-CONTAINER="${CONTAINED_CONTAINER_NAME:-ghcr.io/talhahavadar/contained-debdev:ubuntu-resolute}"
+CONTAINER="${CONTAINED_CONTAINER_NAME:-ghcr.io/talhahavadar/contained-debdev:ubuntu-devel}"
 VOLUMES=(
     "$PWD/..:/work"
 )
