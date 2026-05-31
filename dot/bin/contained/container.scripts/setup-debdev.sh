@@ -25,6 +25,7 @@ apt-get install -y --no-install-recommends \
     pristine-tar \
     quilt \
     sbuild \
+    socat \
     uidmap \
     zstd \
     ${EXTRA_PACKAGES:-}
