@@ -115,3 +115,14 @@ if [ -f /usr/share/bash-completion/completions/quilt ]; then
     complete -F _quilt_completion $_quilt_complete_opt dquilt
 fi
 EOF
+
+cat >>/root/.dput.cf <<'EOF'
+[mentors]
+fqdn = mentors.debian.net
+incoming = /upload
+method = https
+allow_unsigned_uploads = 0
+progress_indicator = 2
+# Allow uploads for UNRELEASED packages
+allowed_distributions = .*
+EOF
