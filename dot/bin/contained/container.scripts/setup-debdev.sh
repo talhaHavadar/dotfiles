@@ -30,6 +30,7 @@ apt-get install -y --no-install-recommends \
 	uidmap \
 	zstd \
 	dput-ng \
+	reportbug \
 	${EXTRA_PACKAGES:-}
 rm -rf /var/lib/apt/lists/*
 
