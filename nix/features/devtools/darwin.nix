@@ -1,8 +1,7 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 let
   devtools_config = config.host.features.devtools;
@@ -16,6 +15,7 @@ in
       brews = [
         "bash"
         "git"
+        "go"
         "curl"
         "openssh"
         "mint"
@@ -34,8 +34,7 @@ in
         "wifiman"
       ];
 
-      masApps = {
-      };
+      masApps = { };
     };
   };
 }

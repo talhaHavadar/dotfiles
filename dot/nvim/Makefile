@@ -31,7 +31,6 @@ ifdef IS_MACOS
 	brew install ninja gettext cmake curl gcc git
 endif
 
-
 .PHONY: treesitter
 treesitter: cargo libclang
 	cargo install --locked tree-sitter-cli
@@ -90,7 +89,6 @@ endif
 ifdef IS_MACOS
 	brew install rustup && rustup default stable
 endif
-	
 
 .PHONY: cargo
 cargo: rustup

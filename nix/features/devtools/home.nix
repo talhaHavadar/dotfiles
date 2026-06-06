@@ -17,7 +17,6 @@ in
         inputs.sparse.packages.${system}.default
         git
         uv
-        go
         nodejs_24
         qemu
         dtc

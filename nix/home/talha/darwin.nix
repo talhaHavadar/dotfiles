@@ -33,6 +33,7 @@
 
       casks = [
         "jordanbaird-ice"
+        "protonvpn"
       ];
 
       masApps = { };
