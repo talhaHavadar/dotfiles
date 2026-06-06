@@ -39,6 +39,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8
 
 COPY container.scripts/setup-debdev.sh /tmp/setup-debdev.sh
+COPY container.scripts/snapshot.sh /usr/local/bin/snapshot
 RUN EXTRA_PACKAGES="ubuntu-keyring ubuntu-dev-tools" /tmp/setup-debdev.sh && rm /tmp/setup-debdev.sh
 
 RUN ARCH="$(dpkg --print-architecture)" \
