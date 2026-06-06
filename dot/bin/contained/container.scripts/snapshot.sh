@@ -60,16 +60,17 @@ CONFIG_FILE="debian/snapshot.conf" # overridable with -c <path>
 UPSTREAM_URL=""            # upstream monorepo git URL (required)
 UPSTREAM_REF="develop"     # default ref `create` snapshots
 UPSTREAM_REMOTE="upstream" # cosmetic: shown in logs / the dch entry
-MAIN_SUBDIR=""             # subdir feeding the main tarball (required), e.g. projects/clr
-COMPONENTS=""              # space/newline list of  name:subdir  pairs
-COMPRESSION="xz"           # xz | gzip
-REPACK_SUFFIX="+ds"        # appended to the upstream version iff files excluded
-SEP="~"                    # ~ -> snapshot BEFORE <marketing>; + -> after
-REV="-1"                   # Debian revision used by `create`'s dch
-DIST="UNRELEASED"          # changelog distribution used by `create`'s dch
-UPSTREAM_VERSION=""        # marketing/base version; may be set per-run with -u
-SHA_ABBREV="10"            # length of the git short hash embedded in versions
-DEBIAN_BRANCH=""           # default: read from debian/gbp.conf
+MAIN_SUBDIR=""             # subdir feeding the main tarball; empty = whole repo
+# (non-monorepo). Monorepo example: projects/clr
+COMPONENTS=""       # space/newline list of  name:subdir  pairs
+COMPRESSION="xz"    # xz | gzip
+REPACK_SUFFIX="+ds" # appended to the upstream version iff files excluded
+SEP="~"             # ~ -> snapshot BEFORE <marketing>; + -> after
+REV="-1"            # Debian revision used by `create`'s dch
+DIST="UNRELEASED"   # changelog distribution used by `create`'s dch
+UPSTREAM_VERSION="" # marketing/base version; may be set per-run with -u
+SHA_ABBREV="10"     # length of the git short hash embedded in versions
+DEBIAN_BRANCH=""    # default: read from debian/gbp.conf
 
 load_config() {
     [ -f debian/changelog ] || die "run from the packaging repo root (no debian/changelog here)"
@@ -81,7 +82,8 @@ load_config() {
     fi
     PKG=${PKG:-$(dpkg-parsechangelog -SSource)}
     [ -n "$UPSTREAM_URL" ] || die "UPSTREAM_URL is not set (config $CONFIG_FILE, or env)"
-    [ -n "$MAIN_SUBDIR" ] || die "MAIN_SUBDIR is not set (config $CONFIG_FILE, or env)"
+    # MAIN_SUBDIR is optional: empty -> the whole upstream repo is the source
+    # (non-monorepo); set it to a path -> only that subtree (monorepo).
     if [ -z "$DEBIAN_BRANCH" ] && [ -f debian/gbp.conf ]; then
         DEBIAN_BRANCH=$(sed -n 's/^[[:space:]]*debian-branch[[:space:]]*=[[:space:]]*//p' debian/gbp.conf | head -1)
     fi
@@ -173,14 +175,17 @@ resolve_sha_commit() {
 #                  name, which is what dpkg-source expects — independent of the
 #                  monorepo subdir name)
 build_origs() {
-    local commit=$1 uv=$2 outdir=$3 raw p name sub
+    local commit=$1 uv=$2 outdir=$3 raw p name sub maintree
     mkdir -p "$outdir"
     local td
     td=$(mktemp -d)
 
-    log "main  <- ${MAIN_SUBDIR}  (${PKG}_${uv}.orig.tar.${EXT})"
+    # Empty MAIN_SUBDIR -> archive the whole repo tree (non-monorepo upstream).
+    maintree="$commit"
+    [ -n "$MAIN_SUBDIR" ] && maintree="${commit}:${MAIN_SUBDIR}"
+    log "main  <- ${MAIN_SUBDIR:-<whole repo>}  (${PKG}_${uv}.orig.tar.${EXT})"
     raw="$td/main.tar"
-    git -C "$SCRATCH" archive --format=tar --prefix="${PKG}-${uv}/" -o "$raw" "${commit}:${MAIN_SUBDIR}"
+    git -C "$SCRATCH" archive --format=tar --prefix="${PKG}-${uv}/" -o "$raw" "$maintree"
     mk-origtargz --repack --compression "$COMPRESSION" \
         --package "$PKG" --version "$uv" \
         --copyright-file debian/copyright --directory "$outdir" "$raw" >&2
