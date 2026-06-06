@@ -23,8 +23,9 @@
 #     snapshot [-c CONFIG] <create|orig|verify> [options]
 #
 #   create   Create a NEW upstream snapshot from a git ref (default: the conf's
-#            UPSTREAM_REF) and import it onto the upstream branch with
-#            pristine-tar, then add a changelog entry. Version is
+#            UPSTREAM_REF, or the remote's default branch when unset) and import
+#            it onto the upstream branch with pristine-tar, then add a changelog
+#            entry. Version is
 #            <marketing>~git<UTCdate>.<sha10>[+ds].
 #               -u, --upstream-version <X.Y.Z>  marketing/base version (required
 #                                               unless set in the conf)
@@ -62,7 +63,8 @@ CONFIG_FILE="debian/snapshot.conf" # overridable with -c <path>
 : "${UPSTREAM_URL:=}"            # upstream monorepo git URL (required; falls back
 # to the Repository: field of debian/upstream/metadata if neither config nor env
 # sets it)
-: "${UPSTREAM_REF:=develop}"     # default ref `create` snapshots
+: "${UPSTREAM_REF:=}"            # ref `create` snapshots; empty = the remote's
+# default branch (whatever HEAD points at in the git forge)
 : "${UPSTREAM_REMOTE:=upstream}" # cosmetic: shown in logs / the dch entry
 : "${MAIN_SUBDIR:=}"             # subdir feeding the main tarball; empty = whole repo
 # (non-monorepo). Monorepo example: projects/clr
@@ -189,17 +191,41 @@ cleanup() {
 trap cleanup EXIT
 
 # Resolve a ref (branch/tag) to a full commit sha, fetching it shallowly.
+# Empty ref -> the remote's default branch (via the "HEAD" pseudo-ref).
 # Requires init_scratch to have run in the caller's shell first.
 fetch_ref_commit() {
-    local ref=$1
+    local ref=${1:-HEAD}
     git -C "$SCRATCH" fetch -q --depth 1 origin "$ref"
     git -C "$SCRATCH" rev-parse FETCH_HEAD
 }
 
+# Echo the remote's default branch name — whatever its HEAD points at (e.g.
+# "main" or "develop"); empty if the remote advertises no symref for HEAD.
+# Requires init_scratch.
+remote_default_branch() {
+    git -C "$SCRATCH" ls-remote --symref origin HEAD 2>/dev/null |
+        awk '/^ref:/ { sub("refs/heads/", "", $2); print $2; exit }'
+}
+
+# The upstream ref `create` snapshots and `orig`/`verify` deepen: the configured
+# UPSTREAM_REF, or — when it is empty — the remote's default branch (falling back
+# to the literal "HEAD" ref if it can't be named). Requires init_scratch.
+upstream_ref() {
+    if [ -n "$UPSTREAM_REF" ]; then
+        printf '%s' "$UPSTREAM_REF"
+        return
+    fi
+    local d
+    d=$(remote_default_branch || true)
+    printf '%s' "${d:-HEAD}"
+}
+
 # Resolve a (possibly abbreviated) sha to a full commit, fetching/deepening the
-# configured branch until it is reachable.  Full 40-char shas are fetched direct.
+# upstream branch (UPSTREAM_REF, or the remote default) until it is reachable.
+# Full 40-char shas are fetched direct.
 resolve_sha_commit() {
-    local sha=$1 full d
+    local sha=$1 full d branch
+    branch=$(upstream_ref)
     if printf '%s' "$sha" | grep -qiE '^[0-9a-f]{40}$'; then
         if git -C "$SCRATCH" fetch -q --depth 1 origin "$sha" 2>/dev/null; then
             git -C "$SCRATCH" rev-parse FETCH_HEAD
@@ -207,13 +233,13 @@ resolve_sha_commit() {
         fi
     fi
     for d in 1 100 1000 10000 100000; do
-        git -C "$SCRATCH" fetch -q --depth "$d" origin "$UPSTREAM_REF" 2>/dev/null || true
+        git -C "$SCRATCH" fetch -q --depth "$d" origin "$branch" 2>/dev/null || true
         if full=$(git -C "$SCRATCH" rev-parse --verify -q "${sha}^{commit}" 2>/dev/null); then
             printf '%s' "$full"
             return 0
         fi
     done
-    die "could not resolve commit $sha on $UPSTREAM_REMOTE/$UPSTREAM_REF (deepened to 100000)"
+    die "could not resolve commit $sha on $UPSTREAM_REMOTE/$branch (deepened to 100000)"
 }
 
 # ---------------------------------------------------------------------------
@@ -346,6 +372,10 @@ cmd_create() {
     [ -n "$UPSTREAM_VERSION" ] || die "marketing version required: -u <X.Y.Z> (or UPSTREAM_VERSION in config)"
 
     init_scratch
+    if [ -z "$ref" ]; then
+        ref=$(upstream_ref)
+        log "no upstream ref given; using remote default branch: ${ref}"
+    fi
     local commit date sha uv uvorig
     commit=$(fetch_ref_commit "$ref")
     sha=$(git -C "$SCRATCH" rev-parse --short="$SHA_ABBREV" "$commit")
@@ -403,8 +433,8 @@ cmd_orig() {
 
     # 2) Fall back to re-deriving from upstream (needs the encoded commit).
     [ -n "$sha" ] || die "no pristine-tar/upstream tree and version is not a snapshot ($up); cannot regenerate"
-    warn "pristine-tar unavailable; re-deriving ${up} from ${UPSTREAM_REMOTE}/${UPSTREAM_REF}"
     init_scratch
+    warn "pristine-tar unavailable; re-deriving ${up} from ${UPSTREAM_REMOTE}/$(upstream_ref)"
     local commit
     commit=$(resolve_sha_commit "$sha")
     log "resolved ${sha} -> ${commit}"
@@ -469,7 +499,8 @@ Usage: ${PROG} [-c CONFIG] <create|orig|verify> [options]
        (default CONFIG: debian/snapshot.conf)
 
   create  -u <X.Y.Z> [-r <ref>] [--no-import]
-            Snapshot the upstream ref (default UPSTREAM_REF), version
+            Snapshot the upstream ref (default: UPSTREAM_REF, or the remote's
+            default branch when unset), version
             <X.Y.Z>${SEP}git<UTCdate>.<sha10>[+ds], and gbp import-orig it.
   orig      Regenerate orig(s) for the top changelog version into ../
             (pristine-tar first, else re-derive from upstream).
