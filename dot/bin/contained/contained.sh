@@ -486,7 +486,11 @@ if [ -d /host-gnupg ]; then
     # below; copying the host keyboxd SQLite db drags WAL/SHM lock state
     # through virtiofs and hangs the container keyboxd. private-keys-v1.d
     # is omitted because the forwarded agent owns the YubiKey-shadow stubs.
-    for entry in common.conf gpg.conf trustdb.gpg openpgp-revocs.d sshcontrol; do
+    # common.conf is omitted because a host `use-keyboxd` would point the
+    # container gpg at keyboxd, which no-autostart (below) blocks from
+    # launching ("No Keybox daemon running") -- the fresh GNUPGHOME must
+    # stay on a plain pubring.kbx for the import-based seeding to work.
+    for entry in gpg.conf trustdb.gpg openpgp-revocs.d sshcontrol; do
         [ -e "/host-gnupg/$entry" ] && cp -RLp "/host-gnupg/$entry" "/run/gnupg/" 2>/dev/null || true
     done
 fi
