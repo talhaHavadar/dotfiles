@@ -57,7 +57,7 @@ $build_dir = '../build-area';
 
 # Use ~90% of available CPUs for parallel builds.
 $build_environment = {
-    'DEB_BUILD_OPTIONS' => 'parallel=' . (int(`nproc` * 0.9) || 1),
+    'DEB_BUILD_OPTIONS' => 'parallel=' . (int(`nproc` * 0.8) || 1),
 };
 
 # Clean up on success but leave failed builds around for inspection.
