@@ -31,6 +31,7 @@ apt-get install -y --no-install-recommends \
 	zstd \
 	dput-ng \
 	reportbug \
+	licenserecon \
 	${EXTRA_PACKAGES:-}
 rm -rf /var/lib/apt/lists/*
 
