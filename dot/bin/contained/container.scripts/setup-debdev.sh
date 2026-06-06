@@ -12,30 +12,31 @@ set -eu
 apt-get update
 # shellcheck disable=SC2086  # intentional word-split of EXTRA_PACKAGES
 apt-get install -y --no-install-recommends \
-	ssh \
-	debian-archive-keyring \
-	wget \
-	aptitude \
-	bash-completion \
-	ca-certificates \
-	devscripts \
-	eatmydata \
-	equivs \
-	fakeroot \
-	git \
-	git-buildpackage \
-	lintian \
-	mmdebstrap \
-	pristine-tar \
-	quilt \
-	sbuild \
-	socat \
-	uidmap \
-	zstd \
-	dput-ng \
-	reportbug \
-	licenserecon \
-	${EXTRA_PACKAGES:-}
+    ssh \
+    dh-python \
+    debian-archive-keyring \
+    wget \
+    aptitude \
+    bash-completion \
+    ca-certificates \
+    devscripts \
+    eatmydata \
+    equivs \
+    fakeroot \
+    git \
+    git-buildpackage \
+    lintian \
+    mmdebstrap \
+    pristine-tar \
+    quilt \
+    sbuild \
+    socat \
+    uidmap \
+    zstd \
+    dput-ng \
+    reportbug \
+    licenserecon \
+    ${EXTRA_PACKAGES:-}
 rm -rf /var/lib/apt/lists/*
 
 # Default sbuild config. Loaded as /etc/sbuild/sbuild.conf -- gets overridden
