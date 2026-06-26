@@ -56,21 +56,24 @@ die() {
 
 CONFIG_FILE="debian/snapshot.conf" # overridable with -c <path>
 
-# Settable by the config file (or environment); no upstream-specific defaults.
-UPSTREAM_URL=""            # upstream monorepo git URL (required)
-UPSTREAM_REF="develop"     # default ref `create` snapshots
-UPSTREAM_REMOTE="upstream" # cosmetic: shown in logs / the dch entry
-MAIN_SUBDIR=""             # subdir feeding the main tarball; empty = whole repo
+# Settable by the config file or the environment; no upstream-specific defaults.
+# `:=` keeps an inherited env value and only applies the default when unset/empty,
+# so precedence is: config file > environment > built-in default.
+: "${UPSTREAM_URL:=}"            # upstream monorepo git URL (required)
+: "${UPSTREAM_REF:=develop}"     # default ref `create` snapshots
+: "${UPSTREAM_REMOTE:=upstream}" # cosmetic: shown in logs / the dch entry
+: "${MAIN_SUBDIR:=}"             # subdir feeding the main tarball; empty = whole repo
 # (non-monorepo). Monorepo example: projects/clr
-COMPONENTS=""       # space/newline list of  name:subdir  pairs
-COMPRESSION="xz"    # xz | gzip
-REPACK_SUFFIX="+ds" # appended to the upstream version iff files excluded
-SEP="~"             # ~ -> snapshot BEFORE <marketing>; + -> after
-REV="-1"            # Debian revision used by `create`'s dch
-DIST="UNRELEASED"   # changelog distribution used by `create`'s dch
-UPSTREAM_VERSION="" # marketing/base version; may be set per-run with -u
-SHA_ABBREV="10"     # length of the git short hash embedded in versions
-DEBIAN_BRANCH=""    # default: read from debian/gbp.conf
+: "${COMPONENTS:=}" # space/newline list of  name:subdir  pairs
+: "${COMPRESSION:=xz}"           # xz | gzip
+: "${REPACK_SUFFIX:=}" # repack suffix override (e.g. +dfsg); empty -> derive from
+# the current changelog's upstream version, falling back to +ds
+: "${SEP:=~}"                    # ~ -> snapshot BEFORE <marketing>; + -> after
+: "${REV:=-1}"                   # Debian revision used by `create`'s dch
+: "${DIST:=UNRELEASED}"          # changelog distribution used by `create`'s dch
+: "${UPSTREAM_VERSION:=}"        # marketing/base version; may be set per-run with -u
+: "${SHA_ABBREV:=10}"            # length of the git short hash embedded in versions
+: "${DEBIAN_BRANCH:=}"           # default: read from debian/gbp.conf
 
 load_config() {
     [ -f debian/changelog ] || die "run from the packaging repo root (no debian/changelog here)"
@@ -265,7 +268,20 @@ cmd_create() {
     date=$(TZ=UTC0 git -C "$SCRATCH" show -s --date=format-local:%Y%m%d --format=%cd "$commit")
     uv="${UPSTREAM_VERSION}${SEP}git${date}.${sha}"
     uvorig="$uv"
-    needs_repack_suffix && uvorig="${uv}${REPACK_SUFFIX}"
+    if needs_repack_suffix; then
+        local suffix="$REPACK_SUFFIX"
+        if [ -z "$suffix" ]; then
+            # Derive the repack suffix the package already ships (e.g. +dfsg/+ds)
+            # from the current changelog: "7.2.4+dfsg" -> "+dfsg". Fall back to
+            # +ds for a first-ever repack whose changelog has no suffix yet.
+            local up
+            up=$(parse_changelog_version | cut -f1)
+            suffix="${up#"${up%%+*}"}"
+            [ -n "$suffix" ] || suffix="+ds"
+            log "repack suffix (derived from changelog): ${suffix}"
+        fi
+        uvorig="${uv}${suffix}"
+    fi
     log "ref ${ref} -> commit ${commit}"
     log "upstream version: ${uvorig}"
 
