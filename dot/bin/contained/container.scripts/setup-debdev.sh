@@ -66,6 +66,29 @@ $purge_build_directory = 'successful';
 $purge_session = 'successful';
 $purge_build_deps = 'successful';
 
+# Disable apt's privilege-drop sandbox inside the build chroot. sbuild's
+# unshare backend (sbuild-usernsexec) only maps a single subuid into the
+# nested user namespace -- one for the build user, mapped from outer UID 1
+# to inner UID 1 (see ChrootUnshare.pm: --map-users "$idmap[0][2],1,1").
+# The chroot's _apt user (UID 65534) is NOT mappable in that namespace, so
+# apt's http method failing with "setgroups (22: Invalid argument)" /
+# "setegid 65534 failed" is the symptom of apt trying to drop privileges
+# to a UID that doesn't exist. Telling apt to stay as root for downloads
+# avoids the privilege drop entirely. This only affects the build chroot;
+# apt sandboxing on the host / in the container image itself is unchanged.
+# Matters most under rootless podman, but the workaround is harmless
+# everywhere so we apply it unconditionally.
+#
+# Quoting note: sbuild's ChrootUnshare::get_command_internal always wraps
+# this command in /bin/sh -c, so we pass a STRING (one shell command line)
+# rather than an argv arrayref. The arrayref form would get joined with
+# spaces into a single string via Build.pm: '$args{COMMAND_STR} =
+# "@{$command}"', losing the shell-arg structure and producing the wrong
+# script after the /bin/sh -c wrap.
+$external_commands->{"chroot-setup-commands"} = [
+    "echo 'APT::Sandbox::User \"root\";' > /etc/apt/apt.conf.d/00sbuild-no-apt-sandbox",
+];
+
 # Run lintian after every build.
 $run_lintian = 1;
 $lintian_opts = ['-EvIL', 'pedantic'];

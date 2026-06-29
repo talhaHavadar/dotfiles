@@ -17,7 +17,7 @@
 #   CONTAINED_RUN_ARGS            per-runtime defaults that wire sbuild's
 #                                 unshare backend through the container layer:
 #                                   macOS:         --privileged --security-opt seccomp=unconfined
-#                                   Linux+podman:  --userns=auto:size=65536
+#                                   Linux+podman:  --userns=keep-id:uid=0,gid=0 --privileged
 #                                   Linux+docker:  (none)
 #                                 Override to replace, set empty to disable.
 #   CONTAINED_HOST_GATEWAY_ALIAS  host.docker.internal (default) -- hostname
@@ -111,16 +111,29 @@ VOLUMES=("$PWD/..:/work")
 #   macOS: --privileged grants CAP_SYS_ADMIN for the chroot's /proc mount,
 #     and --security-opt seccomp=unconfined lets unshare(CLONE_NEWUSER)
 #     through Docker Desktop / OrbStack / Colima / Apple `container`.
-#   Linux + podman: rootless podman maps a single host UID to container root,
-#     so sbuild's `unshare --map-users 100000,1,1 ...` hits EPERM writing
-#     /proc/<pid>/uid_map -- the parent namespace has no UID 100000 to map
-#     in. --userns=auto:size=65536 carves a real subuid range into the
-#     container so the nested namespace satisfies the kernel.
+#   Linux + podman: rootless podman wraps the container in a user namespace.
+#     --userns=keep-id:uid=0,gid=0 maps the host user to container UID 0 so
+#     bind-mounted host-owned files (workdir, staged configs, gpg sockets)
+#     are reachable as the container's "root" without any idmap dance. The
+#     container's userns then spans UIDs 0-65536 (host UID + 65535 subuids),
+#     which is enough for sbuild's nested unshare provided /etc/subuid
+#     inside the container is overridden to live in that range -- see
+#     setup_subid_override_podman below for why and how.
+#     --privileged is needed for the full sbuild chroot flow: the default
+#     rootless podman cap set drops CAP_SYS_ADMIN (so sethostname fails
+#     even inside a nested userns because podman's per-thread seccomp
+#     filter can't see into nested namespaces), AppArmor's container
+#     profile blocks mount /proc inside the unpacked chroot, and the
+#     default seccomp profile rejects several syscalls sbuild-usernsexec
+#     relies on. --privileged grants all caps in the userns + disables the
+#     seccomp / AppArmor gates that block these. In rootless podman it does
+#     NOT grant any host-level privileges (the container is still confined
+#     to the host user's userns), so this is not a privilege grab.
 #   Linux + docker: rootful by default, no extra flags needed.
 # Override via CONTAINED_RUN_ARGS (set empty to disable).
 case "${HOST_OS}:${CONTAINER_RUNTIME}" in
 Darwin:*) _default_run_args="--privileged --security-opt seccomp=unconfined" ;;
-Linux:podman) _default_run_args="--userns=auto:size=65536" ;;
+Linux:podman) _default_run_args="--userns=keep-id:uid=0,gid=0 --privileged" ;;
 *) _default_run_args="" ;;
 esac
 # shellcheck disable=SC2206  # intentional word-split into array
@@ -131,10 +144,14 @@ ENV_ARGS=()
 SBUILD_CONFIG_MOUNTS=()
 GIT_CONFIG_MOUNTS=()
 GPG_MOUNTS=()
+SUBID_OVERRIDE_MOUNTS=()
 
 # Cleanup state.
 STAGED_FILES=()
 GPG_BRIDGE_PID=
+# Set to 1 by setup_gpg_macos / setup_gpg_podman; gates wrap_cmd_with_gpg_bridge
+# so callers without bridge prereqs still get a working container.
+GPG_BRIDGE_ENABLED=0
 
 cleanup() {
     if [ "${#STAGED_FILES[@]}" -gt 0 ]; then
@@ -226,6 +243,34 @@ forward_ssh_agent() {
     fi
 }
 
+# Override /etc/sub{u,g}id inside the container so sbuild's unshare backend
+# can nest a user namespace under rootless podman.
+#
+# The image ships /etc/subuid = "root:100000:65536" because that's the right
+# answer for rootful runtimes: the kernel has the full UID space and unshare
+# can happily map outer UID 100000 to an inner UID. Under rootless podman the
+# container's user namespace only covers UIDs 0-65536 (host UID via
+# keep-id:uid=0, plus the host user's 65535 subuids), so outer UID 100000 is
+# not in the namespace and the uid_map write hits EPERM.
+#
+# Bind-mount a staged copy that lives inside the userns range (root:1:65534)
+# over /etc/sub{u,g}id so sbuild's `unshare --map-users <outer>,1,1` lands on
+# an outer UID that actually exists. Mode 644 so the file is readable
+# regardless of whose UID the bind ends up matching inside the container.
+setup_subid_override_podman() {
+    local subuid subgid
+    subuid=$(mktemp -t contained-subuid.XXXXXX)
+    subgid=$(mktemp -t contained-subgid.XXXXXX)
+    printf 'root:1:65534\n' >"$subuid"
+    printf 'root:1:65534\n' >"$subgid"
+    chmod 644 "$subuid" "$subgid"
+    STAGED_FILES+=("$subuid" "$subgid")
+    SUBID_OVERRIDE_MOUNTS+=(
+        -v "${subuid}:/etc/subuid:ro"
+        -v "${subgid}:/etc/subgid:ro"
+    )
+}
+
 # ---------------------------------------------------------------------------
 # GPG agent forwarding
 # ---------------------------------------------------------------------------
@@ -310,17 +355,81 @@ setup_gpg_macos() {
         -e "CONTAINED_GPG_BRIDGE_HOST=${host_alias}"
         -e "CONTAINED_GPG_BRIDGE_PORT=${port}"
     )
+    GPG_BRIDGE_ENABLED=1
 }
 
-# Top-level GPG dispatcher: one strategy per OS. macOS hard-fails if its
-# bridge prerequisites are missing (socat + reachable gpg-agent); Linux
-# gracefully degrades to pubring-only when no agent is available.
+# Linux+podman bridge: same TCP-loopback idea as the macOS bridge, but the
+# constraints are different.
+#
+# With --userns=keep-id:uid=0,gid=0 the container's "root" is the host user,
+# so bind mounts of host-owned files work in general -- but binding the
+# gpg-agent unix socket *over* a dir bind of ~/.gnupg is still fragile under
+# rootless podman (crun fails to create the nested mount target), and a
+# direct socket bind from the host into the rootless container has its own
+# pitfalls. The TCP bridge sidesteps both: the in-container socat creates
+# the unix socket itself, owned by container root, fully usable.
+#
+# We don't bind ~/.gnupg as a directory here -- it's not needed once we
+# stage the few files we actually want (gpg.conf, pubkeys) individually.
+# Pubkeys and gpg.conf are staged at mode 644 because they're public, and
+# this keeps them readable regardless of how a future caller might tweak
+# the userns mapping.
+setup_gpg_podman() {
+    local sock=$1 port pubkeys gpgconf_staged host_alias
+
+    port=$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1]); s.close()' 2>/dev/null || true)
+    if [ -z "$port" ]; then
+        port=$((20000 + RANDOM % 40000))
+    fi
+    # Bind to all interfaces, not 127.0.0.1: rootless podman with pasta
+    # (default in podman >=5) routes container -> host-gateway traffic via
+    # a link-local IP (typically 169.254.1.2) that arrives on the host's
+    # external interface, NOT on loopback. A 127.0.0.1-only listener is
+    # unreachable from inside the container. Same single-user-host security
+    # caveat applies as the macOS bridge: while the bridge is up, anything
+    # that can reach this port can request signatures from the YubiKey.
+    socat "TCP-LISTEN:${port},reuseaddr,fork" "UNIX-CONNECT:${sock}" >/dev/null 2>&1 &
+    GPG_BRIDGE_PID=$!
+
+    gpgconf --launch keyboxd >/dev/null 2>&1 || true
+    pubkeys=$(mktemp -t contained-pubkeys.XXXXXX)
+    if gpg --batch --no-tty --export >"$pubkeys" 2>/dev/null && [ -s "$pubkeys" ]; then
+        chmod 644 "$pubkeys"
+        STAGED_FILES+=("$pubkeys")
+        GPG_MOUNTS+=(-v "${pubkeys}:/run/host-pubkeys.gpg:ro")
+    else
+        rm -f "$pubkeys"
+    fi
+
+    if [ -f "${HOME}/.gnupg/gpg.conf" ]; then
+        gpgconf_staged=$(mktemp -t contained-gpgconf.XXXXXX)
+        cat "${HOME}/.gnupg/gpg.conf" >"$gpgconf_staged"
+        chmod 644 "$gpgconf_staged"
+        STAGED_FILES+=("$gpgconf_staged")
+        GPG_MOUNTS+=(-v "${gpgconf_staged}:/run/host-gpg.conf:ro")
+    fi
+
+    # podman's built-in host-gateway alias; user can override.
+    host_alias=${CONTAINED_HOST_GATEWAY_ALIAS:-host.containers.internal}
+    DEFAULT_RUN_ARGS+=(--add-host "${host_alias}:host-gateway")
+    ENV_ARGS+=(
+        -e "GNUPGHOME=/run/gnupg"
+        -e "CONTAINED_GPG_BRIDGE_HOST=${host_alias}"
+        -e "CONTAINED_GPG_BRIDGE_PORT=${port}"
+    )
+    GPG_BRIDGE_ENABLED=1
+}
+
+# Top-level GPG dispatcher: one strategy per OS/runtime. macOS hard-fails if
+# its bridge prerequisites are missing (socat + reachable gpg-agent); Linux
+# with rootful docker gracefully degrades to pubring-only when no agent is
+# available. Linux+podman is a no-op (see the case for why).
 setup_gpg() {
     local sock
     sock=$(discover_gpg_socket)
 
-    case "$HOST_OS" in
-    Darwin)
+    case "${HOST_OS}:${CONTAINER_RUNTIME}" in
+    Darwin:*)
         if ! command -v socat >/dev/null 2>&1; then
             echo "contained: macOS gpg bridge requires socat on the host (brew install socat)" >&2
             exit 2
@@ -335,7 +444,24 @@ setup_gpg() {
         fi
         setup_gpg_macos "$sock"
         ;;
-    Linux)
+    Linux:podman)
+        # Under rootless podman the dir-bind + socket-overlay strategy used
+        # by setup_gpg_linux is fragile (crun can refuse to create the
+        # nested mount target), so route through the TCP bridge instead.
+        # Skip gracefully if prereqs are missing -- containers used purely
+        # for non-signing work (uscan, lintian, plain bash) should still
+        # come up.
+        if [ -z "$sock" ]; then
+            echo "contained: skipping in-container gpg signing under podman (no gpg-agent socket on host; try gpgconf --launch gpg-agent)" >&2
+        elif ! command -v socat >/dev/null 2>&1; then
+            echo "contained: skipping in-container gpg signing under podman (socat missing; install with 'apt install socat')" >&2
+        elif ! command -v gpg >/dev/null 2>&1; then
+            echo "contained: skipping in-container gpg signing under podman (gpg missing on host)" >&2
+        else
+            setup_gpg_podman "$sock"
+        fi
+        ;;
+    Linux:*)
         setup_gpg_linux "$sock"
         ;;
     *)
@@ -355,6 +481,7 @@ wrap_cmd_with_gpg_bridge() {
 mkdir -p /run/gnupg
 chmod 700 /run/gnupg
 if [ -d /host-gnupg ]; then
+    # macOS path: copy plain-file bits from the read-only dir bind.
     # Pubring stores are seeded via `gpg --import` from /run/host-pubkeys.gpg
     # below; copying the host keyboxd SQLite db drags WAL/SHM lock state
     # through virtiofs and hangs the container keyboxd. private-keys-v1.d
@@ -363,6 +490,16 @@ if [ -d /host-gnupg ]; then
         [ -e "/host-gnupg/$entry" ] && cp -RLp "/host-gnupg/$entry" "/run/gnupg/" 2>/dev/null || true
     done
 fi
+# podman path: ~/.gnupg dir isnt mounted (would be fragile under rootless),
+# so individual staged files come through their own binds.
+[ -f /run/host-gpg.conf ] && cp /run/host-gpg.conf /run/gnupg/gpg.conf 2>/dev/null || true
+# no-autostart: the in-container socat owns /run/gnupg/S.gpg-agent and
+# tunnels to the host agent. Without no-autostart, gpg will happily fire up
+# a local in-container gpg-agent on the side, which then scribbles sibling
+# sockets (.extra/.ssh/.browser) into /run/gnupg and steals signing
+# requests that should reach the YubiKey via the bridge.
+touch /run/gnupg/gpg.conf
+grep -qxF "no-autostart" /run/gnupg/gpg.conf || printf "\nno-autostart\n" >> /run/gnupg/gpg.conf
 if ! command -v socat >/dev/null 2>&1; then
     echo "contained: gpg-agent bridge requires socat in the container image" >&2
     exit 2
@@ -410,7 +547,7 @@ Environment overrides:
                                 Per-runtime defaults wire sbuild's unshare
                                 backend through the container layer:
                                   macOS:         --privileged --security-opt seccomp=unconfined
-                                  Linux+podman:  --userns=auto:size=65536
+                                  Linux+podman:  --userns=keep-id:uid=0,gid=0 --privileged
                                   Linux+docker:  (none)
                                 Override to replace, set empty to disable.
   CONTAINED_HOST_GATEWAY_ALIAS  host.docker.internal (default) -- alias the
@@ -519,7 +656,10 @@ mount_sbuild_config
 mount_git_config
 setup_gpg
 forward_ssh_agent
-if [ "$HOST_OS" = "Darwin" ]; then
+if [ "$HOST_OS:$CONTAINER_RUNTIME" = "Linux:podman" ]; then
+    setup_subid_override_podman
+fi
+if [ "$GPG_BRIDGE_ENABLED" -eq 1 ]; then
     wrap_cmd_with_gpg_bridge
 fi
 
@@ -539,6 +679,7 @@ fi
     "${SBUILD_CONFIG_MOUNTS[@]}" \
     "${GIT_CONFIG_MOUNTS[@]}" \
     "${GPG_MOUNTS[@]}" \
+    "${SUBID_OVERRIDE_MOUNTS[@]}" \
     "${ENV_ARGS[@]}" \
     "${DEFAULT_RUN_ARGS[@]}" \
     "${DOCKER_EXTRA_ARGS[@]}" \
