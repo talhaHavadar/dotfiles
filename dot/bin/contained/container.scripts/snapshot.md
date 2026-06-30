@@ -58,7 +58,10 @@ SEP="~"                             # 7.3.0~git... sorts BEFORE 7.3.0
 # DEBIAN_BRANCH="debian/experimental"   # else taken from debian/gbp.conf
 ```
 
-Any of these may also come from the environment. **Component name ≠ subdir name:**
+Any of these may also come from the environment. If `UPSTREAM_URL` is set by
+neither the config nor the environment, it falls back to the `Repository:` field
+of `debian/upstream/metadata` (DEP-12), so packages that already declare their
+upstream there don't need to repeat it. **Component name ≠ subdir name:**
 the _name_ (left of `:`) drives the tarball name (`orig-<name>`) and the on-disk
 dir (`<name>/`); the _subdir_ (right of `:`) is only where content is read from.
 

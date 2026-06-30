@@ -59,7 +59,9 @@ CONFIG_FILE="debian/snapshot.conf" # overridable with -c <path>
 # Settable by the config file or the environment; no upstream-specific defaults.
 # `:=` keeps an inherited env value and only applies the default when unset/empty,
 # so precedence is: config file > environment > built-in default.
-: "${UPSTREAM_URL:=}"            # upstream monorepo git URL (required)
+: "${UPSTREAM_URL:=}"            # upstream monorepo git URL (required; falls back
+# to the Repository: field of debian/upstream/metadata if neither config nor env
+# sets it)
 : "${UPSTREAM_REF:=develop}"     # default ref `create` snapshots
 : "${UPSTREAM_REMOTE:=upstream}" # cosmetic: shown in logs / the dch entry
 : "${MAIN_SUBDIR:=}"             # subdir feeding the main tarball; empty = whole repo
@@ -84,7 +86,11 @@ load_config() {
         die "config not found: $CONFIG_FILE"
     fi
     PKG=${PKG:-$(dpkg-parsechangelog -SSource)}
-    [ -n "$UPSTREAM_URL" ] || die "UPSTREAM_URL is not set (config $CONFIG_FILE, or env)"
+    if [ -z "$UPSTREAM_URL" ] && [ -f debian/upstream/metadata ]; then
+        UPSTREAM_URL=$(sed -n 's/^Repository:[[:space:]]*//p' debian/upstream/metadata | head -1)
+        [ -n "$UPSTREAM_URL" ] && log "UPSTREAM_URL from debian/upstream/metadata: ${UPSTREAM_URL}"
+    fi
+    [ -n "$UPSTREAM_URL" ] || die "UPSTREAM_URL is not set (config $CONFIG_FILE, env, or debian/upstream/metadata Repository:)"
     # MAIN_SUBDIR is optional: empty -> the whole upstream repo is the source
     # (non-monorepo); set it to a path -> only that subtree (monorepo).
     if [ -z "$DEBIAN_BRANCH" ] && [ -f debian/gbp.conf ]; then
