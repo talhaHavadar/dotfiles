@@ -65,6 +65,29 @@ upstream there don't need to repeat it. **Component name ≠ subdir name:**
 the _name_ (left of `:`) drives the tarball name (`orig-<name>`) and the on-disk
 dir (`<name>/`); the _subdir_ (right of `:`) is only where content is read from.
 
+### Monorepo auto-detect
+
+For known upstream monorepos, `MAIN_SUBDIR` is filled in automatically from a
+small built-in map keyed by the upstream URL's `owner/repo` (case-insensitive,
+`.git` and SSH/HTTPS variants all normalize to the same key):
+
+| Upstream                           | Default `MAIN_SUBDIR` |
+| ---------------------------------- | --------------------- |
+| `github.com/ROCm/rocm-libraries`   | `projects/<pkg>`      |
+| `github.com/ROCm/rocm-systems`     | `projects/<pkg>`      |
+
+`<pkg>` is the source package name from `debian/changelog`. So a package whose
+only upstream pointer is the `Repository:` field of `debian/upstream/metadata`
+needs no `debian/snapshot.conf` at all — e.g. for `hipblas-common` pointing at
+`ROCm/rocm-libraries`, `MAIN_SUBDIR` resolves to `projects/hipblas-common`
+automatically and `snapshot orig` packs just that subtree.
+
+Precedence is **config file > env > monorepo map > whole upstream repo**, so
+anything you set explicitly still wins. Register a new monorepo by adding a
+line to the `UPSTREAM_MONOREPOS` array near the top of `snapshot.sh`; the value
+is a `printf` template where `%s` is substituted with the package name (use
+e.g. `"components/lib%s"` if the upstream lays things out differently).
+
 ## Subcommands
 
 `snapshot [-c CONFIG] <create|orig|verify> [options]`

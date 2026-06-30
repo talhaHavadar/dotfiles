@@ -77,6 +77,38 @@ CONFIG_FILE="debian/snapshot.conf" # overridable with -c <path>
 : "${SHA_ABBREV:=10}"            # length of the git short hash embedded in versions
 : "${DEBIAN_BRANCH:=}"           # default: read from debian/gbp.conf
 
+# Upstream monorepo map: owner/repo (lowercased) -> MAIN_SUBDIR template, where
+# %s is substituted with the source package name. Used only when neither the
+# config file nor the environment supplies MAIN_SUBDIR. Extend this list when
+# packaging from a new upstream monorepo.
+declare -A UPSTREAM_MONOREPOS=(
+    [rocm/rocm-libraries]="projects/%s"
+    [rocm/rocm-systems]="projects/%s"
+)
+
+# Normalize a git remote URL to "owner/repo" (lowercased, no scheme/host/.git).
+# Handles https://, ssh://, and git@host:owner/repo forms.
+canonical_repo_id() {
+    local url=$1
+    url=${url#*://} # strip scheme
+    url=${url#*@}   # strip user@
+    url=${url/:/\/} # SSH-style host:path -> host/path
+    url=${url#*/}   # strip host
+    url=${url%.git} # strip trailing .git
+    printf '%s' "$url" | tr '[:upper:]' '[:lower:]'
+}
+
+# Echo the default MAIN_SUBDIR for the given URL + package name. Empty output
+# means the URL is not a registered monorepo.
+default_main_subdir_for_url() {
+    local url=$1 pkg=$2 key template
+    key=$(canonical_repo_id "$url")
+    template=${UPSTREAM_MONOREPOS[$key]-}
+    [ -n "$template" ] || return 0
+    # shellcheck disable=SC2059
+    printf -- "$template" "$pkg"
+}
+
 load_config() {
     [ -f debian/changelog ] || die "run from the packaging repo root (no debian/changelog here)"
     if [ -f "$CONFIG_FILE" ]; then
@@ -91,8 +123,17 @@ load_config() {
         [ -n "$UPSTREAM_URL" ] && log "UPSTREAM_URL from debian/upstream/metadata: ${UPSTREAM_URL}"
     fi
     [ -n "$UPSTREAM_URL" ] || die "UPSTREAM_URL is not set (config $CONFIG_FILE, env, or debian/upstream/metadata Repository:)"
-    # MAIN_SUBDIR is optional: empty -> the whole upstream repo is the source
-    # (non-monorepo); set it to a path -> only that subtree (monorepo).
+    # MAIN_SUBDIR is optional. Precedence: config file > env > UPSTREAM_MONOREPOS
+    # map > whole upstream repo. The map kicks in only when MAIN_SUBDIR is still
+    # empty after env+config, so explicit settings always win.
+    if [ -z "$MAIN_SUBDIR" ]; then
+        local auto
+        auto=$(default_main_subdir_for_url "$UPSTREAM_URL" "$PKG")
+        if [ -n "$auto" ]; then
+            MAIN_SUBDIR=$auto
+            log "MAIN_SUBDIR from monorepo map (${UPSTREAM_URL}): ${MAIN_SUBDIR}"
+        fi
+    fi
     if [ -z "$DEBIAN_BRANCH" ] && [ -f debian/gbp.conf ]; then
         DEBIAN_BRANCH=$(sed -n 's/^[[:space:]]*debian-branch[[:space:]]*=[[:space:]]*//p' debian/gbp.conf | head -1)
     fi
@@ -400,6 +441,8 @@ Usage: ${PROG} [-c CONFIG] <create|orig|verify> [options]
 
 Config (debian/snapshot.conf or -c <path>): UPSTREAM_URL, MAIN_SUBDIR,
   COMPONENTS="name:subdir ...", UPSTREAM_REF, COMPRESSION, SEP, DEBIAN_BRANCH.
+  When unset, MAIN_SUBDIR auto-defaults via the UPSTREAM_MONOREPOS map for
+  known upstream monorepos (e.g. ROCm/rocm-libraries -> projects/<pkg>).
 EOF
     exit "${1:-0}"
 }
