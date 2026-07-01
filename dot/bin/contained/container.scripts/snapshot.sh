@@ -217,6 +217,41 @@ resolve_sha_commit() {
 }
 
 # ---------------------------------------------------------------------------
+# pristine-tar reproducibility
+# ---------------------------------------------------------------------------
+# Re-encode an *.orig.tar.<ext> in GNU-tar format so pristine-tar's default
+# reconstruction (which is also GNU-tar) matches byte-for-byte and its stored
+# delta stays small.
+#
+# mk-origtargz emits USTAR; pristine-tar's `recreatetarball` uses GNU tar with
+# no -H flag, i.e. GNU format. On small trees xdelta absorbs the encoding
+# drift, but on large trees the ~512 B `././@LongLink` block that GNU tar adds
+# for each path > 100 chars accumulates to hundreds of MB of literal inserts
+# in the delta (llvm-toolchain-rocm: 173k long paths -> ~200 MB delta).
+#
+# This helper preserves everything a downstream consumer sees: modes, mtimes,
+# symlinks, and file content. Only the tar-level container is re-encoded, and
+# owner is switched from `root/root` to numeric `0/0` (same uid=0/gid=0 either
+# way; the difference is whether the name field is present).
+canonicalize_for_pristine_tar() {
+    local tb=$1 ext work subdir compressor
+    ext=${tb##*.tar.}
+    case "$ext" in
+    xz) compressor="xz -6 -T$(nproc) --check=crc64" ;;
+    gz) compressor='gzip -9n' ;;
+    *) die "canonicalize_for_pristine_tar: unsupported ext: $ext" ;;
+    esac
+    log "canonicalize (GNU tar format): $(basename "$tb")"
+    work=$(mktemp -d)
+    tar -C "$work" -xpf "$tb"
+    subdir=$(cd "$work" && ls)
+    ( cd "$work" && tar cf - --format=gnu --sort=name \
+        --owner=0 --group=0 --numeric-owner \
+        "$subdir" ) | $compressor > "$tb"
+    rm -rf "$work"
+}
+
+# ---------------------------------------------------------------------------
 # Tarball construction
 # ---------------------------------------------------------------------------
 # build_origs <commit> <upstream-version> <outdir>
@@ -239,6 +274,7 @@ build_origs() {
     mk-origtargz --repack --compression "$COMPRESSION" \
         --package "$PKG" --version "$uv" \
         --copyright-file debian/copyright --directory "$outdir" "$raw" >&2
+    canonicalize_for_pristine_tar "$outdir/${PKG}_${uv}.orig.tar.${EXT}"
 
     for p in $COMPONENTS; do
         name=${p%%:*}
@@ -249,6 +285,7 @@ build_origs() {
         mk-origtargz --repack --compression "$COMPRESSION" \
             --package "$PKG" --version "$uv" --component "$name" \
             --copyright-file debian/copyright --directory "$outdir" "$raw" >&2
+        canonicalize_for_pristine_tar "$outdir/${PKG}_${uv}.orig-${name}.tar.${EXT}"
     done
     rm -rf "$td"
 }
