@@ -11,6 +11,7 @@
 
 This script can/may be changed to fit my needs. Please use with caution.
 """
+
 import argparse
 import json
 import requests
@@ -21,8 +22,12 @@ from graphviz import Digraph
 from debian.deb822 import Sources, Packages, PkgRelation
 
 
-def fetch_repo_file(base_url, dist, path, quiet=False):
-    """Fetches and decompresses a repository file (Packages or Sources)."""
+def fetch_repo_file(base_url, dist, path, quiet=False, required=True):
+    """Fetches and decompresses a repository file (Packages or Sources).
+
+    Args:
+        required: If True, exits on failure. If False, returns None on miss.
+    """
     extensions = ["xz", "gz"]
     # Ensure URL ends with /
     if not base_url.endswith("/"):
@@ -46,21 +51,117 @@ def fetch_repo_file(base_url, dist, path, quiet=False):
                 print(f"[!] Connection error: {e}")
             continue
 
-    # Always print errors even in quiet mode (to stderr)
-    print(f"[!] Error: Could not find or download file at {base_url}{path}", file=sys.stderr)
-    sys.exit(1)
+    if required:
+        # Always print errors even in quiet mode (to stderr)
+        print(
+            f"[!] Error: Could not find or download file at {base_url}{path}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    return None
 
 
-def fetch_packages_file(base_url, dist, arch, quiet=False):
-    """Fetches and decompresses the Packages file from the PPA."""
-    base_path = f"dists/{dist}/main/binary-{arch}/Packages"
-    return fetch_repo_file(base_url, dist, base_path, quiet=quiet)
+def fetch_packages_file(
+    base_url, dist, arch, component="main", quiet=False, required=True
+):
+    """Fetches and decompresses the Packages file for a component."""
+    base_path = f"dists/{dist}/{component}/binary-{arch}/Packages"
+    return fetch_repo_file(base_url, dist, base_path, quiet=quiet, required=required)
 
 
-def fetch_sources_file(base_url, dist, quiet=False):
-    """Fetches and decompresses the Sources file from the PPA."""
-    base_path = f"dists/{dist}/main/source/Sources"
-    return fetch_repo_file(base_url, dist, base_path, quiet=quiet)
+def fetch_sources_file(base_url, dist, component="main", quiet=False, required=True):
+    """Fetches and decompresses the Sources file for a component."""
+    base_path = f"dists/{dist}/{component}/source/Sources"
+    return fetch_repo_file(base_url, dist, base_path, quiet=quiet, required=required)
+
+
+def pocket_dist(dist, pocket):
+    """Returns the archive dist string for a series + pocket."""
+    return dist if pocket == "release" else f"{dist}-{pocket}"
+
+
+def fetch_package_set_members(series, name, quiet=False):
+    """Fetches the transitively included source packages of a Launchpad package-set.
+
+    Returns a set of source package names.
+    """
+    url = (
+        f"https://api.launchpad.net/devel/package-sets/ubuntu/{series}/{name}"
+        "?ws.op=getSourcesIncluded"
+    )
+    if not quiet:
+        print(f"[-] Fetching package-set members from: {url}")
+    response = requests.get(url, timeout=30)
+    if response.status_code != 200:
+        print(
+            f"[!] Error: Launchpad returned {response.status_code} for package-set "
+            f"'{name}' in series '{series}'",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    data = response.json()
+    if isinstance(data, list):
+        members = set(data)
+    elif isinstance(data, dict) and "entries" in data:
+        # Defensive: handle paginated collection shape if Launchpad ever changes
+        members = set(data["entries"])
+    else:
+        print(f"[!] Error: Unexpected response shape from Launchpad", file=sys.stderr)
+        sys.exit(1)
+    if not quiet:
+        print(f"[+] Package-set '{name}' has {len(members)} source package(s)")
+    return members
+
+
+def fetch_packages_multi_pocket(base_url, dist, arch, pockets, components, quiet=False):
+    """Fetches Packages across pockets and components, overlaying later pockets over earlier.
+
+    Returns a list of parsed Packages paragraphs. On collisions, the later
+    pocket in `pockets` wins.
+    """
+    merged = {}
+    for pocket in pockets:
+        pdist = pocket_dist(dist, pocket)
+        for component in components:
+            content = fetch_packages_file(
+                base_url,
+                pdist,
+                arch,
+                component=component,
+                quiet=quiet,
+                required=False,
+            )
+            if content is None:
+                if not quiet:
+                    print(
+                        f"[!] Skipping {pdist}/{component}/binary-{arch} (not available)"
+                    )
+                continue
+            for para in Packages.iter_paragraphs(content):
+                merged[para["Package"]] = para
+    return list(merged.values())
+
+
+def fetch_sources_multi_pocket(base_url, dist, pockets, components, quiet=False):
+    """Fetches Sources across pockets and components, overlaying later pockets over earlier."""
+    merged = {}
+    for pocket in pockets:
+        pdist = pocket_dist(dist, pocket)
+        for component in components:
+            content = fetch_sources_file(
+                base_url,
+                pdist,
+                component=component,
+                quiet=quiet,
+                required=False,
+            )
+            if content is None:
+                if not quiet:
+                    print(f"[!] Skipping {pdist}/{component}/source (not available)")
+                continue
+            for para in Sources.iter_paragraphs(content):
+                merged[para["Package"]] = para
+    return list(merged.values())
 
 
 def parse_packages(content):
@@ -391,7 +492,9 @@ def compute_dependency_groups(sources, edges, quiet=False):
             for rep in remaining:
                 pkgs = scc_to_pkgs[rep]
                 is_cycle = len(pkgs) > 1
-                groups.append({'packages': sorted(pkgs), 'is_cycle': is_cycle, 'cycles': []})
+                groups.append(
+                    {"packages": sorted(pkgs), "is_cycle": is_cycle, "cycles": []}
+                )
             break
 
         # Collect all packages at this level, tracking which are cyclic
@@ -423,11 +526,13 @@ def compute_dependency_groups(sources, edges, quiet=False):
         # Combine: non-cyclic first, then cyclic
         final_packages = non_cyclic + cyclic_ordered
 
-        groups.append({
-            'packages': final_packages,
-            'is_cycle': bool(level_cycles),
-            'cycles': level_cycles
-        })
+        groups.append(
+            {
+                "packages": final_packages,
+                "is_cycle": bool(level_cycles),
+                "cycles": level_cycles,
+            }
+        )
 
         assigned.update(current_group_reps)
 
@@ -454,13 +559,17 @@ def print_dependency_groups(groups, cycles_info, edges, json_output=False):
         output = {
             "build_order": [],
             "has_cycles": bool(cycles_info),
-            "cycles": [list(cycle) for cycle in set(frozenset(c) for c in cycles_info.values())] if cycles_info else []
+            "cycles": [
+                list(cycle) for cycle in set(frozenset(c) for c in cycles_info.values())
+            ]
+            if cycles_info
+            else [],
         }
 
         group_num = 1
         for group_info in groups:
-            packages = group_info['packages']
-            cycles = group_info.get('cycles', [])
+            packages = group_info["packages"]
+            cycles = group_info.get("cycles", [])
 
             cyclic_pkgs = set()
             for cycle in cycles:
@@ -497,8 +606,8 @@ def print_dependency_groups(groups, cycles_info, edges, json_output=False):
 
     group_num = 1
     for group_info in groups:
-        packages = group_info['packages']
-        cycles = group_info.get('cycles', [])
+        packages = group_info["packages"]
+        cycles = group_info.get("cycles", [])
 
         # Build set of all cyclic packages in this group
         cyclic_pkgs = set()
@@ -509,7 +618,9 @@ def print_dependency_groups(groups, cycles_info, edges, json_output=False):
         non_cyclic_pkgs = [p for p in packages if p not in cyclic_pkgs]
 
         if has_cycles:
-            print(f"\nGroup {group_num} ({len(packages)} packages) [contains CYCLIC dependencies]:")
+            print(
+                f"\nGroup {group_num} ({len(packages)} packages) [contains CYCLIC dependencies]:"
+            )
 
             # Show non-cyclic packages first
             if non_cyclic_pkgs:
@@ -522,11 +633,15 @@ def print_dependency_groups(groups, cycles_info, edges, json_output=False):
                 if pkg in cyclic_pkgs:
                     cycle_deps = deps_map.get(pkg, set()) & cyclic_pkgs
                     if cycle_deps:
-                        print(f"    {pkg} -> depends on: {', '.join(sorted(cycle_deps))}")
+                        print(
+                            f"    {pkg} -> depends on: {', '.join(sorted(cycle_deps))}"
+                        )
                     else:
                         print(f"    {pkg}")
         else:
-            print(f"\nGroup {group_num} ({len(packages)} package{'s' if len(packages) > 1 else ''}):")
+            print(
+                f"\nGroup {group_num} ({len(packages)} package{'s' if len(packages) > 1 else ''}):"
+            )
             print(f"  {', '.join(packages)}")
 
         group_num += 1
@@ -618,7 +733,9 @@ def build_reverse_depends_source(sources, target_pkg, quiet=False):
         # Also include the source name itself in case it's used directly
         target_binaries.add(target_pkg)
         if not quiet:
-            print(f"[*] Source package '{target_pkg}' provides: {', '.join(sorted(target_binaries - {target_pkg})) or '(none)'}")
+            print(
+                f"[*] Source package '{target_pkg}' provides: {', '.join(sorted(target_binaries - {target_pkg})) or '(none)'}"
+            )
     elif target_pkg in bin_to_source:
         # Target is a binary package - just search for that binary
         target_source = bin_to_source[target_pkg]
@@ -704,7 +821,9 @@ def build_reverse_depends_source_recursive(sources, target_pkg, quiet=False):
         return {}, []
 
     if not quiet:
-        print(f"[*] Source package '{target_pkg}' provides: {', '.join(sorted(source_to_binaries.get(target_pkg, set()))) or '(none)'}")
+        print(
+            f"[*] Source package '{target_pkg}' provides: {', '.join(sorted(source_to_binaries.get(target_pkg, set()))) or '(none)'}"
+        )
 
     visited = set()
     result = {}  # pkg -> {'level': int, 'via': [path], 'deps': [(field, binary)]}
@@ -719,15 +838,15 @@ def build_reverse_depends_source_recursive(sources, target_pkg, quiet=False):
                 visited.add(dependent)
                 new_path = path + [dependent]
                 result[dependent] = {
-                    'level': level + 1,
-                    'via': new_path,
-                    'deps': [(field, matched_bin, current)]
+                    "level": level + 1,
+                    "via": new_path,
+                    "deps": [(field, matched_bin, current)],
                 }
                 traversal_order.append(dependent)
                 queue.append((dependent, level + 1, new_path))
             elif dependent in result:
                 # Add additional dependency info
-                result[dependent]['deps'].append((field, matched_bin, current))
+                result[dependent]["deps"].append((field, matched_bin, current))
 
     return result, traversal_order
 
@@ -778,14 +897,14 @@ def build_reverse_depends_binary_recursive(packages, target_pkg, quiet=False):
                 visited.add(dependent)
                 new_path = path + [dependent]
                 result[dependent] = {
-                    'level': level + 1,
-                    'via': new_path,
-                    'deps': [(field, current)]
+                    "level": level + 1,
+                    "via": new_path,
+                    "deps": [(field, current)],
                 }
                 traversal_order.append(dependent)
                 queue.append((dependent, level + 1, new_path))
             elif dependent in result:
-                result[dependent]['deps'].append((field, current))
+                result[dependent]["deps"].append((field, current))
 
     return result, traversal_order
 
@@ -799,7 +918,7 @@ def print_reverse_depends(reverse_deps, target_pkg, mode, json_output=False):
             "count": len(reverse_deps),
             "reverse_dependencies": {
                 pkg: deps for pkg, deps in sorted(reverse_deps.items())
-            }
+            },
         }
         print(json.dumps(output, indent=2))
         return
@@ -824,49 +943,44 @@ def print_reverse_depends(reverse_deps, target_pkg, mode, json_output=False):
     print(f"\n{'=' * 60}")
 
 
-def print_reverse_depends_recursive(result, traversal_order, target_pkg, mode, json_output=False):
+def print_reverse_depends_recursive(
+    result, traversal_order, target_pkg, mode, json_output=False
+):
     """Prints recursive reverse dependencies in a tree-like format."""
     if json_output:
         # Group by level for JSON output
         levels = {}
         for pkg, info in result.items():
-            level = info['level']
+            level = info["level"]
             if level not in levels:
                 levels[level] = []
 
             # Format dependencies
             deps_formatted = []
-            for dep_info in info['deps']:
+            for dep_info in info["deps"]:
                 if len(dep_info) == 3:  # source mode: (field, binary, source)
                     field, binary, source = dep_info
-                    deps_formatted.append({
-                        "field": field,
-                        "binary": binary,
-                        "source": source
-                    })
+                    deps_formatted.append(
+                        {"field": field, "binary": binary, "source": source}
+                    )
                 else:  # binary mode: (field, pkg)
                     field, dep_pkg = dep_info
-                    deps_formatted.append({
-                        "field": field,
-                        "package": dep_pkg
-                    })
+                    deps_formatted.append({"field": field, "package": dep_pkg})
 
-            levels[level].append({
-                "package": pkg,
-                "path": info['via'],
-                "dependencies": deps_formatted
-            })
+            levels[level].append(
+                {"package": pkg, "path": info["via"], "dependencies": deps_formatted}
+            )
 
         # Sort packages within each level
         for level in levels:
-            levels[level] = sorted(levels[level], key=lambda x: x['package'])
+            levels[level] = sorted(levels[level], key=lambda x: x["package"])
 
         output = {
             "target": target_pkg,
             "mode": mode,
             "recursive": True,
             "count": len(result),
-            "levels": {str(k): v for k, v in sorted(levels.items())}
+            "levels": {str(k): v for k, v in sorted(levels.items())},
         }
         print(json.dumps(output, indent=2))
         return
@@ -884,12 +998,14 @@ def print_reverse_depends_recursive(result, traversal_order, target_pkg, mode, j
     # Group by level
     levels = {}
     for pkg, info in result.items():
-        level = info['level']
+        level = info["level"]
         if level not in levels:
             levels[level] = []
         levels[level].append(pkg)
 
-    print(f"\n{len(result)} package(s) depend on '{target_pkg}' (directly or transitively):\n")
+    print(
+        f"\n{len(result)} package(s) depend on '{target_pkg}' (directly or transitively):\n"
+    )
 
     # Print by level
     for level in sorted(levels.keys()):
@@ -899,12 +1015,12 @@ def print_reverse_depends_recursive(result, traversal_order, target_pkg, mode, j
         for pkg in pkgs:
             info = result[pkg]
             # Show the dependency path
-            path_str = " -> ".join(info['via'])
+            path_str = " -> ".join(info["via"])
             print(f"  {pkg}")
             print(f"    path: {path_str}")
 
             # Show what it depends on
-            for dep_info in info['deps']:
+            for dep_info in info["deps"]:
                 if len(dep_info) == 3:  # source mode: (field, binary, source)
                     field, binary, source = dep_info
                     print(f"    - {field} ({binary}) from {source}")
@@ -929,12 +1045,15 @@ def generate_html_graph(nodes, edges, title, output_path):
     nodes_json = [{"data": {"id": node, "label": node}} for node in sorted(nodes)]
     edges_json = [{"data": {"source": src, "target": tgt}} for src, tgt in edges]
 
-    html_template = '''<!DOCTYPE html>
+    html_template = (
+        """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>''' + title + '''</title>
+    <title>"""
+        + title
+        + """</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
     <style>
         * {
@@ -1159,8 +1278,12 @@ def generate_html_graph(nodes, edges, title, output_path):
     </div>
     <script>
         const graphData = {
-            nodes: ''' + json.dumps(nodes_json) + ''',
-            edges: ''' + json.dumps(edges_json) + '''
+            nodes: """
+        + json.dumps(nodes_json)
+        + """,
+            edges: """
+        + json.dumps(edges_json)
+        + """
         };
 
         // Pre-compute dependency relationships for fast lookup
@@ -1517,9 +1640,10 @@ def generate_html_graph(nodes, edges, title, output_path):
         updateModeIndicator();
     </script>
 </body>
-</html>'''
+</html>"""
+    )
 
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         f.write(html_template)
 
     return output_path
@@ -1550,13 +1674,43 @@ def build_binary_edges(packages):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate PPA Dependency Charts")
+    parser = argparse.ArgumentParser(
+        description="Generate PPA/package-set Dependency Charts"
+    )
 
-    # Required Args
-    parser.add_argument(
+    # Source of packages: PPA URL or Launchpad package-set (mutually exclusive)
+    source_group = parser.add_mutually_exclusive_group(required=True)
+    source_group.add_argument(
         "--ppa",
-        required=True,
         help="The base URL of the PPA (e.g., https://ppa.../ubuntu/)",
+    )
+    source_group.add_argument(
+        "--package-set",
+        metavar="NAME",
+        help="Name of an Ubuntu Launchpad package-set (e.g., 'rocm'). "
+        "Uses --dist as the series and fetches metadata from --archive.",
+    )
+
+    # Archive settings (used with --package-set)
+    parser.add_argument(
+        "--archive",
+        default="http://archive.ubuntu.com/ubuntu/",
+        help="Base URL of the Ubuntu archive for --package-set mode "
+        "(default: http://archive.ubuntu.com/ubuntu/)",
+    )
+    parser.add_argument(
+        "--components",
+        default="main,universe,restricted,multiverse",
+        help="Comma-separated archive components to scan in --package-set mode "
+        "(default: main,universe,restricted,multiverse)",
+    )
+    parser.add_argument(
+        "--pockets",
+        default="release,updates",
+        help="Comma-separated pockets to scan in --package-set mode. "
+        "Later pockets override earlier ones on collision. "
+        "Choices: release, updates, security, proposed, backports. "
+        "(default: release,updates)",
     )
 
     # Optional Args with Defaults
@@ -1564,9 +1718,10 @@ def main():
         "--dist", default="noble", help="Distribution codename (default: noble)"
     )
     parser.add_argument(
-        "--arch", default="amd64",
+        "--arch",
+        default="amd64",
         help="Architecture for binary mode (default: amd64). "
-             "Only applies to --mode=binary. Common values: amd64, arm64, i386"
+        "Only applies to --mode=binary. Common values: amd64, arm64, i386",
     )
     parser.add_argument(
         "--output",
@@ -1585,7 +1740,8 @@ def main():
         help="Show reverse dependencies for the specified package (like reverse-depends)",
     )
     parser.add_argument(
-        "-X", "--recursive",
+        "-X",
+        "--recursive",
         action="store_true",
         help="Recursively follow reverse dependencies (only valid with --rdepends)",
     )
@@ -1607,30 +1763,66 @@ def main():
     if args.recursive and not args.rdepends:
         parser.error("-X/--recursive requires --rdepends")
 
-    # Note about --arch in source mode (it's used for binary transitive deps)
-    # No longer printing a warning since --arch IS used to fetch Packages for
-    # resolving transitive binary dependencies in source mode
+    valid_pockets = {"release", "updates", "security", "proposed", "backports"}
+    pockets = [p.strip() for p in args.pockets.split(",") if p.strip()]
+    for p in pockets:
+        if p not in valid_pockets:
+            parser.error(f"invalid pocket '{p}'; choose from {sorted(valid_pockets)}")
+    components = [c.strip() for c in args.components.split(",") if c.strip()]
 
     # Helper to print status messages (suppressed in JSON mode)
     def log(msg):
         if not args.json:
             print(msg)
 
+    # Resolve package-set members up front so all downstream fetches use them.
+    members = None
+    if args.package_set:
+        members = fetch_package_set_members(
+            args.dist, args.package_set, quiet=args.json
+        )
+
     # 1. Fetch and Parse
     if args.mode == "binary":
-        log(f"[*] Fetching Packages metadata for {args.dist}/{args.arch}...")
-        content = fetch_packages_file(args.ppa, args.dist, args.arch, quiet=args.json)
-        packages = parse_packages(content)
-        log(f"[*] Found {len(packages)} binary packages.")
+        if args.package_set:
+            log(
+                f"[*] Fetching Packages across pockets={pockets} components={components}..."
+            )
+            all_packages = fetch_packages_multi_pocket(
+                args.archive,
+                args.dist,
+                args.arch,
+                pockets,
+                components,
+                quiet=args.json,
+            )
+            log(f"[*] Loaded {len(all_packages)} binary packages from archive.")
+            packages = [p for p in all_packages if get_source_name(p) in members]
+            log(
+                f"[*] Filtered to {len(packages)} binary packages built from package-set sources."
+            )
+        else:
+            log(f"[*] Fetching Packages metadata for {args.dist}/{args.arch}...")
+            content = fetch_packages_file(
+                args.ppa, args.dist, args.arch, quiet=args.json
+            )
+            packages = parse_packages(content)
+            log(f"[*] Found {len(packages)} binary packages.")
 
         # Handle reverse depends query
         if args.rdepends:
             mode_str = f"binary ({args.arch})"
             if args.recursive:
-                result, order = build_reverse_depends_binary_recursive(packages, args.rdepends, quiet=args.json)
-                print_reverse_depends_recursive(result, order, args.rdepends, mode_str, args.json)
+                result, order = build_reverse_depends_binary_recursive(
+                    packages, args.rdepends, quiet=args.json
+                )
+                print_reverse_depends_recursive(
+                    result, order, args.rdepends, mode_str, args.json
+                )
             else:
-                reverse_deps = build_reverse_depends_binary(packages, args.rdepends, quiet=args.json)
+                reverse_deps = build_reverse_depends_binary(
+                    packages, args.rdepends, quiet=args.json
+                )
                 print_reverse_depends(reverse_deps, args.rdepends, mode_str, args.json)
             return
 
@@ -1641,40 +1833,96 @@ def main():
         graph_nodes = ppa_binaries
         graph_edges = edges
     else:
-        log(f"[*] Fetching Sources metadata for {args.dist}...")
-        content = fetch_sources_file(args.ppa, args.dist, quiet=args.json)
-        sources = parse_sources(content)
-        log(f"[*] Found {len(sources)} source packages.")
+        if args.package_set:
+            log(
+                f"[*] Fetching Sources across pockets={pockets} components={components}..."
+            )
+            all_sources = fetch_sources_multi_pocket(
+                args.archive,
+                args.dist,
+                pockets,
+                components,
+                quiet=args.json,
+            )
+            log(f"[*] Loaded {len(all_sources)} source packages from archive.")
+            sources = [s for s in all_sources if s["Package"] in members]
+            log(f"[*] Filtered to {len(sources)} source packages in the package-set.")
 
-        # Also fetch Packages to resolve transitive binary dependencies
-        log(f"[*] Fetching Packages metadata for {args.dist}/{args.arch} (for transitive deps)...")
-        pkg_content = fetch_packages_file(args.ppa, args.dist, args.arch, quiet=args.json)
-        packages = parse_packages(pkg_content)
-        log(f"[*] Found {len(packages)} binary packages.")
+            missing = members - {s["Package"] for s in sources}
+            if missing:
+                log(
+                    f"[!] Warning: {len(missing)} package-set member(s) have no Sources entry "
+                    f"for {args.dist} in {pockets}: {', '.join(sorted(missing))}"
+                )
+
+            log(
+                f"[*] Fetching Packages across pockets={pockets} components={components}..."
+            )
+            all_packages = fetch_packages_multi_pocket(
+                args.archive,
+                args.dist,
+                args.arch,
+                pockets,
+                components,
+                quiet=args.json,
+            )
+            log(f"[*] Loaded {len(all_packages)} binary packages from archive.")
+            packages = [p for p in all_packages if get_source_name(p) in members]
+            log(
+                f"[*] Filtered to {len(packages)} binary packages built from package-set sources."
+            )
+        else:
+            log(f"[*] Fetching Sources metadata for {args.dist}...")
+            content = fetch_sources_file(args.ppa, args.dist, quiet=args.json)
+            sources = parse_sources(content)
+            log(f"[*] Found {len(sources)} source packages.")
+
+            # Also fetch Packages to resolve transitive binary dependencies
+            log(
+                f"[*] Fetching Packages metadata for {args.dist}/{args.arch} (for transitive deps)..."
+            )
+            pkg_content = fetch_packages_file(
+                args.ppa, args.dist, args.arch, quiet=args.json
+            )
+            packages = parse_packages(pkg_content)
+            log(f"[*] Found {len(packages)} binary packages.")
 
         # Handle reverse depends query
         if args.rdepends:
             if args.recursive:
-                result, order = build_reverse_depends_source_recursive(sources, args.rdepends, quiet=args.json)
-                print_reverse_depends_recursive(result, order, args.rdepends, "source (Build-Depends)", args.json)
+                result, order = build_reverse_depends_source_recursive(
+                    sources, args.rdepends, quiet=args.json
+                )
+                print_reverse_depends_recursive(
+                    result, order, args.rdepends, "source (Build-Depends)", args.json
+                )
             else:
-                reverse_deps = build_reverse_depends_source(sources, args.rdepends, quiet=args.json)
-                print_reverse_depends(reverse_deps, args.rdepends, "source (Build-Depends)", args.json)
+                reverse_deps = build_reverse_depends_source(
+                    sources, args.rdepends, quiet=args.json
+                )
+                print_reverse_depends(
+                    reverse_deps, args.rdepends, "source (Build-Depends)", args.json
+                )
             return
 
         # 2. Build Graph (with transitive binary deps)
-        log("[*] Generating SOURCE level dependency graph (using Build-Depends + transitive binary deps)...")
+        log(
+            "[*] Generating SOURCE level dependency graph (using Build-Depends + transitive binary deps)..."
+        )
         dot, edges, ppa_sources = build_source_graph(sources, packages)
         graph_nodes = ppa_sources
         graph_edges = edges
 
         # 3. Compute and print dependency groups
-        groups, cycles_info = compute_dependency_groups(ppa_sources, edges, quiet=args.json)
+        groups, cycles_info = compute_dependency_groups(
+            ppa_sources, edges, quiet=args.json
+        )
         print_dependency_groups(groups, cycles_info, edges, args.json)
 
     # 4. Render
     if args.format == "html":
-        title = f"PPA Dependency Graph ({args.mode} mode) - {args.dist}"
+        scope = f"package-set:{args.package_set}" if args.package_set else "PPA"
+        title = f"{scope} Dependency Graph ({args.mode} mode) - {args.dist}"
         output_path = f"{args.output}.html"
         generate_html_graph(graph_nodes, graph_edges, title, output_path)
         print(f"[SUCCESS] Interactive chart saved to: {output_path}")
