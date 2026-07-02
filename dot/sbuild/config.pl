@@ -68,7 +68,7 @@ $lintian_opts = ['-EvIL', 'pedantic'];
 # $piuparts_opts = ['--schroot', '%r-%a-sbuild', '--no-eatmydata'];
 $run_autopkgtest = 1;
 $autopkgtest_root_args = '';
-$autopkgtest_opts = [ '--', 'lxd', "ubuntu:$distribution" ];
+$autopkgtest_opts = [ '--', 'lxd', "ubuntu-daily:$distribution" ];
 
 # don't remove this, Perl needs it:
 1;
