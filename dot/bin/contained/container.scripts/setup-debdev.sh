@@ -14,6 +14,7 @@ apt-get update
 apt-get install -y --no-install-recommends \
     python3 \
     awk \
+    curl \
     ssh \
     dh-python \
     debian-archive-keyring \
