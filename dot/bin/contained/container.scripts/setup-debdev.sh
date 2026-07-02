@@ -12,6 +12,8 @@ set -eu
 apt-get update
 # shellcheck disable=SC2086  # intentional word-split of EXTRA_PACKAGES
 apt-get install -y --no-install-recommends \
+    python3 \
+    awk \
     ssh \
     dh-python \
     debian-archive-keyring \
