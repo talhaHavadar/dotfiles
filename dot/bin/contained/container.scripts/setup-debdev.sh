@@ -13,7 +13,7 @@ apt-get update
 # shellcheck disable=SC2086  # intentional word-split of EXTRA_PACKAGES
 apt-get install -y --no-install-recommends \
     python3 \
-    awk \
+    gawk \
     curl \
     ssh \
     dh-python \
