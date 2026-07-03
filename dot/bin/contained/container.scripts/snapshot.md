@@ -82,11 +82,39 @@ needs no `debian/snapshot.conf` at all — e.g. for `hipblas-common` pointing at
 `ROCm/rocm-libraries`, `MAIN_SUBDIR` resolves to `projects/hipblas-common`
 automatically and `snapshot orig` packs just that subtree.
 
-Precedence is **config file > env > monorepo map > whole upstream repo**, so
-anything you set explicitly still wins. Register a new monorepo by adding a
-line to the `UPSTREAM_MONOREPOS` array near the top of `snapshot.sh`; the value
-is a `printf` template where `%s` is substituted with the package name (use
-e.g. `"components/lib%s"` if the upstream lays things out differently).
+Precedence is **config file > env > per-package pin > monorepo map > whole
+upstream repo**, so anything you set explicitly still wins. Register a new
+monorepo by adding a line to the `UPSTREAM_MONOREPOS` array near the top of
+`snapshot.sh`; the value is a `printf` template where `%s` is substituted with
+the package name (use e.g. `"components/lib%s"` if the upstream lays things
+out differently).
+
+### Per-package layout overrides
+
+Some monorepo packages don't fit the `projects/<pkg>` template — either the
+upstream subdir name differs from the source package name, or the package
+pulls a sibling subdir in as a gbp component. For example, `rocm-hipamd`
+lives under `ROCm/rocm-systems` but its main tarball comes from
+`projects/clr` (not `projects/rocm-hipamd`, which doesn't exist), plus a
+`hip` component from `projects/hip`.
+
+Pin the layout in-script via the `UPSTREAM_PACKAGE_MAIN` and
+`UPSTREAM_PACKAGE_COMPONENTS` maps in `snapshot.sh`, keyed by source
+package name:
+
+```sh
+declare -A UPSTREAM_PACKAGE_MAIN=(
+    [rocm-hipamd]="projects/clr"
+)
+declare -A UPSTREAM_PACKAGE_COMPONENTS=(
+    [rocm-hipamd]="hip:projects/hip"
+)
+```
+
+These fire only when `MAIN_SUBDIR` / `COMPONENTS` are still empty after
+config+env — explicit settings still win. Unlisted packages fall through
+to the monorepo template (or, for non-monorepo upstreams like
+`ROCm/rocm-cmake`, to whole-repo mode) exactly as before.
 
 ## Subcommands
 

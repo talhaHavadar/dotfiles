@@ -88,6 +88,21 @@ declare -A UPSTREAM_MONOREPOS=(
     [rocm/rocm-systems]="projects/%s"
 )
 
+# Per-package layout overrides for packages that don't fit the
+# UPSTREAM_MONOREPOS template above — e.g. the upstream subdir name
+# differs from the source package name (rocm-hipamd -> projects/clr), or
+# the package pulls a sibling subdir in as a gbp component. Keys are the
+# source package name from debian/changelog. Extend when a monorepo
+# package needs a shape the template can't express. Non-monorepo
+# packages (e.g. rocm-cmake, upstream github.com/ROCm/rocm-cmake) need
+# no entry here — they fall through to whole-repo mode.
+declare -A UPSTREAM_PACKAGE_MAIN=(
+    [rocm-hipamd]="projects/clr"
+)
+declare -A UPSTREAM_PACKAGE_COMPONENTS=(
+    [rocm-hipamd]="hip:projects/hip"
+)
+
 # Normalize a git remote URL to "owner/repo" (lowercased, no scheme/host/.git).
 # Handles https://, ssh://, and git@host:owner/repo forms.
 canonical_repo_id() {
@@ -125,9 +140,14 @@ load_config() {
         [ -n "$UPSTREAM_URL" ] && log "UPSTREAM_URL from debian/upstream/metadata: ${UPSTREAM_URL}"
     fi
     [ -n "$UPSTREAM_URL" ] || die "UPSTREAM_URL is not set (config $CONFIG_FILE, env, or debian/upstream/metadata Repository:)"
-    # MAIN_SUBDIR is optional. Precedence: config file > env > UPSTREAM_MONOREPOS
-    # map > whole upstream repo. The map kicks in only when MAIN_SUBDIR is still
-    # empty after env+config, so explicit settings always win.
+    # MAIN_SUBDIR is optional. Precedence: config file > env >
+    # UPSTREAM_PACKAGE_MAIN pin > UPSTREAM_MONOREPOS template > whole upstream
+    # repo. The pins/templates kick in only when MAIN_SUBDIR is still empty
+    # after env+config, so explicit settings always win.
+    if [ -z "$MAIN_SUBDIR" ] && [ -n "${UPSTREAM_PACKAGE_MAIN[$PKG]-}" ]; then
+        MAIN_SUBDIR=${UPSTREAM_PACKAGE_MAIN[$PKG]}
+        log "MAIN_SUBDIR from per-package overrides: ${MAIN_SUBDIR}"
+    fi
     if [ -z "$MAIN_SUBDIR" ]; then
         local auto
         auto=$(default_main_subdir_for_url "$UPSTREAM_URL" "$PKG")
@@ -135,6 +155,13 @@ load_config() {
             MAIN_SUBDIR=$auto
             log "MAIN_SUBDIR from monorepo map (${UPSTREAM_URL}): ${MAIN_SUBDIR}"
         fi
+    fi
+    # COMPONENTS: config > env > per-package pin (no template — the
+    # component layout is too package-specific to derive from the monorepo
+    # URL alone).
+    if [ -z "$COMPONENTS" ] && [ -n "${UPSTREAM_PACKAGE_COMPONENTS[$PKG]-}" ]; then
+        COMPONENTS=${UPSTREAM_PACKAGE_COMPONENTS[$PKG]}
+        log "COMPONENTS from per-package overrides: ${COMPONENTS}"
     fi
     if [ -z "$DEBIAN_BRANCH" ] && [ -f debian/gbp.conf ]; then
         DEBIAN_BRANCH=$(sed -n 's/^[[:space:]]*debian-branch[[:space:]]*=[[:space:]]*//p' debian/gbp.conf | head -1)
