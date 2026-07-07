@@ -71,7 +71,15 @@ def main():
     cookie_jar = http.cookiejar.MozillaCookieJar(
         f"{os.getenv('HOME')}/cookies.autopkgtest.txt"
     )
-    cookie_jar.load()
+    cookie_jar.load(ignore_expires=True)
+    # Netscape format uses expires=0 for session cookies, but Python's
+    # cookiejar converts that to int(0) and then treats it as expired at
+    # send time (0 <= now). Rewrite to None so they are sent as true
+    # session cookies. Without this, autopkgtest's `not_a_crawler` cookie
+    # is dropped and the request is 429'd by the anti-bot check.
+    for c in cookie_jar:
+        if c.expires == 0:
+            c.expires = None
 
     session = requests.Session()
     session.cookies = cookie_jar
