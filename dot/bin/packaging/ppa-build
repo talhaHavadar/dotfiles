@@ -86,6 +86,7 @@ ALL_ARCHES="amd64,amd64v3,arm64,armhf,i386,powerpc,ppc64el,s390x,riscv64"
 ppa create "$PPA_NAME" --owner-name "$PPA_OWNER" --arches $ALL_ARCHES --pocket proposed ${PPA_DESC:+--description "$PPA_DESC"} || true
 
 packaging dch-auto
+uscan -v --download-current-version || true
 debuild --no-conf --no-lintian -S -d -sa -I.jj -ktalha.can.havadar@canonical.com --source-option='--extend-diff-ignore=(^|/)\.jj/' $NO_CLEAN
 SOURCE_NAME=$(dpkg-parsechangelog -SSource)
 SOURCE_VERSION=$(dpkg-parsechangelog -SVersion)
@@ -94,5 +95,6 @@ cd -
 dput -f "ppa:$PPA_OWNER/$PPA_NAME" "../${SOURCE_CHANGES_FILE}"
 
 if [ "$TESTING" = true ]; then
+	# shellcheck disable=SC2027,SC2046,SC2086
 	tq add "packaging trigger-tests -r "$(dpkg-parsechangelog -SDistribution)" "${SOURCE_NAME}" "$PPA_OWNER/$PPA_NAME""
 fi
