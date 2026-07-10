@@ -101,6 +101,7 @@ declare -A UPSTREAM_PACKAGE_MAIN=(
 )
 declare -A UPSTREAM_PACKAGE_COMPONENTS=(
     [rocm-hipamd]="hip:projects/hip"
+    [rocblas]="tensile:shared/tensile"
 )
 
 # Normalize a git remote URL to "owner/repo" (lowercased, no scheme/host/.git).
