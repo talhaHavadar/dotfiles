@@ -105,6 +105,19 @@ push @$unshare_mmdebstrap_extra_args,
         '--keyring=/usr/share/keyrings/debian-archive-keyring.gpg',
     ];
 
+# Bake ca-certificates into every mmdebstrap chroot tarball. The container
+# image installs ca-certificates for the host layer, but sbuild's unshare
+# backend bootstraps a *separate* chroot via mmdebstrap that doesn't inherit
+# anything from the container's rootfs -- so builds/tests that reach HTTPS
+# (cmake FetchContent, pip, npm, curl in a testsuite) hit "unable to get
+# local issuer certificate" without this. mmdebstrap's --include applies at
+# bootstrap time, so with unshare_mmdebstrap_keep_tarball=1 the cost is paid
+# once per cached suite tarball, not per build.
+push @$unshare_mmdebstrap_extra_args,
+    qr/.*/ => [
+        '--include=ca-certificates',
+    ];
+
 # Debian experimental: apt's default resolver won't pull priority-1 packages
 # even when they satisfy a versioned build-dep. Aptitude does. Detect the
 # target distribution from the sbuild command line so we can override only
