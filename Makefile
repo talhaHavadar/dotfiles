@@ -506,6 +506,11 @@ _symlinks-git:
 	@echo "Creating git symlinks..."
 	$(call create_symlink,$(DOT_DIR)/gitconfig.projects,$(HOME)/.gitconfig.projects)
 	$(call create_symlink,$(DOT_DIR)/gitconfig.workspace,$(HOME)/.gitconfig.workspace)
+	$(call create_symlink,$(DOT_DIR)/bin/git-stack-pr,$(HOME)/.local/bin/git-stack-pr)
+	$(call create_symlink,$(DOT_DIR)/bin/git-fpush,$(HOME)/.local/bin/git-fpush)
+	$(call create_symlink,$(DOT_DIR)/bin/git-fixup,$(HOME)/.local/bin/git-fixup)
+	$(call create_symlink,$(DOT_DIR)/bin/git-wapply,$(HOME)/.local/bin/git-wapply)
+	$(call create_symlink,$(DOT_DIR)/bin/git-lp-clone,$(HOME)/.local/bin/git-lp-clone)
 
 .PHONY: _symlinks-jj
 _symlinks-jj:
