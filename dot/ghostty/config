@@ -1,6 +1,6 @@
 background-blur = 5
 background-opacity = 0.900000
-command = /usr/bin/env bash --login
+command = direct:/run/current-system/sw/bin/bash --login
 cursor-style = block
 gtk-titlebar = false
 keybind = super+c=copy_to_clipboard
