@@ -25,7 +25,6 @@ in
       casks = [
         "container"
         "raspberry-pi-imager"
-        "openvpn-connect"
         "nordic-nrf-command-line-tools"
         "poedit"
         "godot"
