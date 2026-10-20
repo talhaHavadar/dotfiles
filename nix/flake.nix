@@ -17,6 +17,9 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs";
     nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
+    herdr = {
+      url = "github:herdrdev/herdr";
+    };
     sparse = {
       url = "github:Orca-The-Company/sparse";
     };

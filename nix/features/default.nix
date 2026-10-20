@@ -1,4 +1,5 @@
 {
+  lib,
   pkgs,
   modulesPath,
   currentConfigSystem ? "nothome",
@@ -17,5 +18,5 @@ in
     ./tailscale
     ./yubikey
   ]
-  ++ (if !isHome then [ ../overlays ] else [ ../overlays ]);
+  ++ lib.optionals (!isHome) [ ../overlays ];
 }

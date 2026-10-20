@@ -33,7 +33,7 @@ with lib;
     inputs.walker.homeManagerModules.default
   ];
 
-  config = mkIf (home_config.enable && pkgs.system != "aarch64-darwin") {
+  config = mkIf (home_config.enable && pkgs.stdenv.hostPlatform.system != "aarch64-darwin") {
     home.file = {
       ".config/hypr/scripts/volume.sh".source = mkOutOfStoreSymlink ../dot/hyprland/volume.sh;
     };

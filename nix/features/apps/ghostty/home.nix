@@ -6,7 +6,7 @@
 }:
 let
   ghostty_config = config.host.features.apps.ghostty;
-  isDarwin = pkgs.stdenv.isDarwin;
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
 in
 {

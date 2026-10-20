@@ -7,10 +7,10 @@
 }:
 let
   kitty_config = config.host.features.apps.kitty;
-  isDarwin = pkgs.stdenv.isDarwin;
-  isNixOS = pkgs.stdenv.isLinux && builtins.pathExists /etc/NIXOS;
-  isLinuxNonNixOS = pkgs.stdenv.isLinux && !builtins.pathExists /etc/NIXOS;
-  isLinux = pkgs.stdenv.isLinux;
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
+  isNixOS = pkgs.stdenv.hostPlatform.isLinux && builtins.pathExists /etc/NIXOS;
+  isLinuxNonNixOS = pkgs.stdenv.hostPlatform.isLinux && !builtins.pathExists /etc/NIXOS;
+  isLinux = pkgs.stdenv.hostPlatform.isLinux;
 in
 {
   config = lib.mkIf (kitty_config.enable) {

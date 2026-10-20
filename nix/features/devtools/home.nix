@@ -5,7 +5,7 @@
 , ...
 }:
 let
-  isDarwin = pkgs.stdenv.isDarwin;
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
   devtools_config = config.host.features.devtools;
 in
 {
@@ -14,7 +14,7 @@ in
     home.packages =
       with pkgs;
       [
-        inputs.sparse.packages.${system}.default
+        inputs.sparse.packages.${pkgs.stdenv.hostPlatform.system}.default
         git
         uv
         nodejs_24
@@ -27,6 +27,7 @@ in
         gperf
         viu
         github-copilot-cli
+        herdr
       ]
       ++ lib.optionals (!isDarwin) [
         rpi-imager

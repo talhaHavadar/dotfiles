@@ -7,7 +7,7 @@
 }:
 let
   zed-editor_config = config.host.features.apps.zed-editor;
-  isDarwin = pkgs.stdenv.isDarwin;
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
 in
 {
   config = lib.mkIf (zed-editor_config.enable) {

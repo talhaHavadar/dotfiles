@@ -47,7 +47,7 @@ in
   };
 
   home.packages = with pkgs; [
-    inputs.sparse.packages.${system}.default
+    inputs.sparse.packages.${pkgs.stdenv.hostPlatform.system}.default
     tmux
     fzf
     tio

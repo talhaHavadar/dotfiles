@@ -6,10 +6,10 @@
 let
   isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "1";
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
-  isDarwin = pkgs.stdenv.isDarwin;
-  isNixOS = pkgs.stdenv.isLinux && builtins.pathExists /etc/NIXOS;
-  isLinuxNonNixOS = pkgs.stdenv.isLinux && !builtins.pathExists /etc/NIXOS;
-  isLinux = pkgs.stdenv.isLinux;
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
+  isNixOS = pkgs.stdenv.hostPlatform.isLinux && builtins.pathExists /etc/NIXOS;
+  isLinuxNonNixOS = pkgs.stdenv.hostPlatform.isLinux && !builtins.pathExists /etc/NIXOS;
+  isLinux = pkgs.stdenv.hostPlatform.isLinux;
   gpgAgentPrefix =
     if isNixOS then
       "/run/user/1002/gnupg" # TODO: need a better way to inject user id here

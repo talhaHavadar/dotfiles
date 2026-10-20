@@ -11,10 +11,10 @@ let
   homeDirectory = config.home.homeDirectory;
   username = config.home.username;
   isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "1";
-  isDarwin = pkgs.stdenv.isDarwin;
-  isNixOS = pkgs.stdenv.isLinux && builtins.pathExists /etc/NIXOS;
-  isLinuxNonNixOS = pkgs.stdenv.isLinux && !builtins.pathExists /etc/NIXOS;
-  isLinux = pkgs.stdenv.isLinux;
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
+  isNixOS = pkgs.stdenv.hostPlatform.isLinux && builtins.pathExists /etc/NIXOS;
+  isLinuxNonNixOS = pkgs.stdenv.hostPlatform.isLinux && !builtins.pathExists /etc/NIXOS;
+  isLinux = pkgs.stdenv.hostPlatform.isLinux;
 in
 {
   config = lib.mkIf bash-integration_config.enable {
@@ -22,7 +22,7 @@ in
       "${homeDirectory}/.local/bin"
     ];
     home.sessionVariables = {
-      NIX_SYSTEM = pkgs.system;
+      NIX_SYSTEM = pkgs.stdenv.hostPlatform.system;
       NIX_STORE = "/nix/store";
       NIX_MYUSER = "${username}";
       NIX_PLATFORM = "${platform}";
