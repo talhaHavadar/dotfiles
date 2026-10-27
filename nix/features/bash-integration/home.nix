@@ -10,7 +10,7 @@ let
   bash-integration_config = config.host.features.bash-integration;
   homeDirectory = config.home.homeDirectory;
   username = config.home.username;
-  isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "1";
+  isPackagingEnabled = config.host.features.debian-packaging.enable;
   isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
   isNixOS = pkgs.stdenv.hostPlatform.isLinux && builtins.pathExists /etc/NIXOS;
   isLinuxNonNixOS = pkgs.stdenv.hostPlatform.isLinux && !builtins.pathExists /etc/NIXOS;
