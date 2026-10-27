@@ -27,6 +27,7 @@ in
         gperf
         viu
         herdr
+        just
       ]
       ++ lib.optionals (!isDarwin) [
         rpi-imager
