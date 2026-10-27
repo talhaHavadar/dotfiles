@@ -42,6 +42,7 @@ apt-get install -y --no-install-recommends \
     licenserecon \
     autopkgtest \
     dh-fortran \
+    vim \
     ${EXTRA_PACKAGES:-}
 rm -rf /var/lib/apt/lists/*
 
