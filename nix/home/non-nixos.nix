@@ -1,10 +1,9 @@
-{
-  config,
-  lib,
-  pkgs,
-  username,
-  platform,
-  ...
+{ config
+, lib
+, pkgs
+, username
+, platform
+, ...
 }:
 let
   pyp = pkgs.python312Packages;
@@ -12,16 +11,19 @@ let
 in
 with lib;
 {
-
+  targets.genericLinux =
+    {
+      enable = true;
+      gpu.enable = true;
+    };
   host.home.windowManagers.hyprland.enable = false;
-  # TODO: Swift build is failing on ubuntu
-  host.features.apps.neovim.swift.enable = lib.mkForce false;
 
   imports = [
     ../hyprland.nix
   ];
 
   home.packages = with pkgs; [
+    less
     yubioath-flutter
     ubuntu-classic
     nerd-fonts.hack
