@@ -2,7 +2,6 @@
 , lib
 , pkgs
 , platform
-, packagingEnabled
 , currentConfigSystem
 , ...
 }:
@@ -12,13 +11,11 @@ let
 in
 with lib;
 {
-  imports = [
-    ./git.nix
-  ];
-
   config =
     { }
     // lib.optionalAttrs (currentConfigSystem == "home") {
+      host.features.debian-packaging.enable = lib.mkDefault ((builtins.getEnv "INCLUDE_PACKAGING") == "1");
+
       home = {
         username = "ubuntu";
         homeDirectory = "/home/ubuntu";
@@ -28,20 +25,6 @@ with lib;
       home.file = {
         "workspace/.gitconfig".source = mkOutOfStoreSymlink ../../../dot/gitconfig.workspace;
         "projects/.gitconfig".source = mkOutOfStoreSymlink ../../../dot/gitconfig.projects;
-      }
-      // lib.optionalAttrs packagingEnabled {
-        ".devscripts".source = mkOutOfStoreSymlink ../../../dot/devscripts;
-        ".gbp.conf".source = mkOutOfStoreSymlink ../../../dot/gbp.conf;
-        ".mk-sbuild.rc".source = mkOutOfStoreSymlink ../../../dot/mk-sbuild.rc;
-        ".quiltrc-dpkg".source = mkOutOfStoreSymlink ../../../dot/quiltrc-dpkg;
-        ".config/sbuild/config.pl".source = mkOutOfStoreSymlink ../../../dot/sbuild/config.pl;
-        ".packaging.bashrc".source = mkOutOfStoreSymlink ../../../dot/packaging.bashrc;
-        ".local/bin/packaging".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/packaging;
-        ".local/bin/packaging-get-uploads".source =
-          mkOutOfStoreSymlink ../../../dot/bin/packaging/get-uploads;
-        ".local/bin/packaging-mk-sbuild".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/mk-sbuild;
-        ".local/bin/packaging-convert-symbols".source =
-          mkOutOfStoreSymlink ../../../dot/bin/packaging/convert-symbols;
       };
 
       home.sessionVariables = {
