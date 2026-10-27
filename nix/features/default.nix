@@ -14,6 +14,7 @@ in
     ./aerospace
     ./apps
     ./bash-integration
+    ./debian-packaging
     ./devtools
     ./tailscale
     ./yubikey

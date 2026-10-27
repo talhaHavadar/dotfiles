@@ -86,17 +86,15 @@ in
 
       packages =
         with pkgs;
-        [
-          ppa-dev-tools
-        ]
-        ++ lib.optionals (isNixOS) [
+        [ ]
+          ++ lib.optionals (isNixOS) [
           vlc
           gnome.gvfs
           mtools
         ]
-        ++ lib.optionals (isDarwin) [
+          ++ lib.optionals (isDarwin) [
         ]
-        ++ lib.optionals (isLinuxNonNixOS) [
+          ++ lib.optionals (isLinuxNonNixOS) [
         ];
 
     }
