@@ -87,6 +87,7 @@ in
       packages =
         with pkgs;
         [
+          ppa-dev-tools
         ]
         ++ lib.optionals (isNixOS) [
           vlc
@@ -102,9 +103,9 @@ in
     // lib.optionalAttrs (isDarwin) {
       homeDirectory = "/Users/${config.home.username}";
       activation = {
-       # mint-swift-bundler = lib.hm.dag.entryAfter [ "installPackages" ] ''
-       #   PATH="/opt/homebrew/bin:${pkgs.git}/bin:/usr/bin:$PATH" $DRY_RUN_CMD mint install stackotter/swift-bundler@main
-       # '';
+        # mint-swift-bundler = lib.hm.dag.entryAfter [ "installPackages" ] ''
+        #   PATH="/opt/homebrew/bin:${pkgs.git}/bin:/usr/bin:$PATH" $DRY_RUN_CMD mint install stackotter/swift-bundler@main
+        # '';
       };
     }
     // lib.optionalAttrs (isLinux) {

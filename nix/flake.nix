@@ -89,6 +89,7 @@
             ];
             pkgs = import nixpkgs {
               inherit system;
+              overlays = import ./overlays;
               config = {
                 allowUnfree = true;
               };
@@ -106,6 +107,8 @@
     in
     {
       default = { };
+
+      overlays.default = nixpkgs.lib.composeManyExtensions (import ./overlays);
 
       nixosConfigurations.nixos-ai-crawler = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";

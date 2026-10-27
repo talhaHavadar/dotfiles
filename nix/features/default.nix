@@ -18,5 +18,5 @@ in
     ./tailscale
     ./yubikey
   ]
-  ++ lib.optionals (!isHome) [ ../overlays ];
+  ++ lib.optionals (!isHome) [ { nixpkgs.overlays = import ../overlays; } ];
 }
