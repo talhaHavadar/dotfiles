@@ -4,7 +4,6 @@
 , ...
 }:
 let
-  isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "1";
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
   isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
   isNixOS = pkgs.stdenv.hostPlatform.isLinux && builtins.pathExists /etc/NIXOS;

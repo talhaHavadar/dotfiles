@@ -340,7 +340,6 @@
           inherit username;
           inherit inputs;
           platform = "non-nixos";
-          packagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "1";
           currentConfigSystem = "home";
           flakeOutput = "linux";
         };
@@ -353,7 +352,6 @@
           username = "ubuntu";
           inherit inputs;
           platform = "ubuntu-headless";
-          packagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "1";
           currentConfigSystem = "home";
           flakeOutput = "ubuntu-headless";
         };

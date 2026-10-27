@@ -4,7 +4,6 @@
 , ...
 }:
 let
-  isPackagingEnabled = (builtins.getEnv "INCLUDE_PACKAGING") == "1";
   mkOutOfStoreSymlink = config.lib.file.mkOutOfStoreSymlink;
   # Use builtins.currentSystem to determine platform without evaluating pkgs
   system = builtins.currentSystem;
@@ -42,34 +41,6 @@ in
         ".config/wlogout".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/wlogout";
         ".config/waybar".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/waybar";
         ".local/bin/contained".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/contained/contained.sh";
-      }
-      // lib.optionalAttrs isPackagingEnabled {
-        ".devscripts".source = mkOutOfStoreSymlink ../../../dot/devscripts;
-        ".gbp.conf".source = mkOutOfStoreSymlink ../../../dot/gbp.conf;
-        ".mk-sbuild.rc".source = mkOutOfStoreSymlink ../../../dot/mk-sbuild.rc;
-        ".quiltrc-dpkg".source = mkOutOfStoreSymlink ../../../dot/quiltrc-dpkg;
-        ".config/sbuild/config.pl".source = mkOutOfStoreSymlink ../../../dot/sbuild/config.pl;
-        ".packaging.bashrc".source = mkOutOfStoreSymlink ../../../dot/packaging.bashrc;
-        ".local/bin/packaging".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/packaging;
-        ".local/bin/packaging-get-uploads".source =
-          mkOutOfStoreSymlink ../../../dot/bin/packaging/get-uploads;
-        ".local/bin/packaging-mk-sbuild".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/mk-sbuild;
-        ".local/bin/packaging-convert-symbols".source =
-          mkOutOfStoreSymlink ../../../dot/bin/packaging/convert-symbols;
-        ".local/bin/packaging-dch-auto".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/dch-auto;
-        ".local/bin/packaging-dep-viz".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/dep-viz;
-        ".local/bin/packaging-copy-from-ubuntu".source =
-          mkOutOfStoreSymlink ../../../dot/bin/packaging/copy-from-ubuntu;
-        ".local/bin/packaging-ppa-build".source = mkOutOfStoreSymlink ../../../dot/bin/packaging/ppa-build;
-        ".local/bin/packaging-trigger-tests".source =
-          mkOutOfStoreSymlink ../../../dot/bin/packaging/trigger-tests.py;
-        ".local/bin/lp-tools".source =
-          mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/lp-tools/lp-tools.sh";
-        ".local/bin/lp-tools-create-bug".source =
-          mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/lp-tools/lp-tools-create-bug.py";
-        ".local/bin/lp-tools-propose-merge".source =
-          mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/lp-tools/lp-tools-propose-merge.py";
-        ".lp-tools-completion".source = mkOutOfStoreSymlink ../../../dot/lp-tools-completion;
       };
 
       # - pkgs.stdenv.isLinux
