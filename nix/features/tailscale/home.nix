@@ -1,13 +1,15 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 let
   tailscale_config = config.host.features.tailscale;
 in
 {
   config = lib.mkIf tailscale_config.enable {
+    home.packages = with pkgs; [
+      tailscale
+    ];
   };
 }
