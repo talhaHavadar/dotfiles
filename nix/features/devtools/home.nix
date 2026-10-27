@@ -26,7 +26,6 @@ in
         wget
         gperf
         viu
-        github-copilot-cli
         herdr
       ]
       ++ lib.optionals (!isDarwin) [
@@ -34,8 +33,10 @@ in
       ]
       ++ lib.optionals (devtools_config.ai.enable) [
         claude-code
+        github-copilot-cli
       ]
       ++ lib.optionals (devtools_config.build-tools.cpp.enable) [
+        clang
         cmake
         ninja
         ccache
