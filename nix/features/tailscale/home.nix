@@ -9,7 +9,6 @@ in
 {
   config = lib.mkIf tailscale_config.enable {
     home.packages = with pkgs; [
-      tailscale
     ];
   };
 }
