@@ -16,6 +16,7 @@ in
       [
         inputs.sparse.packages.${pkgs.stdenv.hostPlatform.system}.default
         git
+        jujutsu
         uv
         nodejs_24
         qemu
