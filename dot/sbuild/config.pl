@@ -56,7 +56,7 @@ $dpkg_source_opts = [
 ];
 
 # Directory for writing build logs to
-$log_dir=$ENV{HOME}."/sbuild/logs";
+$log_dir="../build-area";
 $build_dir="../build-area";
 
 ##############################################################################

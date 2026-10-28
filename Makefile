@@ -57,7 +57,7 @@ help:
 	@echo "Features (auto-detect platform):"
 	@echo "  make nvim         Build neovim from source"
 	@echo "  make river        River compositor + kwm (Ubuntu only)"
-	@echo "  make packaging    Packaging tools + sbuild (Ubuntu only)"
+	@echo "  make packaging    Packaging shims (run tools via contained)"
 	@echo "  make contained    Install the contained wrapper (~/.local/bin/contained)"
 	@echo "  make yubikey      Security/Yubikey tools"
 	@echo "  make cli          CLI utilities (ripgrep, btop, etc.)"
@@ -151,49 +151,14 @@ ifdef IS_UBUNTU
 endif
 
 # ============================================================
-# PACKAGING FEATURE (Ubuntu only)
+# PACKAGING FEATURE
 # ============================================================
+# Packaging tools (debuild, sbuild, gbp, git-ubuntu, ...) run inside the
+# `contained` image via shims in ~/.local/bin; nothing is apt-installed here.
 .PHONY: packaging
-packaging: packaging-deps symlinks-packaging packaging-setup
+packaging: contained symlinks-packaging
 	@echo ""
 	@echo "Packaging setup complete."
-	@echo "NOTE: Log out and back in for group membership to take effect."
-
-.PHONY: packaging-deps
-packaging-deps:
-ifdef IS_UBUNTU
-	@echo "Installing packaging tools..."
-	sudo apt update
-	sudo apt install -y sbuild \
-		ubuntu-dev-tools \
-		autopkgtest \
-		lintian \
-		git-buildpackage \
-		config-package-dev \
-		lxc-templates \
-		dh-sequence-gir \
-		python3-venv
-	sudo snap install git-ubuntu --classic || true
-	sudo snap install lxd || true
-	sudo snap install ppa-dev-tools || true
-else
-	@echo "ERROR: Packaging tools are only available on Ubuntu."
-	@false
-endif
-
-.PHONY: packaging-setup
-packaging-setup:
-ifdef IS_UBUNTU
-	@echo "Creating sbuild directories..."
-	mkdir -p $(HOME)/sbuild/build
-	mkdir -p $(HOME)/sbuild/logs
-	mkdir -p $(HOME)/sbuild/scratch
-	@echo "Adding user to sbuild group..."
-	sudo adduser $(USER) sbuild || true
-	@echo "Adding user to lxd group..."
-	sudo adduser $(USER) lxd || true
-	@echo "Make sure to run 'setup-packaging-environment' to complete the setup"
-endif
 
 # ============================================================
 # CONTAINED FEATURE (Debian packaging in a container)
@@ -495,11 +460,19 @@ _symlinks-shell:
 _symlinks-packaging:
 	@echo "Creating packaging symlinks..."
 	$(call create_symlink,$(DOT_DIR)/sbuild/config.pl,$(HOME)/.config/sbuild/config.pl)
-	$(call create_symlink,$(DOT_DIR)/mk-sbuild.rc,$(HOME)/.mk-sbuild.rc)
 	$(call create_symlink,$(DOT_DIR)/quiltrc-dpkg,$(HOME)/.quiltrc-dpkg)
 	$(call create_symlink,$(DOT_DIR)/devscripts,$(HOME)/.devscripts)
 	$(call create_symlink,$(DOT_DIR)/gbp.conf,$(HOME)/.gbp.conf)
 	$(call create_symlink,$(DOT_DIR)/packaging.bashrc,$(HOME)/.packaging.bashrc)
+	$(call create_symlink,$(DOT_DIR)/bin/packaging/contained-shim,$(HOME)/.local/bin/dch)
+	$(call create_symlink,$(DOT_DIR)/bin/packaging/contained-shim,$(HOME)/.local/bin/debuild)
+	$(call create_symlink,$(DOT_DIR)/bin/packaging/contained-shim,$(HOME)/.local/bin/uscan)
+	$(call create_symlink,$(DOT_DIR)/bin/packaging/contained-shim,$(HOME)/.local/bin/dput)
+	$(call create_symlink,$(DOT_DIR)/bin/packaging/contained-shim,$(HOME)/.local/bin/sbuild)
+	$(call create_symlink,$(DOT_DIR)/bin/packaging/contained-shim,$(HOME)/.local/bin/gbp)
+	$(call create_symlink,$(DOT_DIR)/bin/packaging/contained-shim,$(HOME)/.local/bin/quilt)
+	$(call create_symlink,$(DOT_DIR)/bin/packaging/contained-shim,$(HOME)/.local/bin/lintian)
+	$(call create_symlink,$(DOT_DIR)/bin/packaging/contained-shim,$(HOME)/.local/bin/git-ubuntu)
 
 .PHONY: _symlinks-git
 _symlinks-git:

@@ -4,8 +4,10 @@ if [ -f /usr/lib/mc/mc.sh ]; then
 fi
 
 alias dquilt="quilt --quiltrc=${HOME}/.quiltrc-dpkg"
-. /usr/share/bash-completion/completions/quilt
-complete -F _quilt_completion $_quilt_complete_opt dquilt
+if [ -f /usr/share/bash-completion/completions/quilt ]; then
+  . /usr/share/bash-completion/completions/quilt
+  complete -F _quilt_completion $_quilt_complete_opt dquilt
+fi
 
 export DEBFULLNAME="Talha Can Havadar"
 export DEBEMAIL="havadartalha@gmail.com"

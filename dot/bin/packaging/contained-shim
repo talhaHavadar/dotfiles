@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+#
+# Generic shim for Debian/Ubuntu packaging tools. Symlinked under the name of
+# the tool (dch, debuild, uscan, dput, sbuild, gbp, quilt, lintian,
+# git-ubuntu, ...). If a real binary of that name exists elsewhere on PATH it
+# is exec'd untouched; otherwise the tool runs inside `contained`.
+#
+# Env:
+#   PACKAGING_USE_CONTAINED   auto (default) | always | never
+#   CONTAINED_CONTAINER_NAME  image for regular tools (honoured by contained)
+#   PACKAGING_UBUNTU_IMAGE    image for Ubuntu-only tools (git-ubuntu)
+set -eo pipefail
+
+tool="$(basename "$0")"
+self="$(realpath "$0")"
+mode="${PACKAGING_USE_CONTAINED:-auto}"
+
+if [ "$mode" != "always" ]; then
+	IFS=: read -ra dirs <<<"$PATH"
+	for dir in "${dirs[@]}"; do
+		candidate="${dir:-.}/$tool"
+		if [ -x "$candidate" ] && [ ! -d "$candidate" ] && [ "$(realpath "$candidate")" != "$self" ]; then
+			exec "$candidate" "$@"
+		fi
+	done
+	if [ "$mode" = "never" ]; then
+		echo "$tool: not found on PATH and PACKAGING_USE_CONTAINED=never" >&2
+		exit 127
+	fi
+fi
+
+if ! command -v contained >/dev/null 2>&1; then
+	echo "$tool: not found on PATH and 'contained' is not installed (make contained)" >&2
+	exit 127
+fi
+
+opts=()
+[ -t 0 ] && [ -t 1 ] && opts+=(-i)
+case "$tool" in
+git-ubuntu) opts+=(-c "${PACKAGING_UBUNTU_IMAGE:-ghcr.io/talhahavadar/contained-debdev:ubuntu-devel}") ;;
+esac
+
+# The container's $HOME is /root, so rewrite host-home quiltrc paths.
+args=()
+for a in "$@"; do
+	case "$a" in
+	--quiltrc="$HOME"/*) a="--quiltrc=/root/${a#--quiltrc="$HOME"/}" ;;
+	esac
+	args+=("$a")
+done
+
+exec contained "${opts[@]}" -- "$tool" "${args[@]}"

@@ -16,15 +16,23 @@ in
     ];
 
     home.file = {
+      # Run via `contained` when the real tool is missing from PATH
+      ".local/bin/dch" = link "bin/packaging/contained-shim";
+      ".local/bin/debuild" = link "bin/packaging/contained-shim";
+      ".local/bin/uscan" = link "bin/packaging/contained-shim";
+      ".local/bin/dput" = link "bin/packaging/contained-shim";
+      ".local/bin/sbuild" = link "bin/packaging/contained-shim";
+      ".local/bin/gbp" = link "bin/packaging/contained-shim";
+      ".local/bin/quilt" = link "bin/packaging/contained-shim";
+      ".local/bin/lintian" = link "bin/packaging/contained-shim";
+      ".local/bin/git-ubuntu" = link "bin/packaging/contained-shim";
       ".devscripts" = link "devscripts";
       ".gbp.conf" = link "gbp.conf";
-      ".mk-sbuild.rc" = link "mk-sbuild.rc";
       ".quiltrc-dpkg" = link "quiltrc-dpkg";
       ".config/sbuild/config.pl" = link "sbuild/config.pl";
       ".packaging.bashrc" = link "packaging.bashrc";
       ".local/bin/packaging" = link "bin/packaging/packaging";
       ".local/bin/packaging-get-uploads" = link "bin/packaging/get-uploads";
-      ".local/bin/packaging-mk-sbuild" = link "bin/packaging/mk-sbuild";
       ".local/bin/packaging-convert-symbols" = link "bin/packaging/convert-symbols";
       ".local/bin/packaging-dch-auto" = link "bin/packaging/dch-auto";
       ".local/bin/packaging-dep-viz" = link "bin/packaging/dep-viz";
