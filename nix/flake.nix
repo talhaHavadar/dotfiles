@@ -23,6 +23,10 @@
     sparse = {
       url = "github:Orca-The-Company/sparse";
     };
+    sdwire-cli = {
+      url = "github:Badger-Embedded/sdwire-cli";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";

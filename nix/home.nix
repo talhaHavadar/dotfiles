@@ -1,11 +1,10 @@
-{
-  inputs,
-  config,
-  lib,
-  pkgs,
-  username,
-  platform,
-  ...
+{ inputs
+, config
+, lib
+, pkgs
+, username
+, platform
+, ...
 }:
 let
   pyp = pkgs.python312Packages;
@@ -48,6 +47,7 @@ in
 
   home.packages = with pkgs; [
     inputs.sparse.packages.${pkgs.stdenv.hostPlatform.system}.default
+    inputs.sdwire-cli.packages.${pkgs.stdenv.hostPlatform.system}.default
     tmux
     fzf
     tio

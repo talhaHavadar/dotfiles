@@ -185,6 +185,24 @@
         "type": "github"
       }
     },
+    "flake-utils_2": {
+      "inputs": {
+        "systems": "systems_3"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
     "gitignore": {
       "inputs": {
         "nixpkgs": [
@@ -515,6 +533,7 @@
         "nixos-raspberrypi": "nixos-raspberrypi",
         "nixpkgs": "nixpkgs_3",
         "nixvim": "nixvim",
+        "sdwire-cli": "sdwire-cli",
         "sparse": "sparse",
         "system-manager": "system-manager",
         "walker": "walker",
@@ -542,9 +561,30 @@
         "type": "github"
       }
     },
-    "sparse": {
+    "sdwire-cli": {
       "inputs": {
         "flake-utils": "flake-utils",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793187825,
+        "narHash": "sha256-cr90uXO3xGoVfUKkUSQTyuAWqwehkpOU72HgBkVVfB4=",
+        "owner": "Badger-Embedded",
+        "repo": "sdwire-cli",
+        "rev": "2fe9e86de24a70a2125ba073c7e8ba3ad4665d51",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Badger-Embedded",
+        "repo": "sdwire-cli",
+        "type": "github"
+      }
+    },
+    "sparse": {
+      "inputs": {
+        "flake-utils": "flake-utils_2",
         "zig-nixpkgs": "zig-nixpkgs"
       },
       "locked": {
@@ -632,6 +672,21 @@
     },
     "systems_4": {
       "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_5": {
+      "locked": {
         "lastModified": 1689347949,
         "narHash": "sha256-12tWmuL2zgBgZkdoB6qXZsgJEH9LR3oUgpaQq2RbI80=",
         "owner": "nix-systems",
@@ -657,7 +712,7 @@
           "nixpkgs"
         ],
         "pre-commit-hooks-nix": "pre-commit-hooks-nix",
-        "systems": "systems_3"
+        "systems": "systems_4"
       },
       "locked": {
         "lastModified": 1770377964,
@@ -680,7 +735,7 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "systems": "systems_4"
+        "systems": "systems_5"
       },
       "locked": {
         "lastModified": 1791441924,
