@@ -21,6 +21,7 @@ python3Packages.buildPythonApplication {
   dependencies = with python3Packages; [
     click
     distro-info
+    keyring # launchpadlib imports it lazily to load stored credentials
     launchpadlib
     lazr-restfulclient
     pyyaml
