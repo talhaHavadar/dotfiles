@@ -29,6 +29,7 @@ in
         viu
         herdr
         just
+        lima
       ]
       ++ lib.optionals (!isDarwin) [
         rpi-imager
