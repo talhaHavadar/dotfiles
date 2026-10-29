@@ -1,4 +1,4 @@
-{ lib, python3Packages, fetchgit }:
+{ lib, stdenv, python3Packages, fetchgit }:
 
 python3Packages.buildPythonApplication {
   pname = "ppa-dev-tools";
@@ -25,7 +25,8 @@ python3Packages.buildPythonApplication {
     launchpadlib
     lazr-restfulclient
     pyyaml
-    python-apt # only needed for `ppa tests --show-rdepends`
+  ] ++ lib.optionals stdenv.hostPlatform.isLinux [
+    python-apt # only needed for `ppa tests --show-rdepends`; not available on darwin
   ];
 
   pythonRelaxDeps = true;

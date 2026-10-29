@@ -42,6 +42,9 @@ in
         clang
         cmake
         ninja
+      ]
+      # nixpkgs ccache pulls in elfutils (Linux-only) as a check input
+      ++ lib.optionals (!isDarwin) [
         ccache
       ];
   };
