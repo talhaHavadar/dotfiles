@@ -22,6 +22,10 @@ with lib;
       go
       nixfmt
     ];
+
+    programs.bash.bashrcExtra = mkAfter ''
+      export EDITOR=nvim
+    '';
   };
 
 }
