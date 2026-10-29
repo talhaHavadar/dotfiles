@@ -86,6 +86,7 @@ local setup_treesitter = function()
         "python",
         "zig",
         "nix",
+        "templ",
     }
 
     local config = require("nvim-treesitter.config")
