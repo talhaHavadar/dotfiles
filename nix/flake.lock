@@ -569,11 +569,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793187825,
-        "narHash": "sha256-cr90uXO3xGoVfUKkUSQTyuAWqwehkpOU72HgBkVVfB4=",
+        "lastModified": 1793264384,
+        "narHash": "sha256-ckHuUUuD2Iwljbimnh/sxUENa9DMnM++q7NgGIQ6UvI=",
         "owner": "Badger-Embedded",
         "repo": "sdwire-cli",
-        "rev": "2fe9e86de24a70a2125ba073c7e8ba3ad4665d51",
+        "rev": "34b435c1e4dc6ec7cde3e5842d2a5f17a4a8f97b",
         "type": "github"
       },
       "original": {
