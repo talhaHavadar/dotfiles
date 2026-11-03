@@ -12,7 +12,7 @@ with lib;
 {
   config = mkIf (home_config.enable) {
     home.file = {
-      ".config/hypr/scripts/wallpaperUpdate.sh".source = mkOutOfStoreSymlink ../../dot/hyprland/wallpaperUpdate.sh;
+      ".config/hypr/scripts/wallpaperUpdate.sh".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/hyprland/wallpaperUpdate.sh";
     };
     services.hyprpaper = {
       enable = true;

@@ -17,14 +17,14 @@ in
     ./home/${platform}.nix # platform specific configuration [ nixos, non-nixos, macos ]
   ];
   home.file = {
-    ".local/bin/git-stack-pr".source = mkOutOfStoreSymlink ../dot/bin/git-stack-pr;
-    ".local/bin/git-fpush".source = mkOutOfStoreSymlink ../dot/bin/git-fpush;
-    ".local/bin/git-fixup".source = mkOutOfStoreSymlink ../dot/bin/git-fixup;
-    ".local/bin/git-wapply".source = mkOutOfStoreSymlink ../dot/bin/git-wapply;
-    ".local/bin/git-lp-clone".source = mkOutOfStoreSymlink ../dot/bin/git-lp-clone.sh;
-    ".config/starship.toml".source = mkOutOfStoreSymlink ../dot/starship.toml;
-    ".complete_alias".source = mkOutOfStoreSymlink ../dot/complete_alias;
-    ".tmux-completion".source = mkOutOfStoreSymlink ../dot/tmux-completion;
+    ".local/bin/git-stack-pr".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/git-stack-pr";
+    ".local/bin/git-fpush".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/git-fpush";
+    ".local/bin/git-fixup".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/git-fixup";
+    ".local/bin/git-wapply".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/git-wapply";
+    ".local/bin/git-lp-clone".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/bin/git-lp-clone.sh";
+    ".config/starship.toml".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/starship.toml";
+    ".complete_alias".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/complete_alias";
+    ".tmux-completion".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/tmux-completion";
     ".config/nvim".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/nvim";
   };
 

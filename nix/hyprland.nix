@@ -35,7 +35,7 @@ with lib;
 
   config = mkIf (home_config.enable && pkgs.stdenv.hostPlatform.system != "aarch64-darwin") {
     home.file = {
-      ".config/hypr/scripts/volume.sh".source = mkOutOfStoreSymlink ../dot/hyprland/volume.sh;
+      ".config/hypr/scripts/volume.sh".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/hyprland/volume.sh";
     };
 
     programs.walker = {

@@ -23,8 +23,8 @@ with lib;
       };
 
       home.file = {
-        "workspace/.gitconfig".source = mkOutOfStoreSymlink ../../../dot/gitconfig.workspace;
-        "projects/.gitconfig".source = mkOutOfStoreSymlink ../../../dot/gitconfig.projects;
+        "workspace/.gitconfig".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/gitconfig.workspace";
+        "projects/.gitconfig".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/gitconfig.projects";
       };
 
       home.sessionVariables = {

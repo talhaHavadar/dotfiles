@@ -7,8 +7,8 @@ with lib;
 {
   config = mkIf (home_config.enable) {
     home.file = {
-      ".config/waybar/mocha.css".source = mkOutOfStoreSymlink ../../dot/waybar/mocha.css;
-      ".config/waybar/latte.css".source = mkOutOfStoreSymlink ../../dot/waybar/latte.css;
+      ".config/waybar/mocha.css".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/waybar/mocha.css";
+      ".config/waybar/latte.css".source = mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/waybar/latte.css";
     };
 
     programs.waybar = {

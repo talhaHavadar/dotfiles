@@ -8,7 +8,7 @@ with lib;
   config = mkIf (home_config.enable) {
     home.file = {
       ".config/hypr/scripts/laptopDisplayHandler.sh".source =
-        mkOutOfStoreSymlink ../../dot/hyprland/laptopDisplayHandler.sh;
+        mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/dotfiles/dot/hyprland/laptopDisplayHandler.sh";
     };
     wayland.windowManager.hyprland.settings = {
       "$scriptsDir" = "$HOME/.config/hypr/scripts";
