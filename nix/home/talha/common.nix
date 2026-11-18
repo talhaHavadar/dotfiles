@@ -16,5 +16,6 @@
     host.features.apps.neovim.enable = true;
     host.features.apps.zen-browser.enable = false;
     host.features.apps.zed-editor.enable = false;
+    host.features.apps.handy.enable = true;
   };
 }
