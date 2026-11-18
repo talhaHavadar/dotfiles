@@ -10,5 +10,6 @@
     ./ghostty
     ./kitty
     ./zed-editor
+    ./handy
   ];
 }
